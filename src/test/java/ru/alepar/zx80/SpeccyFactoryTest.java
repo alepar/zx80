@@ -6,10 +6,10 @@ import org.junit.Test;
  * User: alepar
  * Date: Sep 14, 2010
  */
-public class MainTest {
+public class SpeccyFactoryTest {
 
     @Test
-    public void dummyTest() {
-        Main.main(null);
+    public void speccyBuildsWithoutExceptions() {
+        SpeccyFactory.buildSpeccy();
     }
 }
