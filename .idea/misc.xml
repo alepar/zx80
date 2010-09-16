@@ -27,6 +27,9 @@
       </list>
     </option>
   </component>
+  <component name="ProjectKey">
+    <option name="state" value="project://49698894-57d0-4295-b5f4-3d5f1d536813" />
+  </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_6" assert-keyword="true" jdk-15="true" project-jdk-name="1.6" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
