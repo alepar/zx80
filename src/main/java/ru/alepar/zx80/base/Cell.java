@@ -16,6 +16,10 @@ public class Cell {
         this.value = value;
     }
 
+    public void copyFrom(Cell src) {
+        this.value = src.value;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
