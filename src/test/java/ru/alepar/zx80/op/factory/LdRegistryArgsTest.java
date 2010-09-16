@@ -43,6 +43,17 @@ public class LdRegistryArgsTest {
     }
 
     @Test
+    public void ldAToLExecutedProperly() {
+        Cell[] opcode = new Cell[] { new Cell() };
+        opcode[0].setValue((byte) 0x6f); //A -> L
+
+        assertThat(opFactory.accept(opcode), equalTo(1));
+        speccy.getRegistryBlock().getCell(Register.A).setValue((byte) 0xca);
+        opFactory.build(opcode).execute();
+        assertThat(speccy.getRegistryBlock().getCell(Register.L).getValue(), equalTo((byte) 0xca));
+    }
+
+    @Test
     public void ldHLToAExecutedProperly() {
         Cell[] opcode = new Cell[] { new Cell() };
         opcode[0].setValue((byte) 0x7e); // (HL) -> A
