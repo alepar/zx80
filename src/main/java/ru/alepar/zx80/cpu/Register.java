@@ -1,26 +1,30 @@
 package ru.alepar.zx80.cpu;
 
-import ru.alepar.zx80.base.Cell;
-
 /**
  * User: alepar
  * Date: Sep 14, 2010
  */
-public class Register {
+public enum Register {
+    A, A_ALT,   //accumulator
+    F, F_ALT,   //flags
 
-    private Cell cell;
-    private RegisterType type;
+    B, B_ALT,
+    C, C_ALT,
 
-    public Register(RegisterType type) {
-        this.type = type;
-        this.cell = new Cell();
-    }
+    D, D_ALT,
+    E, E_ALT,
 
-    public Cell getCell() {
-        return cell;
-    }
+    H, H_ALT,
+    L, L_ALT,
 
-    public RegisterType getType() {
-        return type;
-    }
+    /**
+     * interrupt vector
+     */
+    I,
+
+    /**
+     * memory refresh
+     */
+    R,
+
 }

@@ -1,26 +1,28 @@
 package ru.alepar.zx80.cpu;
 
-import ru.alepar.zx80.base.Word;
-
 /**
  * User: alepar
  * Date: Sep 14, 2010
  */
-public class WordRegister {
+public enum WordRegister {
 
-    private Word word;
-    private WordRegisterType type;
+    /**
+     * index x
+     */
+    IX,
 
-    public WordRegister(WordRegisterType type) {
-        this.type = type;
-        this.word = new Word();
-    }
+    /**
+     * index y
+     */
+    IY,
 
-    public Word getWord() {
-        return word;
-    }
+    /**
+     * stack pointer
+     */
+    SP,
 
-    public WordRegisterType getType() {
-        return type;
-    }
+    /**
+     * program counter
+     */
+    PC
 }

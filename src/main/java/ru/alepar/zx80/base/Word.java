@@ -6,11 +6,16 @@ package ru.alepar.zx80.base;
  */
 public class Word {
 
-    private Cell high, low;
+    private final Cell high, low;
 
     public Word() {
         high = new Cell();
         low = new Cell();
+    }
+
+    public Word(Cell high, Cell low) {
+        this.high = high;
+        this.low = low;
     }
 
     public Cell getHigh() {
@@ -39,5 +44,9 @@ public class Word {
         int result = high != null ? high.hashCode() : 0;
         result = 31 * result + (low != null ? low.hashCode() : 0);
         return result;
+    }
+
+    public int getValue() {
+        return ((high.getValue() << 8) & 0xff00) | (low.getValue() & 0xff);
     }
 }

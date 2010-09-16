@@ -1,6 +1,8 @@
 package ru.alepar.zx80.cpu;
 
 import org.junit.Test;
+import ru.alepar.zx80.base.Cell;
+import ru.alepar.zx80.base.Word;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -15,25 +17,21 @@ public class RegistryBlockTest {
     
     @Test
     public void allEnumeratedRegistriesAreAccessible() {
-        for (int i = 0; i < RegisterType.values().length; i++) {
-            RegisterType type = RegisterType.values()[i];
-            Register register = registryBlock.getRegister(type);
+        for (int i = 0; i < Register.values().length; i++) {
+            Register type = Register.values()[i];
+            Cell register = registryBlock.getCell(type);
 
             assertThat(register, notNullValue());
-            assertThat(register.getCell(), notNullValue());
-            assertThat(register.getType(), equalTo(type));
         }
     }
 
     @Test
     public void allEnumeratedWordRegistriesAreAccessible() {
-        for (int i = 0; i < WordRegisterType.values().length; i++) {
-            WordRegisterType type = WordRegisterType.values()[i];
-            WordRegister register = registryBlock.getWordRegister(type);
+        for (int i = 0; i < WordRegister.values().length; i++) {
+            WordRegister type = WordRegister.values()[i];
+            Word register = registryBlock.getWordRegister(type);
 
             assertThat(register, notNullValue());
-            assertThat(register.getWord(), notNullValue());
-            assertThat(register.getType(), equalTo(type));
         }
     }
 

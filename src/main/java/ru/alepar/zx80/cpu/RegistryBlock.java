@@ -1,5 +1,8 @@
 package ru.alepar.zx80.cpu;
 
+import ru.alepar.zx80.base.Cell;
+import ru.alepar.zx80.base.Word;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,8 +12,8 @@ import java.util.Map;
  */
 public class RegistryBlock {
 
-    private Map<RegisterType, Register> registers;
-    private Map<WordRegisterType, WordRegister> wordRegisters;
+    private Map<Register, Cell> registers;
+    private Map<WordRegister, Word> wordRegisters;
 
     public RegistryBlock() {
         initRegisters();
@@ -18,26 +21,30 @@ public class RegistryBlock {
     }
 
     private void initRegisters() {
-        registers = new HashMap<RegisterType, Register>();
-        for (int i = 0; i < RegisterType.values().length; i++) {
-            RegisterType type = RegisterType.values()[i];
-            registers.put(type, new Register(type));
+        registers = new HashMap<Register, Cell>();
+        for (int i = 0; i < Register.values().length; i++) {
+            Register type = Register.values()[i];
+            registers.put(type, new Cell());
         }
     }
 
     private void initWordRegisters() {
-        wordRegisters = new HashMap<WordRegisterType, WordRegister>();
-        for (int i = 0; i < WordRegisterType.values().length; i++) {
-            WordRegisterType type = WordRegisterType.values()[i];
-            wordRegisters.put(type, new WordRegister(type));
+        wordRegisters = new HashMap<WordRegister, Word>();
+        for (int i = 0; i < WordRegister.values().length; i++) {
+            WordRegister type = WordRegister.values()[i];
+            wordRegisters.put(type, new Word());
         }
     }
 
-    public Register getRegister(RegisterType type) {
+    public Cell getCell(Register type) {
         return registers.get(type);
     }
 
-    public WordRegister getWordRegister(WordRegisterType type) {
+    public Word getWordRegister(WordRegister type) {
         return wordRegisters.get(type);
+    }
+
+    public Word getWord(Register high, Register low) {
+        return new Word(getCell(high), getCell(low));
     }
 }
