@@ -19,4 +19,15 @@ public class WordTest {
 
         assertThat(word.getValue(), equalTo(0xf0f0));
     }
+
+    @Test
+    public void testGetAfterSetGivesSameValue() throws Exception {
+        Word word = new Word();
+
+        word.setValue(0xcafe);
+        assertThat(word.getValue(), equalTo(0xcafe));
+
+        word.setValue(0xbabe);
+        assertThat(word.getValue(), equalTo(0xbabe));
+    }
 }

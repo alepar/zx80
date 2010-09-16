@@ -13,4 +13,5 @@ public abstract class SpeccyOpFactory implements OpFactory {
     protected SpeccyOpFactory(Speccy speccy) {
         this.speccy = speccy;
     }
+    
 }

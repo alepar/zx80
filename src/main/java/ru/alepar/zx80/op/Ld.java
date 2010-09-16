@@ -1,6 +1,5 @@
 package ru.alepar.zx80.op;
 
-import ru.alepar.zx80.Speccy;
 import ru.alepar.zx80.base.Cell;
 
 /**
@@ -17,7 +16,7 @@ public class Ld implements Op {
     }
 
     @Override
-    public void execute(Speccy speccy) {
+    public void execute() {
         dst.copyFrom(src);
     }
 }

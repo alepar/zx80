@@ -13,6 +13,7 @@ public class SpeccyFactory {
 
     public static Speccy buildSpeccy() {
         Config config = new StaticConfig();
+
         Memory memory = new Memory(config.getMemorySize());
         RegistryBlock registryBlock = new RegistryBlock();
 

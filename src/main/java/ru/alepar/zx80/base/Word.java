@@ -49,4 +49,9 @@ public class Word {
     public int getValue() {
         return ((high.getValue() << 8) & 0xff00) | (low.getValue() & 0xff);
     }
+
+    public void setValue(int value) {
+        high.setValue((byte) ((value >>> 8) & 0xff));
+        low.setValue((byte)value);
+    }
 }

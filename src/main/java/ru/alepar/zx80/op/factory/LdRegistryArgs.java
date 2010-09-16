@@ -22,7 +22,7 @@ public class LdRegistryArgs extends SpeccyOpFactory {
 
     @Override
     public int accept(Cell[] opcode) {
-        if (mask(opcode[0].getValue()).applyTo((byte) 0xc0) == 0x01) {
+        if (mask(0xc0).applyTo(opcode[0].getValue()) == 0x01) {
             return 1;
         }
         return 0;
