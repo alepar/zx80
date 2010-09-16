@@ -5,7 +5,6 @@ import ru.alepar.zx80.base.Cell;
 import ru.alepar.zx80.base.Word;
 import ru.alepar.zx80.cpu.Register;
 import ru.alepar.zx80.op.Ld;
-import ru.alepar.zx80.op.Op;
 
 import static ru.alepar.zx80.base.Address.*;
 import static ru.alepar.zx80.util.Mask.*;
@@ -29,7 +28,7 @@ public class LdRegistryArgs extends SpeccyOpFactory {
     }
 
     @Override
-    public Op build(Cell[] opcode) {
+    public Ld build(Cell[] opcode) {
         byte op = opcode[0].getValue();
         byte srcMask = 0x07;
         byte dstMask = 0x38;
