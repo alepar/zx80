@@ -22,40 +22,40 @@ public class LdRegistryArgsTest {
 
     @Test
     public void ldBToAExecutedProperly() {
-        Cell[] opcode = new Cell[] { new Cell() };
+        Cell[] opcode = new Cell[]{new Cell()};
         opcode[0].setValue((byte) 0x78); //B -> A
 
         assertThat(opFactory.accept(opcode), equalTo(1));
         speccy.getRegistryBlock().getCell(Register.B).setValue((byte) 0xca);
-        opFactory.build(opcode).execute();
+        opFactory.build(opcode).execute(speccy);
         assertThat(speccy.getRegistryBlock().getCell(Register.A).getValue(), equalTo((byte) 0xca));
     }
 
     @Test
     public void ldFToHExecutedProperly() {
-        Cell[] opcode = new Cell[] { new Cell() };
+        Cell[] opcode = new Cell[]{new Cell()};
         opcode[0].setValue((byte) 0x64); //F -> H
 
         assertThat(opFactory.accept(opcode), equalTo(1));
         speccy.getRegistryBlock().getCell(Register.F).setValue((byte) 0xca);
-        opFactory.build(opcode).execute();
+        opFactory.build(opcode).execute(speccy);
         assertThat(speccy.getRegistryBlock().getCell(Register.H).getValue(), equalTo((byte) 0xca));
     }
 
     @Test
     public void ldAToLExecutedProperly() {
-        Cell[] opcode = new Cell[] { new Cell() };
+        Cell[] opcode = new Cell[]{new Cell()};
         opcode[0].setValue((byte) 0x6f); //A -> L
 
         assertThat(opFactory.accept(opcode), equalTo(1));
         speccy.getRegistryBlock().getCell(Register.A).setValue((byte) 0xca);
-        opFactory.build(opcode).execute();
+        opFactory.build(opcode).execute(speccy);
         assertThat(speccy.getRegistryBlock().getCell(Register.L).getValue(), equalTo((byte) 0xca));
     }
 
     @Test
     public void ldHLToAExecutedProperly() {
-        Cell[] opcode = new Cell[] { new Cell() };
+        Cell[] opcode = new Cell[]{new Cell()};
         opcode[0].setValue((byte) 0x7e); // (HL) -> A
 
         assertThat(opFactory.accept(opcode), equalTo(1));
@@ -64,12 +64,10 @@ public class LdRegistryArgsTest {
         word.setValue(0x01);
         speccy.getMemory().getCell(address(word)).setValue((byte) 0xca);
 
-        opFactory.build(opcode).execute();
-        
+        opFactory.build(opcode).execute(speccy);
+
         assertThat(speccy.getRegistryBlock().getCell(Register.A).getValue(), equalTo((byte) 0xca));
     }
-
-
 
 
 }

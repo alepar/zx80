@@ -1,6 +1,7 @@
 package ru.alepar.zx80.op;
 
-import ru.alepar.zx80.base.Cell;
+import ru.alepar.zx80.Speccy;
+import ru.alepar.zx80.retrieve.CellRetriever;
 
 /**
  * User: alepar
@@ -8,15 +9,15 @@ import ru.alepar.zx80.base.Cell;
  */
 public class Ld implements Op {
 
-    private final Cell src, dst;
+    private final CellRetriever src, dst;
 
-    public Ld(Cell src, Cell dst) {
+    public Ld(CellRetriever src, CellRetriever dst) {
         this.src = src;
         this.dst = dst;
     }
 
     @Override
-    public void execute() {
-        dst.copyFrom(src);
+    public void execute(Speccy speccy) {
+        dst.getFrom(speccy).copyFrom(src.getFrom(speccy));
     }
 }

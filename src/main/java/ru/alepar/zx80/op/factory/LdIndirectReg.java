@@ -2,10 +2,11 @@ package ru.alepar.zx80.op.factory;
 
 import ru.alepar.zx80.Speccy;
 import ru.alepar.zx80.base.Cell;
-import ru.alepar.zx80.cpu.Register;
 import ru.alepar.zx80.op.Ld;
+import ru.alepar.zx80.retrieve.CellRetriever;
 
-import static ru.alepar.zx80.base.Address.*;
+import static ru.alepar.zx80.cpu.Register.*;
+import static ru.alepar.zx80.retrieve.Retrievers.*;
 
 /**
  * User: alepar
@@ -19,11 +20,11 @@ public class LdIndirectReg extends SpeccyOpFactory {
 
     @Override
     public int accept(Cell[] opcode) {
-        switch(opcode[0].getValue()) {
-            case (byte)0x0a:
-            case (byte)0x1a:
-            case (byte)0x02:
-            case (byte)0x12:
+        switch (opcode[0].getValue()) {
+            case (byte) 0x0a:
+            case (byte) 0x1a:
+            case (byte) 0x02:
+            case (byte) 0x12:
                 return 1;
         }
         return 0;
@@ -31,40 +32,24 @@ public class LdIndirectReg extends SpeccyOpFactory {
 
     @Override
     public Ld build(Cell[] opcode) {
-        Cell src;
-        Cell dst;
-        switch(opcode[0].getValue()) {
-            case (byte)0x0a:
-                src = speccy.getMemory().getCell(
-                        address(speccy.getRegistryBlock().getWord(
-                                Register.B,
-                                Register.C
-                        )));
-                dst = speccy.getRegistryBlock().getCell(Register.A);
+        CellRetriever src;
+        CellRetriever dst;
+        switch (opcode[0].getValue()) {
+            case (byte) 0x0a:
+                src = imem(reg(B), reg(C));
+                dst = reg(A);
                 break;
-            case (byte)0x1a:
-                src = speccy.getMemory().getCell(
-                        address(speccy.getRegistryBlock().getWord(
-                                Register.D,
-                                Register.E
-                        )));
-                dst = speccy.getRegistryBlock().getCell(Register.A);
+            case (byte) 0x1a:
+                src = imem(reg(D), reg(E));
+                dst = reg(A);
                 break;
-            case (byte)0x02:
-                src = speccy.getRegistryBlock().getCell(Register.A);
-                dst = speccy.getMemory().getCell(
-                        address(speccy.getRegistryBlock().getWord(
-                                Register.B,
-                                Register.C
-                        )));
+            case (byte) 0x02:
+                src = reg(A);
+                dst = imem(reg(B), reg(C));
                 break;
-            case (byte)0x12:
-                src = speccy.getRegistryBlock().getCell(Register.A);
-                dst = speccy.getMemory().getCell(
-                        address(speccy.getRegistryBlock().getWord(
-                                Register.D,
-                                Register.E
-                        )));
+            case (byte) 0x12:
+                src = reg(A);
+                dst = imem(reg(D), reg(E));
                 break;
             default:
                 throw new RuntimeException("should not happen, cases cover all variants");
