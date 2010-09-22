@@ -20,4 +20,9 @@ public class MemoryRetriever implements CellRetriever {
     public Cell getFrom(Speccy speccy) {
         return speccy.getMemory().getCell(address);
     }
+
+    @Override
+    public String mnemonic() {
+        return "(0x" + Integer.toString(address.getValue(), 16).toUpperCase() + ")";
+    }
 }

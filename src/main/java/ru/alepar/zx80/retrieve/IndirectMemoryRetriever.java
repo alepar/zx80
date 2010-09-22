@@ -22,9 +22,12 @@ public class IndirectMemoryRetriever implements CellRetriever {
     @Override
     public Cell getFrom(Speccy speccy) {
         return speccy.getMemory().getCell(
-                address(
-                        new Word(high.getFrom(speccy), low.getFrom(speccy))
-                )
+                address(new Word(high.getFrom(speccy), low.getFrom(speccy)))
         );
+    }
+
+    @Override
+    public String mnemonic() {
+        return "(" + high.mnemonic() + low.mnemonic() + ")";
     }
 }

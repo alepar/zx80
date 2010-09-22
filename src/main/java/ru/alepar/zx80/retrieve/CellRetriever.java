@@ -11,4 +11,6 @@ public interface CellRetriever {
 
     Cell getFrom(Speccy speccy);
 
+    String mnemonic();
+
 }

@@ -21,4 +21,8 @@ public class RegistryRetriever implements CellRetriever {
         return speccy.getRegistryBlock().getCell(register);
     }
 
+    @Override
+    public String mnemonic() {
+        return register.name();
+    }
 }
