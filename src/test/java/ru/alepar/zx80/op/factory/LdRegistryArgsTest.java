@@ -54,7 +54,7 @@ public class LdRegistryArgsTest {
     }
 
     @Test
-    public void ldHLToAExecutedProperly() {
+    public void ldHlToAExecutedProperly() {
         Cell[] opcode = new Cell[]{new Cell()};
         opcode[0].setValue((byte) 0x7e); // (HL) -> A
 

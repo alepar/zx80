@@ -21,7 +21,7 @@ public class LdIndirectRegTest {
     private final OpFactory opFactory = new LdIndirectReg(speccy);
 
     @Test
-    public void ldBCToAExecutedProperly() {
+    public void ldBcToAExecutedProperly() {
         Cell[] opcode = new Cell[]{new Cell()};
         opcode[0].setValue((byte) 0x0a); // (BC) -> A
 
@@ -37,7 +37,7 @@ public class LdIndirectRegTest {
     }
 
     @Test
-    public void ldAtoDEExecutedProperly() {
+    public void ldAToDeExecutedProperly() {
         Cell[] opcode = new Cell[]{new Cell()};
         opcode[0].setValue((byte) 0x12); // A -> (DE)
 
