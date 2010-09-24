@@ -20,4 +20,10 @@ public class Ld implements Op {
     public void execute(Speccy speccy) {
         dst.getFrom(speccy).copyFrom(src.getFrom(speccy));
     }
+
+    @Override
+    public String mnemonic() {
+        return "LD\t" + dst.mnemonic() + ", " + src.mnemonic(); 
+    }
+    
 }

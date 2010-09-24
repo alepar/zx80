@@ -7,10 +7,8 @@ import ru.alepar.zx80.base.Cell;
  * User: alepar
  * Date: Sep 23, 2010
  */
-public interface CellRetriever {
+public interface CellRetriever extends Mnemonic {
 
     Cell getFrom(Speccy speccy);
-
-    String mnemonic();
 
 }
