@@ -11,6 +11,8 @@ import static ru.alepar.zx80.retrieve.Retrievers.*;
 /**
  * User: alepar
  * Date: Sep 15, 2010
+ * <p/>
+ * (BC),(DE) <-> A
  */
 public class LdIndirectReg extends SpeccyOpFactory {
 

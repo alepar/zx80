@@ -2,6 +2,7 @@ package ru.alepar.zx80.retrieve;
 
 import ru.alepar.zx80.base.Address;
 import ru.alepar.zx80.cpu.Register;
+import ru.alepar.zx80.cpu.WordRegister;
 
 /**
  * User: alepar
@@ -19,6 +20,18 @@ public class Retrievers {
 
     public static CellRetriever reg(Register r) {
         return new RegistryRetriever(r);
+    }
+
+    public static WordRetriever reg(WordRegister r) {
+        return new RegistryWordRetriever(r);
+    }
+
+    public static CellRetriever imem(WordRetriever r, byte offset) {
+        return new IndirectWordMemoryRetriever(r, offset);
+    }
+
+    public static CellRetriever imem(WordRetriever r) {
+        return new IndirectWordMemoryRetriever(r);
     }
 
 }

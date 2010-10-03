@@ -16,6 +16,10 @@ public class Address {
         return new Address(value.getValue());
     }
 
+    public static Address address(Word value, byte offset) {
+        return new Address(value.getValue() + offset);
+    }
+
     private Address(int value) {
         this.value = value;
     }

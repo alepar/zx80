@@ -1,8 +1,8 @@
 package ru.alepar.zx80.retrieve;
 
 import ru.alepar.zx80.Speccy;
-import ru.alepar.zx80.base.Cell;
-import ru.alepar.zx80.cpu.Register;
+import ru.alepar.zx80.base.Word;
+import ru.alepar.zx80.cpu.WordRegister;
 
 /**
  * User: alepar
@@ -10,15 +10,15 @@ import ru.alepar.zx80.cpu.Register;
  */
 public class RegistryWordRetriever implements WordRetriever {
 
-    private final Register register;
+    private final WordRegister register;
 
-    RegistryWordRetriever(Register register) {
+    RegistryWordRetriever(WordRegister register) {
         this.register = register;
     }
 
     @Override
-    public Cell getFrom(Speccy speccy) {
-        return speccy.getRegistryBlock().getCell(register);
+    public Word getFrom(Speccy speccy) {
+        return speccy.getRegistryBlock().getWordRegister(register);
     }
 
     @Override
