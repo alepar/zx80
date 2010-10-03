@@ -36,8 +36,8 @@ public class LdCommon {
         }
     }
 
-    public static CellRetriever getDstCell(byte srcVal) {
-        switch (srcVal) {
+    public static CellRetriever getDstCell(byte val) {
+        switch (val) {
             case 0:
                 return reg(B);
             case 1:

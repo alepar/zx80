@@ -18,7 +18,7 @@ import static ru.alepar.zx80.cpu.Register.*;
 public class LdIndirectRegTest {
 
     private final Speccy speccy = SpeccyFactory.buildSpeccy();
-    private final OpFactory opFactory = new LdIndirectReg(speccy);
+    private final OpFactory opFactory = new LdIndirectReg();
 
     @Test
     public void ldBcToAExecutedProperly() {

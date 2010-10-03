@@ -18,7 +18,7 @@ import static ru.alepar.zx80.base.Address.*;
 public class LdRegistryArgsTest {
 
     private final Speccy speccy = SpeccyFactory.buildSpeccy();
-    private final OpFactory opFactory = new LdRegistryArgs(speccy);
+    private final OpFactory opFactory = new LdRegistryArgs();
 
     @Test
     public void ldBToAExecutedProperly() {

@@ -1,6 +1,5 @@
 package ru.alepar.zx80.op.factory;
 
-import ru.alepar.zx80.Speccy;
 import ru.alepar.zx80.base.Cell;
 import ru.alepar.zx80.op.Ld;
 import ru.alepar.zx80.retrieve.CellRetriever;
@@ -15,10 +14,6 @@ import static ru.alepar.zx80.retrieve.Retrievers.*;
  * (BC),(DE) <-> A
  */
 public class LdIndirectReg extends SpeccyOpFactory {
-
-    public LdIndirectReg(Speccy speccy) {
-        super(speccy);
-    }
 
     @Override
     public int accept(Cell[] opcode) {

@@ -1,6 +1,5 @@
 package ru.alepar.zx80.op.factory;
 
-import ru.alepar.zx80.Speccy;
 import ru.alepar.zx80.base.Cell;
 import ru.alepar.zx80.op.Ld;
 
@@ -13,10 +12,6 @@ import static ru.alepar.zx80.op.factory.LdCommon.*;
  * A,B,C,... -> A,B,C,...
  */
 public class LdRegistryArgs extends SpeccyOpFactory {
-
-    public LdRegistryArgs(Speccy speccy) {
-        super(speccy);
-    }
 
     @Override
     public int accept(Cell[] opcode) {
