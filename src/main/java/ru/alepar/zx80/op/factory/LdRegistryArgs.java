@@ -9,7 +9,7 @@ import static ru.alepar.zx80.op.factory.LdCommon.*;
 /**
  * User: alepar
  * Date: Sep 15, 2010
- * <p/>
+ * 
  * A,B,C,... -> A,B,C,...
  */
 public class LdRegistryArgs extends SpeccyOpFactory {

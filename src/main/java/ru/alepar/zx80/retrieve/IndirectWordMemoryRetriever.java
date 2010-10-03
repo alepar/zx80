@@ -33,6 +33,6 @@ public class IndirectWordMemoryRetriever implements CellRetriever {
 
     @Override
     public String mnemonic() {
-        return "(" + word.mnemonic() + ")";
+        return "(" + word.mnemonic() + (offset == 0 ? "": " + " + offset) + ")";
     }
 }
