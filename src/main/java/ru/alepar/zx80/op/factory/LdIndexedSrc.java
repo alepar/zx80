@@ -21,8 +21,8 @@ public class LdIndexedSrc extends SpeccyOpFactory {
             return 0;
         }
         if (opcode[0].getValue() == (byte)0xdd || opcode[0].getValue() == (byte)0xfd) {
-            if (getHeader(opcode[1]) == 0x01) {
-                if (getSrcVal(opcode[1]) == 6) {
+            if (getHeader(opcode[1]) == (byte) 0x01) {
+                if (getSrcVal(opcode[1]) == (byte) 0x06) {
                     return 3;
                 }
             }
