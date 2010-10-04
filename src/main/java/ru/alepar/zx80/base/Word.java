@@ -52,6 +52,6 @@ public class Word {
 
     public void setValue(int value) {
         high.setValue((byte) ((value >>> 8) & 0xff));
-        low.setValue((byte)value);
+        low.setValue((byte) value);
     }
 }

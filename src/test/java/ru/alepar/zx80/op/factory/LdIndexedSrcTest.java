@@ -22,7 +22,7 @@ public class LdIndexedSrcTest {
 
     @Test
     public void ldIxToAExecutedProperly() {
-        Cell[] opcode = new Cell[]{new Cell(),new Cell(),new Cell()};
+        Cell[] opcode = new Cell[]{new Cell(), new Cell(), new Cell()};
         opcode[0].setValue((byte) 0xdd); // (IX+d) -> A
         opcode[1].setValue((byte) 0x7e);
         opcode[2].setValue((byte) 0x05);
@@ -32,10 +32,10 @@ public class LdIndexedSrcTest {
         int addr = 0x10;
         int offset = 0x05;
         speccy.getRegistryBlock().getWord(WordRegister.IX).setValue(addr);
-        speccy.getMemory().getCell(address(addr+offset)).setValue((byte) 0xca);
+        speccy.getMemory().getCell(address(addr + offset)).setValue((byte) 0xca);
 
         opFactory.build(opcode).execute(speccy);
         assertThat(speccy.getRegistryBlock().getCell(Register.A).getValue(), equalTo((byte) 0xca));
     }
-    
+
 }

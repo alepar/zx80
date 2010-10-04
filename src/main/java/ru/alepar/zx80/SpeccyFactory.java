@@ -17,6 +17,6 @@ public class SpeccyFactory {
         Memory memory = new Memory(config.getMemorySize());
         RegistryBlock registryBlock = new RegistryBlock();
 
-        return new Speccy(memory, registryBlock); 
+        return new Speccy(memory, registryBlock);
     }
 }

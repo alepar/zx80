@@ -11,8 +11,8 @@ import static ru.alepar.zx80.retrieve.Retrievers.*;
 /**
  * User: alepar
  * Date: Oct 05, 2010
- * 
- *  A -> (nn)
+ * <p/>
+ * A -> (nn)
  */
 public class LdExtAddrDst extends SpeccyOpFactory {
 
@@ -21,7 +21,7 @@ public class LdExtAddrDst extends SpeccyOpFactory {
         if (opcode.length < 3) {
             return 0;
         }
-        if (opcode[0].getValue() == (byte)0x32) {
+        if (opcode[0].getValue() == (byte) 0x32) {
             return 3;
         }
         return 0;
@@ -32,7 +32,7 @@ public class LdExtAddrDst extends SpeccyOpFactory {
         return new Ld(
                 reg(Register.A),
                 mem(address(new Word(opcode[1], opcode[2])))
-            );
+        );
     }
 
 }

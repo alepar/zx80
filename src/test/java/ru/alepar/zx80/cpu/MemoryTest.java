@@ -23,7 +23,7 @@ public class MemoryTest {
         for (int i = 0; i < MEMORY_SIZE; i++) {
             Cell cell = memory.getCell(address(i));
             assertThat(cell, notNullValue());
-            assertThat(cell.getValue(), equalTo((byte)0));
+            assertThat(cell.getValue(), equalTo((byte) 0));
         }
     }
 

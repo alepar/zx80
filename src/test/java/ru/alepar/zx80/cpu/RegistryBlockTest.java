@@ -14,7 +14,7 @@ import static org.junit.Assert.*;
 public class RegistryBlockTest {
 
     private RegistryBlock registryBlock = new RegistryBlock();
-    
+
     @Test
     public void allEnumeratedRegistriesAreAccessible() {
         for (int i = 0; i < Register.values().length; i++) {

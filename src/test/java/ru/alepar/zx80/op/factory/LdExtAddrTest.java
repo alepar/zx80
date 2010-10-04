@@ -21,7 +21,7 @@ public class LdExtAddrTest {
 
     @Test
     public void ldIxToAExecutedProperly() {
-        Cell[] opcode = new Cell[]{new Cell(),new Cell(),new Cell()};
+        Cell[] opcode = new Cell[]{new Cell(), new Cell(), new Cell()};
         opcode[0].setValue((byte) 0x32); // A -> (nn)
         opcode[1].setValue((byte) 0x02);
         opcode[2].setValue((byte) 0x05);
@@ -35,5 +35,5 @@ public class LdExtAddrTest {
         int addr = 0x0205;
         assertThat(speccy.getMemory().getCell(address(addr)).getValue(), equalTo((byte) 0xca));
     }
-    
+
 }

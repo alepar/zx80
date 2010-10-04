@@ -1,7 +1,6 @@
 package ru.alepar.zx80.util;
 
 /**
- *
  * User: alepar
  * Date: Sep 15, 2010
  */
@@ -15,7 +14,7 @@ public class Mask {
     }
 
     public static Mask mask(byte mask) {
-        return new Mask(((int)mask) & 0xff);
+        return new Mask(((int) mask) & 0xff);
     }
 
     private Mask(int mask) {
@@ -31,10 +30,10 @@ public class Mask {
     }
 
     public byte applyTo(byte src) {
-        return (byte)applyTo(((int)src) & 0xff); 
+        return (byte) applyTo(((int) src) & 0xff);
     }
 
     public int applyTo(int src) {
-        return (src & mask ) >>> shift;
+        return (src & mask) >>> shift;
     }
 }

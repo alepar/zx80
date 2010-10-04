@@ -6,11 +6,11 @@ package ru.alepar.zx80.config;
  */
 public class StaticConfig implements Config {
 
-    public static final int MEMORY_SIZE = 16*1024;
+    public static final int MEMORY_SIZE = 16 * 1024;
 
     @Override
     public int getMemorySize() {
         return MEMORY_SIZE;
     }
-    
+
 }

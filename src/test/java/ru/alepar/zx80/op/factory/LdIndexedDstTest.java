@@ -22,7 +22,7 @@ public class LdIndexedDstTest {
 
     @Test
     public void ldCToIyExecutedProperly() {
-        Cell[] opcode = new Cell[]{new Cell(),new Cell(),new Cell()};
+        Cell[] opcode = new Cell[]{new Cell(), new Cell(), new Cell()};
         opcode[0].setValue((byte) 0xfd); // C -> (IY+d)
         opcode[1].setValue((byte) 0x71);
         opcode[2].setValue((byte) 0x05);
@@ -35,8 +35,8 @@ public class LdIndexedDstTest {
         speccy.getRegistryBlock().getCell(Register.C).setValue((byte) 0xca);
 
         opFactory.build(opcode).execute(speccy);
-        
-        assertThat(speccy.getMemory().getCell(address(addr+offset)).getValue(), equalTo((byte) 0xca));
+
+        assertThat(speccy.getMemory().getCell(address(addr + offset)).getValue(), equalTo((byte) 0xca));
     }
-    
+
 }

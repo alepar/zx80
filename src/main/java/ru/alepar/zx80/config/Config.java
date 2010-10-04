@@ -7,5 +7,5 @@ package ru.alepar.zx80.config;
 public interface Config {
 
     int getMemorySize();
-    
+
 }

@@ -17,7 +17,7 @@ public class IndirectWordMemoryRetrieverTest {
         Mnemonic r = new IndirectWordMemoryRetriever(new RegistryWordRetriever(WordRegister.IX), (byte) 5);
         assertThat(r.mnemonic(), equalTo("(IX + 5)"));
     }
-    
+
     @Test
     public void testMnemonicWithZeroOffset() throws Exception {
         Mnemonic r = new IndirectWordMemoryRetriever(new RegistryWordRetriever(WordRegister.IY));

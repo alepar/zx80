@@ -10,7 +10,7 @@ import static ru.alepar.zx80.retrieve.Retrievers.*;
 /**
  * User: alepar
  * Date: Sep 15, 2010
- * 
+ * <p/>
  * A,B,C... -> (IX + d)
  */
 public class LdIndexedDst extends SpeccyOpFactory {
@@ -20,7 +20,7 @@ public class LdIndexedDst extends SpeccyOpFactory {
         if (opcode.length < 3) {
             return 0;
         }
-        if (opcode[0].getValue() == (byte)0xdd || opcode[0].getValue() == (byte)0xfd) {
+        if (opcode[0].getValue() == (byte) 0xdd || opcode[0].getValue() == (byte) 0xfd) {
             if (getHeader(opcode[1]) == (byte) 0x01) {
                 if (getDstVal(opcode[1]) == (byte) 0x06) {
                     return 3;
@@ -41,7 +41,7 @@ public class LdIndexedDst extends SpeccyOpFactory {
         return new Ld(
                 getSrcCell(getSrcVal(opcode[1])),
                 imem(reg(r), opcode[2].getValue())
-            );
+        );
     }
 
 }

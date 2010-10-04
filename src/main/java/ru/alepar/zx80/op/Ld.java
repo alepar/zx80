@@ -23,7 +23,7 @@ public class Ld implements Op {
 
     @Override
     public String mnemonic() {
-        return "LD\t" + dst.mnemonic() + ", " + src.mnemonic(); 
+        return "LD\t" + dst.mnemonic() + ", " + src.mnemonic();
     }
-    
+
 }
