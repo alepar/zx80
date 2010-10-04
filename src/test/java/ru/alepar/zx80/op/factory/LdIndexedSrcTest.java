@@ -31,7 +31,7 @@ public class LdIndexedSrcTest {
 
         int addr = 0x10;
         int offset = 0x05;
-        speccy.getRegistryBlock().getWordRegister(WordRegister.IX).setValue(addr);
+        speccy.getRegistryBlock().getWord(WordRegister.IX).setValue(addr);
         speccy.getMemory().getCell(address(addr+offset)).setValue((byte) 0xca);
 
         opFactory.build(opcode).execute(speccy);

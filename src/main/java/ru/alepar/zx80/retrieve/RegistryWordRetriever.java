@@ -18,7 +18,7 @@ public class RegistryWordRetriever implements WordRetriever {
 
     @Override
     public Word getFrom(Speccy speccy) {
-        return speccy.getRegistryBlock().getWordRegister(register);
+        return speccy.getRegistryBlock().getWord(register);
     }
 
     @Override

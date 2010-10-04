@@ -40,7 +40,7 @@ public class RegistryBlock {
         return registers.get(type);
     }
 
-    public Word getWordRegister(WordRegister type) {
+    public Word getWord(WordRegister type) {
         return wordRegisters.get(type);
     }
 

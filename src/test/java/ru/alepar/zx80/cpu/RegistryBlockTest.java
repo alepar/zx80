@@ -29,7 +29,7 @@ public class RegistryBlockTest {
     public void allEnumeratedWordRegistriesAreAccessible() {
         for (int i = 0; i < WordRegister.values().length; i++) {
             WordRegister type = WordRegister.values()[i];
-            Word register = registryBlock.getWordRegister(type);
+            Word register = registryBlock.getWord(type);
 
             assertThat(register, notNullValue());
         }
