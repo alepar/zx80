@@ -11,7 +11,7 @@ import static ru.alepar.zx80.retrieve.Retrievers.*;
  * User: alepar
  * Date: Sep 15, 2010
  * 
- * (IX + d) -> A,B,C...
+ * A,B,C... -> (IX + d)
  */
 public class LdIndexedDst extends SpeccyOpFactory {
 

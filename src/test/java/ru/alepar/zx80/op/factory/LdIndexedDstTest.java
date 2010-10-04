@@ -21,7 +21,7 @@ public class LdIndexedDstTest {
     private final OpFactory opFactory = new LdIndexedDst();
 
     @Test
-    public void ldIxToAExecutedProperly() {
+    public void ldCToIyExecutedProperly() {
         Cell[] opcode = new Cell[]{new Cell(),new Cell(),new Cell()};
         opcode[0].setValue((byte) 0xfd); // C -> (IY+d)
         opcode[1].setValue((byte) 0x71);
