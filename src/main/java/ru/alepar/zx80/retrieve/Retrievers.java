@@ -34,4 +34,8 @@ public class Retrievers {
         return new IndirectWordMemoryRetriever(r);
     }
 
+    public static CellRetriever immed(byte value) {
+        return new ConstrRetriever(value);
+    }
+
 }
