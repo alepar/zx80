@@ -20,7 +20,7 @@ public class LdIndexedDstImmediateTest {
     private final OpFactory opFactory = new LdIndexedDstImmediate();
 
     @Test
-    public void ldCToIyExecutedProperly() {
+    public void ldImmediateToIxExecutedProperly() {
         byte offset = (byte) 0x05;
 
         Cell[] opcode = new Cell[]{new Cell(), new Cell(), new Cell(), new Cell()};
