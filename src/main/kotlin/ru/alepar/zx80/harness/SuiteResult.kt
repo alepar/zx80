@@ -5,7 +5,8 @@ import kotlinx.serialization.json.JsonElement
 
 /**
  * Result of running one suite. `details` is suite-specific JSON that lands verbatim under the
- * suite's key in the composite score.json.
+ * suite's key in the composite score.json. Each Suite implementation documents its own `details`
+ * JSON shape in its class KDoc.
  */
 @Serializable
 data class SuiteResult(

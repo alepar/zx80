@@ -11,6 +11,9 @@ import ru.alepar.zx80.harness.SuiteResult
  * * 256 = 1792). A more nuanced "documented opcodes only" denominator can replace this once we have
  *   a list of which entries are intentionally undefined; for now this gives a monotonic gradient as
  *   we fill in tables.
+ *
+ * `details` shape: `{ "missing": ["<table>:0x<XX>", ...] }` (capped at MISSING_LIMIT entries;
+ * sorted by table then opcode index).
  */
 class OpcodeCoverage(private val decoder: Decoder) : Suite {
     override val name: String = "opcodes"
@@ -36,7 +39,7 @@ class OpcodeCoverage(private val decoder: Decoder) : Suite {
                     table
                         .withIndex()
                         .filter { (_, op) -> op == null }
-                        .map { (i, _) -> "$label:0x${i.toString(16).padStart(2, '0').uppercase()}" }
+                        .map { (i, _) -> "$label:0x${"%02X".format(i)}" }
                 }
                 .take(MISSING_LIMIT)
 

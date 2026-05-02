@@ -16,9 +16,6 @@ class Decoder {
     val ddcb: Array<Op?> = arrayOfNulls(TABLE_SIZE)
     val fdcb: Array<Op?> = arrayOfNulls(TABLE_SIZE)
 
-    fun installedCount(): Int =
-        sequenceOf(main, cb, ed, dd, fd, ddcb, fdcb).sumOf { table -> table.count { it != null } }
-
     companion object {
         const val TABLE_SIZE = 256
     }

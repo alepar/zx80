@@ -41,6 +41,13 @@ class OpcodeCoverageTest {
         // First missing entry should be main:0x01 (since 0x00 is filled)
         assertThat(missing.first().jsonPrimitive.content).isEqualTo("main:0x01")
     }
+
+    @Test
+    fun `missing list is capped at MISSING_LIMIT entries`() {
+        val r = OpcodeCoverage(Decoder()).run() // empty Decoder; everything is missing
+        val missing = (r.details as JsonObject)["missing"]!!.jsonArray
+        assertThat(missing).hasSize(OpcodeCoverage.MISSING_LIMIT)
+    }
 }
 
 private object StubOp : Op {
