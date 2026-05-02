@@ -16,10 +16,6 @@ object OpTableBuilder {
         val d = Decoder()
         MiscOps.installInto(d)
         ExOps.installInto(d)
-        // Family fragments slot in here as they land:
-        //   LdOps.installInto(d)    (Plan 2.1b)
-        //   ArithOps.installInto(d) (Plan 2.2)
-        //   ...
         return d
     }
 }
