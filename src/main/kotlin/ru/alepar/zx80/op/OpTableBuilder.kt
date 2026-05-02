@@ -1,6 +1,7 @@
 package ru.alepar.zx80.op
 
 import ru.alepar.zx80.cpu.Decoder
+import ru.alepar.zx80.op.misc.MiscOps
 
 /**
  * Builds the populated [Decoder] for production. Per-family fragments (e.g. `MiscOps`, `ExOps`,
@@ -12,8 +13,8 @@ object OpTableBuilder {
 
     fun build(): Decoder {
         val d = Decoder()
+        MiscOps.installInto(d)
         // Family fragments slot in here as they land:
-        //   MiscOps.installInto(d)  (WU 2.1a-3)
         //   ExOps.installInto(d)    (WU 2.1a-4)
         //   LdOps.installInto(d)    (Plan 2.1b)
         //   ArithOps.installInto(d) (Plan 2.2)

@@ -6,10 +6,10 @@ import org.junit.jupiter.api.Test
 class OpTableBuilderTest {
 
     @Test
-    fun `build returns a Decoder with no Ops installed yet`() {
+    fun `build returns a Decoder with at least the misc family installed`() {
         val d = OpTableBuilder.build()
-        val tables = listOf(d.main, d.cb, d.ed, d.dd, d.fd, d.ddcb, d.fdcb)
-        val totalInstalled = tables.sumOf { table -> table.count { it != null } }
-        assertThat(totalInstalled).isZero
+        // Spot check: NOP at 0x00 and IM 1 at ED 0x56
+        assertThat(d.main[0x00]).isNotNull
+        assertThat(d.ed[0x56]).isNotNull
     }
 }

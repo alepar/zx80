@@ -18,20 +18,20 @@ class ScoreCommandTest {
             )
 
     @Test
-    fun `score on empty decoder reports SCORE colon zero`() {
+    fun `score reports headline with non-zero opcode count`() {
         val result = newCli().test("score")
         assertThat(result.statusCode).isZero()
-        assertThat(result.stdout).contains("SCORE: 0.000")
-        assertThat(result.stdout).contains("opcodes 0/")
-        assertThat(result.stdout).contains("fuse 0/")
-        assertThat(result.stdout).contains("programs 0/1")
+        assertThat(result.stdout).contains("SCORE: ")
+        assertThat(result.stdout).contains("opcodes ")
+        assertThat(result.stdout).doesNotContain("opcodes 0/") // we now have some installed
+        assertThat(result.stdout).contains("programs 1/1") // nop_loop now passes
     }
 
     @Test
     fun `score with suite filter runs only one suite`() {
         val result = newCli().test("score --suite=opcodes")
         assertThat(result.statusCode).isZero()
-        assertThat(result.stdout).contains("opcodes 0/")
+        assertThat(result.stdout).contains("opcodes ")
         assertThat(result.stdout).doesNotContain("fuse")
     }
 
