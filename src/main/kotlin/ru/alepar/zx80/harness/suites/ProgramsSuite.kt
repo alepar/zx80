@@ -12,7 +12,7 @@ import ru.alepar.zx80.harness.programs.ExpectedState
 import ru.alepar.zx80.harness.programs.ProgramExpectation
 
 /** A single program plus its expected outcome. */
-data class ProgramFixture(val bytes: ByteArray, val expectation: ProgramExpectation)
+class ProgramFixture(val bytes: ByteArray, val expectation: ProgramExpectation)
 
 /**
  * Runs each program fixture, comparing final CPU+memory state to the declared expectation. With the
@@ -67,7 +67,7 @@ class ProgramsSuite(private val decoder: Decoder, private val programs: List<Pro
                 op.execute(cpu, mem)
             }
             if (failure == null) failure = checkExpectations(cpu, mem, exp.expect)
-        } catch (t: Throwable) {
+        } catch (t: Exception) {
             failure = "exception: ${t::class.simpleName}: ${t.message}"
         }
 
@@ -95,6 +95,10 @@ class ProgramsSuite(private val decoder: Decoder, private val programs: List<Pro
         return null
     }
 
-    private fun parseHex(s: String): Int =
-        if (s.startsWith("0x") || s.startsWith("0X")) s.substring(2).toInt(16) else s.toInt()
+    private fun parseHex(s: String): Int {
+        require(s.startsWith("0x") || s.startsWith("0X")) {
+            "expected hex address with 0x prefix, got '$s'"
+        }
+        return s.substring(2).toInt(16)
+    }
 }

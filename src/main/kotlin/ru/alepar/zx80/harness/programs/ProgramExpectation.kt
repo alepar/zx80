@@ -21,6 +21,9 @@ data class ExpectedState(
     val de: Int? = null,
     val hl: Int? = null,
     val sp: Int? = null,
-    /** Map of "0xNNNN" → expected byte value at that address. */
+    /**
+     * Map of address → expected byte. Address must be hex with `0x` prefix (e.g. `"0x100"`); case
+     * insensitive.
+     */
     val memory: Map<String, Int>? = null,
 )
