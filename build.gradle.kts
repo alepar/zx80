@@ -6,15 +6,12 @@ plugins {
 }
 
 group = "ru.alepar"
+
 version = "0.1.0-SNAPSHOT"
 
-kotlin {
-    jvmToolchain(21)
-}
+kotlin { jvmToolchain(21) }
 
-repositories {
-    mavenCentral()
-}
+repositories { mavenCentral() }
 
 dependencies {
     implementation(libs.kotlinx.serialization.json)
@@ -32,9 +29,7 @@ application {
 
 tasks.test {
     useJUnitPlatform()
-    testLogging {
-        events("passed", "failed", "skipped")
-    }
+    testLogging { events("passed", "failed", "skipped") }
 }
 
 spotless {

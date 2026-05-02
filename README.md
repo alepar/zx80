@@ -24,6 +24,8 @@ Requires JDK 21 on PATH.
 ./build/install/zx80/bin/zx80 score
 ```
 
+> *Note: as of WU1 there is no source code yet — `./gradlew help` is the only command that works until WU2+ lands.*
+
 Expected during M1 development: a `SCORE: x.yyy` line on stdout, plus
 `build/score.json` with the breakdown.
 
