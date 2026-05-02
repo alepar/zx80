@@ -16,3 +16,8 @@ Thumbs.db
 # Score outputs
 score.json
 score.prev.json
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key
