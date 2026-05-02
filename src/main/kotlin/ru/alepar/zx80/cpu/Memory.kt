@@ -3,6 +3,10 @@ package ru.alepar.zx80.cpu
 /**
  * 64K linear address space. Reads return unsigned 0..255 as Int. Writes mask to 8 bits. Address
  * arithmetic wraps mod 65536.
+ *
+ * Callers SHOULD pass raw arithmetic results (e.g. `sp - 1`) without pre-masking; the address is
+ * wrapped internally. This is required for Z80 semantics like `PUSH` from `SP=0` decrementing to
+ * `0xFFFF`.
  */
 class Memory {
     private val bytes = ByteArray(SIZE)
@@ -15,7 +19,7 @@ class Memory {
 
     fun loadAt(addr: Int, payload: ByteArray) {
         require(addr in 0..ADDR_MASK) { "load address out of range: 0x${addr.toString(16)}" }
-        require(addr + payload.size <= SIZE) {
+        require(payload.size <= SIZE - addr) {
             "payload of ${payload.size} bytes at 0x${addr.toString(16)} overflows 64K address space"
         }
         payload.copyInto(bytes, addr)

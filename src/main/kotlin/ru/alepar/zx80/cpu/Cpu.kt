@@ -3,6 +3,9 @@ package ru.alepar.zx80.cpu
 /**
  * Z80 CPU state. All 8-bit registers are stored as Int in 0..255 to sidestep signed-byte
  * arithmetic. Pair accessors compose/decompose on each call; pair setters mask to 16 bits.
+ *
+ * The alternate register set uses `aAlt`, `bAlt`, ... naming (Kotlin doesn't allow primes in
+ * identifiers); Z80 documentation refers to these as `A'`, `B'`, ...
  */
 class Cpu {
     // Main 8-bit register set
@@ -41,35 +44,42 @@ class Cpu {
     var im: Int = 0
     var halted: Boolean = false
 
-    // Cycle accumulator (T-states since reset)
+    /**
+     * Cycle accumulator (T-states since reset). The convention is that each `Op.execute()` adds its
+     * own T-states; the dispatcher does not touch this field.
+     */
     var tStates: Long = 0
 
     // Register-pair convenience accessors
     var af: Int
         get() = (a shl 8) or f
         set(value) {
-            a = (value ushr 8) and 0xFF
-            f = value and 0xFF
+            val v = value and 0xFFFF
+            a = (v ushr 8) and 0xFF
+            f = v and 0xFF
         }
 
     var bc: Int
         get() = (b shl 8) or c
         set(value) {
-            b = (value ushr 8) and 0xFF
-            c = value and 0xFF
+            val v = value and 0xFFFF
+            b = (v ushr 8) and 0xFF
+            c = v and 0xFF
         }
 
     var de: Int
         get() = (d shl 8) or e
         set(value) {
-            d = (value ushr 8) and 0xFF
-            e = value and 0xFF
+            val v = value and 0xFFFF
+            d = (v ushr 8) and 0xFF
+            e = v and 0xFF
         }
 
     var hl: Int
         get() = (h shl 8) or l
         set(value) {
-            h = (value ushr 8) and 0xFF
-            l = value and 0xFF
+            val v = value and 0xFFFF
+            h = (v ushr 8) and 0xFF
+            l = v and 0xFF
         }
 }

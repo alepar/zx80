@@ -80,4 +80,31 @@ class CpuTest {
         cpu.bc = 0x1_2345 // 17-bit value; top bit must be discarded
         assertThat(cpu.bc).isEqualTo(0x2345)
     }
+
+    @Test
+    fun `register pair setter masks negative and overflowing values to bottom 16 bits`() {
+        val cpu = Cpu()
+        cpu.bc = -1 // 0xFFFFFFFF
+        assertThat(cpu.bc).isEqualTo(0xFFFF)
+
+        cpu.de = 0xFFFF_0000.toInt() // top 16 bits set, bottom 16 zero
+        assertThat(cpu.de).isEqualTo(0x0000)
+
+        cpu.hl = 0x1_2345_FFFF.toInt() // discard everything above bit 15
+        // 0x1_2345_FFFF as Int is 0x2345_FFFF; bottom 16 = 0xFFFF
+        assertThat(cpu.hl).isEqualTo(0xFFFF)
+    }
+
+    @Test
+    fun `alternate registers are independent of main registers`() {
+        val cpu = Cpu()
+        cpu.a = 0x11
+        cpu.aAlt = 0x22
+        cpu.b = 0x33
+        cpu.bAlt = 0x44
+        assertThat(cpu.a).isEqualTo(0x11)
+        assertThat(cpu.aAlt).isEqualTo(0x22)
+        assertThat(cpu.b).isEqualTo(0x33)
+        assertThat(cpu.bAlt).isEqualTo(0x44)
+    }
 }

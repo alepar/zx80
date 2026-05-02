@@ -55,4 +55,26 @@ class MemoryTest {
         assertThatThrownBy { mem.loadAt(0xFFFE, byteArrayOf(1, 2, 3)) }
             .isInstanceOf(IllegalArgumentException::class.java)
     }
+
+    @Test
+    fun `loadAt with empty payload is a no-op even at the last valid address`() {
+        val mem = Memory()
+        mem.loadAt(0xFFFF, byteArrayOf()) // must not throw
+        mem.loadAt(0, byteArrayOf())
+        // sanity: nothing changed
+        assertThat(mem.read(0xFFFF)).isZero
+        assertThat(mem.read(0)).isZero
+    }
+
+    @Test
+    fun `loadAt rejects pathologically large payload using overflow-safe check`() {
+        val mem = Memory()
+        // Allocate a payload equal in size to the full address space, load at non-zero addr
+        // — the naive `addr + payload.size` would compute 0x10100, which fits in Int and would
+        // PASS the old (overflowing) check ONLY for huge payloads. Here we simply demonstrate
+        // the check still fires correctly under realistic over-large payloads.
+        assertThatThrownBy { mem.loadAt(0x100, ByteArray(Memory.SIZE)) }
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessageContaining("overflows")
+    }
 }
