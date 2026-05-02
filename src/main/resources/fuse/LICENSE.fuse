@@ -1,0 +1,6 @@
+The FUSE Z80 test suite (`tests.in` and `tests.expected`) is part of
+the FUSE emulator and is distributed under the GNU General Public
+License version 2 or later. See https://fuse-emulator.sourceforge.net/
+for the full source and license text.
+
+Original author: Philip Kendall.
