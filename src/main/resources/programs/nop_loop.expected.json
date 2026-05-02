@@ -1,0 +1,11 @@
+{
+  "name": "nop_loop",
+  "load_at": 0,
+  "entry": 0,
+  "max_cycles": 8,
+  "stop_on": "HALT",
+  "expect": {
+    "pc": 1,
+    "halted": true
+  }
+}
