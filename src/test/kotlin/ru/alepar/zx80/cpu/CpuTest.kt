@@ -107,4 +107,29 @@ class CpuTest {
         assertThat(cpu.b).isEqualTo(0x33)
         assertThat(cpu.bAlt).isEqualTo(0x44)
     }
+
+    @Test
+    fun `bumpR increments r preserving top bit, wrapping bottom 7`() {
+        val cpu = Cpu()
+
+        cpu.r = 0x10
+        cpu.bumpR()
+        assertThat(cpu.r).isEqualTo(0x11)
+
+        cpu.r = 0x7F // bottom 7 saturated
+        cpu.bumpR()
+        assertThat(cpu.r).isEqualTo(0x00) // bottom 7 wraps; top bit still 0
+
+        cpu.r = 0xFF // top bit set, bottom 7 saturated
+        cpu.bumpR()
+        assertThat(cpu.r).isEqualTo(0x80) // top bit preserved, bottom 7 wraps to 0
+
+        cpu.r = 0x00
+        cpu.bumpR(2)
+        assertThat(cpu.r).isEqualTo(0x02)
+
+        cpu.r = 0x7E
+        cpu.bumpR(2)
+        assertThat(cpu.r).isEqualTo(0x00) // 0x7E + 2 = 0x80 → top bit was 0, mask to 0x7F = 0x00
+    }
 }

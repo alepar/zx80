@@ -82,4 +82,15 @@ class Cpu {
             h = (v ushr 8) and 0xFF
             l = v and 0xFF
         }
+
+    /**
+     * Increment the R register, preserving its top bit (which the Z80 keeps unchanged across normal
+     * increments). Bottom 7 bits wrap mod 128.
+     *
+     * Use `bumpR(2)` for prefixed instructions (CB/ED/DD/FD), since the M1 cycle for the prefix and
+     * the M1 cycle for the opcode each tick R.
+     */
+    fun bumpR(by: Int = 1) {
+        r = (r and 0x80) or ((r + by) and 0x7F)
+    }
 }

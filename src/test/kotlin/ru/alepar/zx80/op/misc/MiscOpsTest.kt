@@ -22,5 +22,8 @@ class MiscOpsTest {
         assertThat(d.ed[0x46]).isInstanceOf(Im::class.java)
         assertThat(d.ed[0x56]).isInstanceOf(Im::class.java)
         assertThat(d.ed[0x5E]).isInstanceOf(Im::class.java)
+        assertThat((d.ed[0x46] as Im).mnemonic { 0 }).isEqualTo("IM 0")
+        assertThat((d.ed[0x56] as Im).mnemonic { 0 }).isEqualTo("IM 1")
+        assertThat((d.ed[0x5E] as Im).mnemonic { 0 }).isEqualTo("IM 2")
     }
 }

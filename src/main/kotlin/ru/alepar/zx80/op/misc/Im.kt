@@ -16,7 +16,7 @@ class Im(private val mode: Int) : Op {
     override fun execute(cpu: Cpu, mem: Memory) {
         cpu.im = mode
         cpu.pc = (cpu.pc + 2) and 0xFFFF
-        cpu.r = (cpu.r and 0x80) or ((cpu.r + 2) and 0x7F)
+        cpu.bumpR(2)
         cpu.tStates += baseCycles
     }
 
