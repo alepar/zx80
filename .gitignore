@@ -1,3 +1,18 @@
+# Build
+build/
+.gradle/
+out/
 
-/.idea/workspace.xml
-/target
+# IDE
+.idea/
+*.iml
+*.iws
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Score outputs
+score.json
+score.prev.json
