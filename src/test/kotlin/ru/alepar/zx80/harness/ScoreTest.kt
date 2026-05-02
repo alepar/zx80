@@ -26,6 +26,13 @@ class ScoreTest {
     }
 
     @Test
+    fun `empty suites yields zero score and empty parens headline`() {
+        val c = Score.compute(emptyList())
+        assertThat(c.score).isEqualTo(0.0)
+        assertThat(c.headline()).isEqualTo("SCORE: 0.000  ()")
+    }
+
+    @Test
     fun `headline format`() {
         val suites =
             listOf(

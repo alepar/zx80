@@ -19,6 +19,8 @@ data class CompositeScore(val score: Double, val results: List<SuiteResult>) {
     }
 
     fun toJson(prettyPrint: Boolean = true, gitInfo: GitInfo = GitInfo.unknown()): String {
+        // Shape contract: docs/superpowers/specs/2026-05-02-zx80-spectrum-emulator-design.md
+        // §"build/score.json"
         val obj = buildJsonObject {
             put("score", JsonPrimitive(score))
             put("timestamp", JsonPrimitive(Instant.now().toString()))
