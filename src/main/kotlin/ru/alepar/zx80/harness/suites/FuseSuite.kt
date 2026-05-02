@@ -5,6 +5,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import ru.alepar.zx80.cpu.Cpu
 import ru.alepar.zx80.cpu.Decoder
+import ru.alepar.zx80.cpu.Dispatcher
 import ru.alepar.zx80.cpu.Memory
 import ru.alepar.zx80.harness.SuiteResult
 import ru.alepar.zx80.harness.fuse.FuseExpectedCase
@@ -25,6 +26,8 @@ class FuseSuite(
     private val inputs: List<FuseInputCase>,
     private val expected: List<FuseExpectedCase>,
 ) : Suite {
+    private val dispatcher = Dispatcher(decoder)
+
     override val name: String = "fuse"
     override val weight: Double = 0.7
 
@@ -69,9 +72,12 @@ class FuseSuite(
                 }
             }
 
-        val opcodeByte = mem.read(cpu.pc)
         val op =
-            decoder.main[opcodeByte] ?: return "no op for opcode 0x${"%02X".format(opcodeByte)}"
+            dispatcher.decodeAt(cpu, mem)
+                ?: run {
+                    val opcodeByte = mem.read(cpu.pc)
+                    return "no op for opcode 0x${"%02X".format(opcodeByte)} (no dispatch route)"
+                }
         op.execute(cpu, mem)
 
         if (cpu.af != want.af) return "af mismatch: ${hex4(cpu.af)} vs ${hex4(want.af)}"

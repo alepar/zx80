@@ -6,6 +6,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import ru.alepar.zx80.cpu.Cpu
 import ru.alepar.zx80.cpu.Decoder
+import ru.alepar.zx80.cpu.Dispatcher
 import ru.alepar.zx80.cpu.Memory
 import ru.alepar.zx80.harness.SuiteResult
 import ru.alepar.zx80.harness.programs.ExpectedState
@@ -23,6 +24,8 @@ class ProgramFixture(val bytes: ByteArray, val expectation: ProgramExpectation)
  */
 class ProgramsSuite(private val decoder: Decoder, private val programs: List<ProgramFixture>) :
     Suite {
+    private val dispatcher = Dispatcher(decoder)
+
     override val name: String = "programs"
     override val weight: Double = 0.1
 
@@ -57,11 +60,11 @@ class ProgramsSuite(private val decoder: Decoder, private val programs: List<Pro
                     failure = "exceeded max_cycles=${exp.max_cycles}"
                     break
                 }
-                val opcodeByte = mem.read(cpu.pc)
-                val op = decoder.main[opcodeByte]
+                val op = dispatcher.decodeAt(cpu, mem)
                 if (op == null) {
+                    val opcodeByte = mem.read(cpu.pc)
                     failure =
-                        "no op for opcode 0x${opcodeByte.toString(16)} at pc=0x${cpu.pc.toString(16)}"
+                        "no op for opcode 0x${opcodeByte.toString(16)} at pc=0x${cpu.pc.toString(16)} (no dispatch route)"
                     break
                 }
                 op.execute(cpu, mem)

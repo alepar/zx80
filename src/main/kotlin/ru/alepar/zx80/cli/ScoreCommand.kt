@@ -8,11 +8,11 @@ import com.github.ajalt.clikt.parameters.options.option
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
-import ru.alepar.zx80.cpu.Decoder
 import ru.alepar.zx80.harness.Score
 import ru.alepar.zx80.harness.suites.FuseSuite
 import ru.alepar.zx80.harness.suites.OpcodeCoverage
 import ru.alepar.zx80.harness.suites.ProgramsSuite
+import ru.alepar.zx80.op.OpTableBuilder
 
 /**
  * `zx80 score` — runs the three scoring suites against an empty Decoder, prints the headline, and
@@ -27,7 +27,7 @@ class ScoreCommand : CliktCommand(name = "score") {
         option("--strict", help = "exit nonzero on regression (currently a no-op)").flag()
 
     override fun run() {
-        val decoder = Decoder() // empty for now; populated by future OpTableBuilder
+        val decoder = OpTableBuilder.build()
         val all =
             listOf(
                 OpcodeCoverage(decoder),
