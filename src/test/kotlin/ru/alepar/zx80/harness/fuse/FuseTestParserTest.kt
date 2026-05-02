@@ -161,6 +161,62 @@ class FuseTestParserTest {
     }
 
     @Test
+    fun `parseInputs rejects state line with wrong token count`() {
+        val src =
+            """
+            00
+            1234 5678 9abc
+            0 0 1 4 0 0 0
+            0100 00 -1
+            -1
+            """
+                .trimIndent()
+        org.assertj.core.api.Assertions.assertThatThrownBy {
+                FuseTestParser.parseInputs(src.lineSequence())
+            }
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessageContaining("00")
+    }
+
+    @Test
+    fun `parseInputs rejects unterminated memory block`() {
+        // Memory line with no -1 terminator and not followed by another memory line
+        val src =
+            """
+            00
+            0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
+            0 0 1 4 0 0 0
+            0100 00
+            -1
+            """
+                .trimIndent()
+        org.assertj.core.api.Assertions.assertThatThrownBy {
+                FuseTestParser.parseInputs(src.lineSequence())
+            }
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessageContaining("00")
+            .hasMessageContaining("terminator")
+    }
+
+    @Test
+    fun `parseExpected diagnostic includes test name not the placeholder`() {
+        // A malformed memory line in expected — error message should mention "99" not "<expected>"
+        val src =
+            """
+            99
+            0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
+            0 0 1 4 0 0 0
+            0100 00
+            """
+                .trimIndent()
+        org.assertj.core.api.Assertions.assertThatThrownBy {
+                FuseTestParser.parseExpected(src.lineSequence())
+            }
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessageContaining("99")
+    }
+
+    @Test
     fun `parses the entire vendored tests_in file`() {
         val resource =
             requireNotNull(this::class.java.getResourceAsStream("/fuse/tests.in")) {

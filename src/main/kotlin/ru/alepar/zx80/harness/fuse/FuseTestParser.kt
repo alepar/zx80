@@ -125,7 +125,7 @@ object FuseTestParser {
             val regs = stateLine.splitTokens(STATE_TOKEN_COUNT, name)
             val ctrl =
                 it.nextRequired("control line for '$name'").splitTokens(CONTROL_TOKEN_COUNT, name)
-            val mem = readExpectedMemory(it)
+            val mem = readExpectedMemory(it, name)
             result.add(
                 FuseExpectedCase(
                     name = name,
@@ -172,12 +172,12 @@ object FuseTestParser {
      * Read tests.expected memory blocks until a blank line or EOF. Each line is one block ending
      * with `-1`; there is no overall list terminator.
      */
-    private fun readExpectedMemory(it: Iterator<String>): List<Pair<Int, ByteArray>> {
+    private fun readExpectedMemory(it: Iterator<String>, name: String): List<Pair<Int, ByteArray>> {
         val blocks = mutableListOf<Pair<Int, ByteArray>>()
         while (it.hasNext()) {
             val raw = it.next()
             if (raw.isBlank()) return blocks
-            blocks.add(parseMemoryBlock(raw.trim(), name = "<expected>"))
+            blocks.add(parseMemoryBlock(raw.trim(), name))
         }
         return blocks
     }
@@ -185,6 +185,7 @@ object FuseTestParser {
     private fun parseMemoryBlock(line: String, name: String): Pair<Int, ByteArray> {
         val toks = line.split(Regex("\\s+"))
         require(toks.size >= 2) { "malformed memory block for '$name': '$line'" }
+        require(toks.last() == "-1") { "memory block missing -1 terminator for '$name': '$line'" }
         val addr = toks[0].toInt(16)
         val bytes =
             toks.drop(1).takeWhile { it != "-1" }.map { it.toInt(16).toByte() }.toByteArray()
