@@ -233,7 +233,7 @@ The `0.342` is a weighted composite. Default weights: opcodes 0.2, fuse 0.7, pro
 ### Suites
 
 - **OpcodeCoverage.** Walks the 7 dispatch tables (`main`, `cb`, `ed`, `dd`, `fd`, `ddcb`, `fdcb`); counts non-null entries against the documented opcode set (a static list of which entries are documented). Total denominator: ~1024 documented opcodes across all tables (exact number set when building the documented-opcode table).
-- **FuseSuite.** Vendors `tests.in` and `tests.expected` from the FUSE Z80 test suite (BSD-licensed; bundle `LICENSE.fuse`). For each test case: deserialize initial CPU+memory state into a fresh `Cpu`+`Memory`; run *one* instruction; compare resulting state byte-by-byte against expected, including T-states. Pass = exact match. Tests covering undocumented opcodes/flags are tagged and excluded from the headline (reported in `excluded_undocumented` counter).
+- **FuseSuite.** Vendors `tests.in` and `tests.expected` from the FUSE Z80 test suite (GPL-2.0-or-later; bundle `LICENSE.fuse`). For each test case: deserialize initial CPU+memory state into a fresh `Cpu`+`Memory`; run *one* instruction; compare resulting state byte-by-byte against expected, including T-states. Pass = exact match. Tests covering undocumented opcodes/flags are tagged and excluded from the headline (reported in `excluded_undocumented` counter).
 - **ProgramsSuite.** Hand-written assembled Z80 binaries in `src/test/resources/programs/`, each with a sibling `.expected.json`:
 
   ```json
@@ -321,7 +321,7 @@ Phase 0: a session. Phase 1: a session. Phase 2: the bulk; each batch is roughly
 - **Dependencies.** `kotlinx-serialization-json`, `com.github.ajalt.clikt:clikt`. No logging framework yet.
 - **Tests.** JUnit 5, AssertJ. No mocking library.
 - **Test layout.** Mirrors main; one test class per `Op` class. Backtick-quoted readable test method names.
-- **Vendored data (production resources, on the runtime classpath).** `src/main/resources/fuse/{tests.in,tests.expected}` (FUSE upstream, BSD); `src/main/resources/programs/*.bin` (assembled with `pasmo` outside the build, `.asm` source checked in alongside); `src/main/resources/zexdoc.com` (public-domain Frank Cringle binary). They live in `main/` (not `test/`) because the harness CLI consumes them at runtime after `installDist`.
+- **Vendored data (production resources, on the runtime classpath).** `src/main/resources/fuse/{tests.in,tests.expected}` (FUSE upstream, GPL-2.0-or-later); `src/main/resources/programs/*.bin` (assembled with `pasmo` outside the build, `.asm` source checked in alongside); `src/main/resources/zexdoc.com` (public-domain Frank Cringle binary). They live in `main/` (not `test/`) because the harness CLI consumes them at runtime after `installDist`.
 - **CI.** GitHub Actions: `./gradlew check`, then run `score` and upload `score.json` as artifact. Doesn't fail on regression initially.
 - **Repo.** `.gitignore` for Gradle/IDEA/Kotlin; `.editorconfig` (4-space, LF, UTF-8); `README.md` stub.
 - **Deliberately omitted.** No DI framework, no logging framework, no multi-module split, no Maven publish, no detekt.

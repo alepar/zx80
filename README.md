@@ -15,6 +15,10 @@ See:
 - `docs/superpowers/specs/2026-05-02-zx80-spectrum-emulator-design.md`
 - `docs/superpowers/plans/`
 
+## License
+
+This project is licensed under the GNU General Public License v2.0 or later (GPL-2.0-or-later). See `LICENSE` for the full text. The vendored FUSE Z80 test suite under `src/main/resources/fuse/` is also under GPLv2-or-later (see `src/main/resources/fuse/LICENSE.fuse`).
+
 ## Build & run
 
 Requires JDK 21 on PATH.
