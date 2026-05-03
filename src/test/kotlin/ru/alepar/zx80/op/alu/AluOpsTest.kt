@@ -151,4 +151,24 @@ class AluOpsTest {
         assertThat((d.main[0x2B] as DecPair).mnemonic { 0 }).isEqualTo("DEC HL")
         assertThat((d.main[0x3B] as DecPair).mnemonic { 0 }).isEqualTo("DEC SP")
     }
+
+    @Test
+    fun `installInto registers ADC HL,rr in ed table`() {
+        val d = Decoder()
+        AluOps.installInto(d)
+        assertThat((d.ed[0x4A] as AdcHlPair).mnemonic { 0 }).isEqualTo("ADC HL, BC")
+        assertThat((d.ed[0x5A] as AdcHlPair).mnemonic { 0 }).isEqualTo("ADC HL, DE")
+        assertThat((d.ed[0x6A] as AdcHlPair).mnemonic { 0 }).isEqualTo("ADC HL, HL")
+        assertThat((d.ed[0x7A] as AdcHlPair).mnemonic { 0 }).isEqualTo("ADC HL, SP")
+    }
+
+    @Test
+    fun `installInto registers SBC HL,rr in ed table`() {
+        val d = Decoder()
+        AluOps.installInto(d)
+        assertThat((d.ed[0x42] as SbcHlPair).mnemonic { 0 }).isEqualTo("SBC HL, BC")
+        assertThat((d.ed[0x52] as SbcHlPair).mnemonic { 0 }).isEqualTo("SBC HL, DE")
+        assertThat((d.ed[0x62] as SbcHlPair).mnemonic { 0 }).isEqualTo("SBC HL, HL")
+        assertThat((d.ed[0x72] as SbcHlPair).mnemonic { 0 }).isEqualTo("SBC HL, SP")
+    }
 }

@@ -22,6 +22,16 @@ object AluOps {
         installDec(d)
         installAddHl(d)
         installIncDecPair(d)
+        installAdcSbcHl(d)
+    }
+
+    private fun installAdcSbcHl(d: Decoder) {
+        // ADC HL,rr — ED 01 ss 1010 → ED 0x4A, ED 0x5A, ED 0x6A, ED 0x7A
+        // SBC HL,rr — ED 01 ss 0010 → ED 0x42, ED 0x52, ED 0x62, ED 0x72
+        for (ssBits in 0..3) {
+            d.ed[0x4A or (ssBits shl 4)] = AdcHlPair(src = RegPair.fromBits(ssBits))
+            d.ed[0x42 or (ssBits shl 4)] = SbcHlPair(src = RegPair.fromBits(ssBits))
+        }
     }
 
     private fun installIncDecPair(d: Decoder) {
