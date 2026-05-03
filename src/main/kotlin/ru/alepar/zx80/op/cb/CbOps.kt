@@ -4,6 +4,8 @@ import ru.alepar.zx80.cpu.Decoder
 import ru.alepar.zx80.cpu.Reg
 import ru.alepar.zx80.op.bit.BitHl
 import ru.alepar.zx80.op.bit.BitReg
+import ru.alepar.zx80.op.bit.ResHl
+import ru.alepar.zx80.op.bit.ResReg
 import ru.alepar.zx80.op.rot.RotShiftHl
 import ru.alepar.zx80.op.rot.RotShiftReg
 import ru.alepar.zx80.op.rot.RotateOp
@@ -19,6 +21,16 @@ object CbOps {
     fun installInto(d: Decoder) {
         installRotateShift(d)
         installBit(d)
+        installRes(d)
+    }
+
+    private fun installRes(d: Decoder) {
+        for (n in 0..7) {
+            for (rrrBits in 0..7) {
+                val opcode = 0x80 or (n shl 3) or rrrBits
+                d.cb[opcode] = if (rrrBits == 6) ResHl(n) else ResReg(n, Reg.fromBits(rrrBits))
+            }
+        }
     }
 
     private fun installBit(d: Decoder) {

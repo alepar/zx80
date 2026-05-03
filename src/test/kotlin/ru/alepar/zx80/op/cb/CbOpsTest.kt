@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test
 import ru.alepar.zx80.cpu.Decoder
 import ru.alepar.zx80.op.bit.BitHl
 import ru.alepar.zx80.op.bit.BitReg
+import ru.alepar.zx80.op.bit.ResHl
+import ru.alepar.zx80.op.bit.ResReg
 import ru.alepar.zx80.op.rot.RotShiftHl
 import ru.alepar.zx80.op.rot.RotShiftReg
 
@@ -53,6 +55,21 @@ class CbOpsTest {
         assertThat((d.cb[0x7F] as BitReg).mnemonic { 0 }).isEqualTo("BIT 7, A")
 
         val count = (0x40..0x7F).count { d.cb[it] != null }
+        assertThat(count).isEqualTo(64)
+    }
+
+    @Test
+    fun `installInto registers RES n,r at CB 0x80 to 0xBF (64 opcodes)`() {
+        val d = Decoder()
+        CbOps.installInto(d)
+        assertThat((d.cb[0x80] as ResReg).mnemonic { 0 }).isEqualTo("RES 0, B")
+        assertThat((d.cb[0x86] as ResHl).mnemonic { 0 }).isEqualTo("RES 0, (HL)")
+        assertThat((d.cb[0x87] as ResReg).mnemonic { 0 }).isEqualTo("RES 0, A")
+        assertThat((d.cb[0xB8] as ResReg).mnemonic { 0 }).isEqualTo("RES 7, B")
+        assertThat((d.cb[0xBE] as ResHl).mnemonic { 0 }).isEqualTo("RES 7, (HL)")
+        assertThat((d.cb[0xBF] as ResReg).mnemonic { 0 }).isEqualTo("RES 7, A")
+
+        val count = (0x80..0xBF).count { d.cb[it] != null }
         assertThat(count).isEqualTo(64)
     }
 }
