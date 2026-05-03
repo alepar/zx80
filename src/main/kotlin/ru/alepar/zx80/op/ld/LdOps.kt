@@ -17,6 +17,22 @@ object LdOps {
         installRegToReg(d)
         installImmediate(d)
         installPairImmediate(d)
+        installMemoryAddress(d)
+    }
+
+    private fun installMemoryAddress(d: Decoder) {
+        // LD A,(BC) / LD A,(DE) — opcodes 0x0A and 0x1A
+        d.main[0x0A] = LdAFromBcDe(pair = RegPair.BC)
+        d.main[0x1A] = LdAFromBcDe(pair = RegPair.DE)
+        // LD (BC),A / LD (DE),A — opcodes 0x02 and 0x12
+        d.main[0x02] = LdBcDeFromA(pair = RegPair.BC)
+        d.main[0x12] = LdBcDeFromA(pair = RegPair.DE)
+        // LD HL,(nn) / LD (nn),HL — opcodes 0x2A and 0x22
+        d.main[0x2A] = LdHlFromAddr
+        d.main[0x22] = LdAddrFromHl
+        // LD A,(nn) / LD (nn),A — opcodes 0x3A and 0x32
+        d.main[0x3A] = LdAFromAddr
+        d.main[0x32] = LdAddrFromA
     }
 
     private fun installPairImmediate(d: Decoder) {

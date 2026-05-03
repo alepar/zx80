@@ -86,4 +86,36 @@ class LdOpsTest {
         assertThat((d.main[0x21] as LdPairImm).mnemonic { 0 }).isEqualTo("LD HL, nn")
         assertThat((d.main[0x31] as LdPairImm).mnemonic { 0 }).isEqualTo("LD SP, nn")
     }
+
+    @Test
+    fun `installInto registers LD A,(BC) and LD A,(DE) at 0x0A and 0x1A`() {
+        val d = Decoder()
+        LdOps.installInto(d)
+        assertThat((d.main[0x0A] as LdAFromBcDe).mnemonic { 0 }).isEqualTo("LD A, (BC)")
+        assertThat((d.main[0x1A] as LdAFromBcDe).mnemonic { 0 }).isEqualTo("LD A, (DE)")
+    }
+
+    @Test
+    fun `installInto registers LD (BC),A and LD (DE),A at 0x02 and 0x12`() {
+        val d = Decoder()
+        LdOps.installInto(d)
+        assertThat((d.main[0x02] as LdBcDeFromA).mnemonic { 0 }).isEqualTo("LD (BC), A")
+        assertThat((d.main[0x12] as LdBcDeFromA).mnemonic { 0 }).isEqualTo("LD (DE), A")
+    }
+
+    @Test
+    fun `installInto registers LD HL,(nn) at 0x2A and LD (nn),HL at 0x22`() {
+        val d = Decoder()
+        LdOps.installInto(d)
+        assertThat(d.main[0x2A]).isSameAs(LdHlFromAddr)
+        assertThat(d.main[0x22]).isSameAs(LdAddrFromHl)
+    }
+
+    @Test
+    fun `installInto registers LD A,(nn) at 0x3A and LD (nn),A at 0x32`() {
+        val d = Decoder()
+        LdOps.installInto(d)
+        assertThat(d.main[0x3A]).isSameAs(LdAFromAddr)
+        assertThat(d.main[0x32]).isSameAs(LdAddrFromA)
+    }
 }
