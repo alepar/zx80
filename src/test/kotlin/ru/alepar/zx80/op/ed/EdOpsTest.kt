@@ -46,6 +46,16 @@ class EdOpsTest {
     }
 
     @Test
+    fun `installInto registers block compare at ED A1, A9, B1, B9`() {
+        val d = Decoder()
+        EdOps.installInto(d)
+        assertThat(d.ed[0xA1]).isSameAs(Cpi)
+        assertThat(d.ed[0xA9]).isSameAs(Cpd)
+        assertThat(d.ed[0xB1]).isSameAs(Cpir)
+        assertThat(d.ed[0xB9]).isSameAs(Cpdr)
+    }
+
+    @Test
     fun `installInto registers block move at ED A0, A8, B0, B8`() {
         val d = Decoder()
         EdOps.installInto(d)

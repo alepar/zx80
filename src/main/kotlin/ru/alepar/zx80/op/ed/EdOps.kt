@@ -18,6 +18,14 @@ object EdOps {
         installRrdRld(d)
         installExtendedLdPair(d)
         installBlockMove(d)
+        installBlockCompare(d)
+    }
+
+    private fun installBlockCompare(d: Decoder) {
+        d.ed[0xA1] = Cpi
+        d.ed[0xA9] = Cpd
+        d.ed[0xB1] = Cpir
+        d.ed[0xB9] = Cpdr
     }
 
     private fun installBlockMove(d: Decoder) {
