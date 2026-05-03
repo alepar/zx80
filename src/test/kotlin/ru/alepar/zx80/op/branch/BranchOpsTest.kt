@@ -51,4 +51,25 @@ class BranchOpsTest {
         assertThat((d.main[0x30] as JrRelCc).mnemonic { 0 }).isEqualTo("JR NC, e")
         assertThat((d.main[0x38] as JrRelCc).mnemonic { 0 }).isEqualTo("JR C, e")
     }
+
+    @Test
+    fun `installInto registers CALL nn at 0xCD`() {
+        val d = Decoder()
+        BranchOps.installInto(d)
+        assertThat(d.main[0xCD]).isSameAs(CallAbs)
+    }
+
+    @Test
+    fun `installInto registers CALL cc, nn at 0xC4 (NZ) through 0xFC (M)`() {
+        val d = Decoder()
+        BranchOps.installInto(d)
+        assertThat((d.main[0xC4] as CallAbsCc).mnemonic { 0 }).isEqualTo("CALL NZ, nn")
+        assertThat((d.main[0xCC] as CallAbsCc).mnemonic { 0 }).isEqualTo("CALL Z, nn")
+        assertThat((d.main[0xD4] as CallAbsCc).mnemonic { 0 }).isEqualTo("CALL NC, nn")
+        assertThat((d.main[0xDC] as CallAbsCc).mnemonic { 0 }).isEqualTo("CALL C, nn")
+        assertThat((d.main[0xE4] as CallAbsCc).mnemonic { 0 }).isEqualTo("CALL PO, nn")
+        assertThat((d.main[0xEC] as CallAbsCc).mnemonic { 0 }).isEqualTo("CALL PE, nn")
+        assertThat((d.main[0xF4] as CallAbsCc).mnemonic { 0 }).isEqualTo("CALL P, nn")
+        assertThat((d.main[0xFC] as CallAbsCc).mnemonic { 0 }).isEqualTo("CALL M, nn")
+    }
 }
