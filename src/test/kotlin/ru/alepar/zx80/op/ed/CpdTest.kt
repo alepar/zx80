@@ -29,7 +29,8 @@ class CpdTest {
     }
 
     @Test
-    fun `CPD sets X and Y from (A - mem at HL - H_after) bits 5 and 3`() {
+    fun `CPD X comes from bit 1 of n=(A - byte - H_after) and Y comes from bit 3`() {
+        // n = 0x27: bit 1 = 1 -> X; bit 3 = 0 -> not Y. Same conclusion as Cpi.
         val cpu =
             Cpu().apply {
                 a = 0x30
@@ -38,8 +39,22 @@ class CpdTest {
             }
         val mem = Memory().apply { write(0x4000, 0x08) }
         Cpd.execute(cpu, mem)
-        // n = 0x27 -> 0x27 and 0x28 = 0x20 -> only X
         assertThat(cpu.f and Flags.X).isNotZero
+        assertThat(cpu.f and Flags.Y).isZero
+    }
+
+    @Test
+    fun `CPD Sean Young rule discriminates from old n_and_0x28 rule`() {
+        // n = 0x30: bit 5 = 1 (OLD rule -> X=1) but bit 1 = 0 (NEW rule -> X=0).
+        val cpu =
+            Cpu().apply {
+                a = 0x40
+                hl = 0x4000
+                bc = 0x0001
+            }
+        val mem = Memory().apply { write(0x4000, 0x10) }
+        Cpd.execute(cpu, mem)
+        assertThat(cpu.f and Flags.X).isZero
         assertThat(cpu.f and Flags.Y).isZero
     }
 }

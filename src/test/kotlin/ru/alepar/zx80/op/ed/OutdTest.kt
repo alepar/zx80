@@ -25,15 +25,29 @@ class OutdTest {
     }
 
     @Test
-    fun `OUTD X and Y reflect (portByte + L) and 0x28`() {
+    fun `OUTD X and Y come from bits 5 and 3 of B after decrement`() {
+        // B = 0x29 -> after = 0x28: bit 5 = 1 -> X; bit 3 = 1 -> Y.
         val cpu =
             Cpu().apply {
                 hl = 0x4018
-                bc = 0x0107
+                bc = 0x2907
             }
         val mem = Memory().apply { write(0x4018, 0x10) }
         Outd.execute(cpu, mem)
+        assertThat(cpu.b).isEqualTo(0x28)
         assertThat(cpu.f and Flags.X).isNotZero
         assertThat(cpu.f and Flags.Y).isNotZero
+    }
+
+    @Test
+    fun `OUTD N comes from bit 7 of byte read from HL`() {
+        val cpu =
+            Cpu().apply {
+                hl = 0x4000
+                bc = 0x0200
+            }
+        val mem = Memory().apply { write(0x4000, 0x80) }
+        Outd.execute(cpu, mem)
+        assertThat(cpu.f and Flags.N).isNotZero
     }
 }

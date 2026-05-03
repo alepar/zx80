@@ -16,8 +16,15 @@ object Otir : Op {
         cpu.b = (cpu.b - 1) and 0xFF
         cpu.io.write(cpu.bc, byte)
         cpu.hl = (cpu.hl + 1) and 0xFFFF
-        var f = Flags.N
-        if (cpu.b == 0) f = f or Flags.Z
+        val bAfter = cpu.b
+        val temp = byte + cpu.l // L after HL++
+        var f = 0
+        if (bAfter == 0) f = f or Flags.Z
+        if (bAfter and 0x80 != 0) f = f or Flags.S
+        if (byte and 0x80 != 0) f = f or Flags.N
+        if (temp > 0xFF) f = f or Flags.C or Flags.H
+        if (Flags.parity((temp and 0x07) xor bAfter)) f = f or Flags.PV
+        f = f or (bAfter and (Flags.X or Flags.Y))
         cpu.f = f
         if (cpu.b != 0) {
             cpu.tStates += 21

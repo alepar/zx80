@@ -69,7 +69,9 @@ class LdiTest {
     }
 
     @Test
-    fun `LDI sets X and Y from (transferredByte + A) bits 5 and 3`() {
+    fun `LDI X comes from bit 1 of n=(byte+A) and Y comes from bit 3`() {
+        // Per Sean Young's TUZD: F[5] (X) = bit 1 of n; F[3] (Y) = bit 3 of n.
+        // Pick n = 0x22 (0010 0010): bit 1 = 1 -> X set; bit 3 = 0 -> Y clear.
         val cpu =
             Cpu().apply {
                 hl = 0x4000
@@ -77,10 +79,25 @@ class LdiTest {
                 bc = 0x0001
                 a = 0x10
             }
-        val mem = Memory().apply { write(0x4000, 0x18) }
+        val mem = Memory().apply { write(0x4000, 0x12) } // n = 0x12 + 0x10 = 0x22
         Ldi.execute(cpu, mem)
-        // n = byte + A = 0x18 + 0x10 = 0x28 -> X+Y
         assertThat(cpu.f and Flags.X).isNotZero
+        assertThat(cpu.f and Flags.Y).isZero
+    }
+
+    @Test
+    fun `LDI Y comes from bit 3 of n and X comes from bit 1`() {
+        // Pick n = 0x08 (0000 1000): bit 1 = 0 -> X clear; bit 3 = 1 -> Y set.
+        val cpu =
+            Cpu().apply {
+                hl = 0x4000
+                de = 0x5000
+                bc = 0x0001
+                a = 0x00
+            }
+        val mem = Memory().apply { write(0x4000, 0x08) }
+        Ldi.execute(cpu, mem)
+        assertThat(cpu.f and Flags.X).isZero
         assertThat(cpu.f and Flags.Y).isNotZero
     }
 }

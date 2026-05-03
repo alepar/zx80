@@ -64,7 +64,10 @@ class CpiTest {
     }
 
     @Test
-    fun `CPI sets X and Y from (A - mem at HL - H_after) bits 5 and 3`() {
+    fun `CPI X comes from bit 1 of n=(A - byte - H_after) and Y comes from bit 3`() {
+        // Per Sean Young's TUZD: F[5] (X) = bit 1 of n; F[3] (Y) = bit 3 of n.
+        // diff = 0x30 - 0x08 = 0x28; H = 1 (low-nibble borrow). n = 0x28 - 1 = 0x27.
+        // 0x27 = 0010 0111: bit 1 = 1 -> X set; bit 3 = 0 -> Y clear.
         val cpu =
             Cpu().apply {
                 a = 0x30
@@ -73,9 +76,24 @@ class CpiTest {
             }
         val mem = Memory().apply { write(0x4000, 0x08) }
         Cpi.execute(cpu, mem)
-        // diff = 0x30 - 0x08 = 0x28; H computed: (0x30 & 0xF) - (0x08 & 0xF) = 0 - 8 < 0 -> H=1
-        // n = 0x28 - 1 = 0x27 -> 0x27 and 0x28 = 0x20 -> only X
         assertThat(cpu.f and Flags.X).isNotZero
+        assertThat(cpu.f and Flags.Y).isZero
+    }
+
+    @Test
+    fun `CPI Sean Young rule discriminates from old n_and_0x28 rule`() {
+        // diff = 0x40 - 0x10 = 0x30; H = 0 (low nibble 0-0=0). n = 0x30 (no H subtraction).
+        // 0x30 = 0011 0000. OLD rule (n & 0x28) -> X=1 (bit 5 = 1), Y=0 (bit 3 = 0).
+        // NEW rule (bit 1 -> X, bit 3 -> Y) -> X=0 (bit 1 = 0), Y=0 (bit 3 = 0).
+        val cpu =
+            Cpu().apply {
+                a = 0x40
+                hl = 0x4000
+                bc = 0x0001
+            }
+        val mem = Memory().apply { write(0x4000, 0x10) }
+        Cpi.execute(cpu, mem)
+        assertThat(cpu.f and Flags.X).isZero
         assertThat(cpu.f and Flags.Y).isZero
     }
 }

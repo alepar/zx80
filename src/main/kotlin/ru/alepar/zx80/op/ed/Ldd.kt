@@ -11,7 +11,7 @@ import ru.alepar.zx80.op.OperandFetcher
  *
  * mem[DE] = mem[HL]; HL--; DE--; BC--.
  *
- * Flags: H=0, N=0, P/V = (BC != 0 after); S/Z/C preserved.
+ * Flags: H=0, N=0, P/V = (BC != 0 after); S/Z/C preserved. X/Y per Sean Young (see Ldi).
  */
 object Ldd : Op {
     override val operandLength = 0
@@ -25,7 +25,8 @@ object Ldd : Op {
         cpu.bc = (cpu.bc - 1) and 0xFFFF
         var f = cpu.f and (Flags.S or Flags.Z or Flags.C)
         if (cpu.bc != 0) f = f or Flags.PV
-        f = f or (((byte + cpu.a) and 0xFF) and 0x28) // X/Y from (byte + A) per Zilog NMOS
+        val n = (byte + cpu.a) and 0xFF
+        f = f or ((n shl 4) and Flags.X) or (n and Flags.Y) // X = bit 1 of n; Y = bit 3 of n
         cpu.f = f
         cpu.pc = (cpu.pc + 2) and 0xFFFF
         cpu.bumpR(2)

@@ -15,12 +15,16 @@ object Cpir : Op {
     override val baseCycles = 16
 
     override fun execute(cpu: Cpu, mem: Memory) {
-        val r = Flags.afterSub(cpu.a, mem.read(cpu.hl), 0)
+        val byte = mem.read(cpu.hl)
+        val r = Flags.afterSub(cpu.a, byte, 0)
         cpu.hl = (cpu.hl + 1) and 0xFFFF
         cpu.bc = (cpu.bc - 1) and 0xFFFF
         val matched = (r.newF and Flags.Z) != 0
         var f = (r.newF and (Flags.S or Flags.Z or Flags.H or Flags.N)) or (cpu.f and Flags.C)
         if (cpu.bc != 0) f = f or Flags.PV
+        // X/Y per Sean Young's TUZD (see Cpi): n = (A - byte - H_after); X = bit 1; Y = bit 3.
+        val n = (cpu.a - byte - (if (f and Flags.H != 0) 1 else 0)) and 0xFF
+        f = f or ((n shl 4) and Flags.X) or (n and Flags.Y)
         cpu.f = f
         if (cpu.bc != 0 && !matched) {
             cpu.tStates += 21

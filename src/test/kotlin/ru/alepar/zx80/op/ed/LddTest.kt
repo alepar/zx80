@@ -46,7 +46,8 @@ class LddTest {
     }
 
     @Test
-    fun `LDD sets X and Y from (transferredByte + A) bits 5 and 3`() {
+    fun `LDD X comes from bit 1 of n=(byte+A) and Y comes from bit 3`() {
+        // n = 0x22 (0010 0010): bit 1 = 1 -> X; bit 3 = 0 -> not Y.
         val cpu =
             Cpu().apply {
                 hl = 0x4000
@@ -54,10 +55,9 @@ class LddTest {
                 bc = 0x0001
                 a = 0x20
             }
-        val mem = Memory().apply { write(0x4000, 0x08) }
+        val mem = Memory().apply { write(0x4000, 0x02) }
         Ldd.execute(cpu, mem)
-        // n = 0x08 + 0x20 = 0x28 -> X+Y
         assertThat(cpu.f and Flags.X).isNotZero
-        assertThat(cpu.f and Flags.Y).isNotZero
+        assertThat(cpu.f and Flags.Y).isZero
     }
 }

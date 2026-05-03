@@ -24,9 +24,9 @@ object Cpi : Op {
         cpu.bc = (cpu.bc - 1) and 0xFFFF
         var f = (r.newF and (Flags.S or Flags.Z or Flags.H or Flags.N)) or (cpu.f and Flags.C)
         if (cpu.bc != 0) f = f or Flags.PV
-        // X/Y from n = (A - byte - H_after) per Zilog NMOS
+        // X/Y from n = (A - byte - H_after) per Sean Young's TUZD: X = bit 1 of n; Y = bit 3 of n.
         val n = (cpu.a - byte - (if (f and Flags.H != 0) 1 else 0)) and 0xFF
-        f = f or (n and 0x28)
+        f = f or ((n shl 4) and Flags.X) or (n and Flags.Y)
         cpu.f = f
         cpu.pc = (cpu.pc + 2) and 0xFFFF
         cpu.bumpR(2)
