@@ -4,6 +4,7 @@ import ru.alepar.zx80.cpu.Decoder
 import ru.alepar.zx80.op.alu.AluOps
 import ru.alepar.zx80.op.branch.BranchOps
 import ru.alepar.zx80.op.cb.CbOps
+import ru.alepar.zx80.op.ed.EdOps
 import ru.alepar.zx80.op.ex.ExOps
 import ru.alepar.zx80.op.ix.IxOps
 import ru.alepar.zx80.op.ixcb.IxCbOps
@@ -32,6 +33,7 @@ object OpTableBuilder {
         CbOps.installInto(d)
         IxOps.installInto(d)
         IxCbOps.installInto(d)
+        EdOps.installInto(d)
         return d
     }
 }

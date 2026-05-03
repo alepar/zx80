@@ -39,6 +39,79 @@ class FuseSuiteTest {
     }
 
     @Test
+    fun `runOne loops dispatch until tStatesToRun is reached (Trap B fix)`() {
+        val stubOp =
+            object : ru.alepar.zx80.op.Op {
+                override val operandLength = 0
+                override val baseCycles = 4
+                var executions = 0
+
+                override fun execute(cpu: ru.alepar.zx80.cpu.Cpu, mem: ru.alepar.zx80.cpu.Memory) {
+                    executions++
+                    cpu.tStates += 4
+                    cpu.pc = (cpu.pc + 1) and 0xFFFF
+                }
+
+                override fun mnemonic(operands: ru.alepar.zx80.op.OperandFetcher) = "STUB"
+            }
+        val decoder = Decoder().apply { main[0x00] = stubOp }
+        val input =
+            FuseInputCase(
+                name = "loop-test",
+                af = 0,
+                bc = 0,
+                de = 0,
+                hl = 0,
+                afAlt = 0,
+                bcAlt = 0,
+                deAlt = 0,
+                hlAlt = 0,
+                ix = 0,
+                iy = 0,
+                sp = 0,
+                pc = 0,
+                memptr = 0,
+                i = 0,
+                r = 0,
+                iff1 = false,
+                iff2 = false,
+                im = 0,
+                halted = false,
+                tStatesToRun = 12,
+                memory = listOf(0 to byteArrayOf(0, 0, 0)),
+            )
+        val expected =
+            FuseExpectedCase(
+                name = "loop-test",
+                af = 0,
+                bc = 0,
+                de = 0,
+                hl = 0,
+                afAlt = 0,
+                bcAlt = 0,
+                deAlt = 0,
+                hlAlt = 0,
+                ix = 0,
+                iy = 0,
+                sp = 0,
+                pc = 3,
+                memptr = 0,
+                i = 0,
+                r = 0,
+                iff1 = false,
+                iff2 = false,
+                im = 0,
+                halted = false,
+                tStatesAfter = 12,
+                memory = emptyList(),
+            )
+        val suite = FuseSuite(decoder, listOf(input), listOf(expected))
+        val r = suite.run()
+        assertThat(r.passed).isEqualTo(1)
+        assertThat(stubOp.executions).isEqualTo(3)
+    }
+
+    @Test
     fun `mismatched list sizes throws`() {
         val suite = FuseSuite(Decoder(), listOf(syntheticInput("00")), emptyList())
         assertThatThrownBy { suite.run() }

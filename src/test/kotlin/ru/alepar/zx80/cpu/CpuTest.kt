@@ -34,6 +34,20 @@ class CpuTest {
         assertThat(cpu.im).isZero
         assertThat(cpu.halted).isFalse
         assertThat(cpu.tStates).isZero
+        assertThat(cpu.io).isSameAs(NoIoBus)
+    }
+
+    @Test
+    fun `Cpu io can be reassigned`() {
+        val customBus =
+            object : IoBus {
+                override fun read(port: Int) = port and 0xFF
+
+                override fun write(port: Int, value: Int) {}
+            }
+        val cpu = Cpu()
+        cpu.io = customBus
+        assertThat(cpu.io.read(0x42)).isEqualTo(0x42)
     }
 
     @Test

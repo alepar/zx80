@@ -50,6 +50,9 @@ class Cpu {
      */
     var tStates: Long = 0
 
+    /** I/O bus; defaults to NoIoBus (returns 0xFF on read, ignores writes). */
+    var io: IoBus = NoIoBus
+
     // Register-pair convenience accessors
     var af: Int
         get() = (a shl 8) or f

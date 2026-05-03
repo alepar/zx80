@@ -72,13 +72,17 @@ class FuseSuite(
                 }
             }
 
-        val op =
-            dispatcher.decodeAt(cpu, mem)
-                ?: run {
-                    val opcodeByte = mem.read(cpu.pc)
-                    return "no op for opcode 0x${"%02X".format(opcodeByte)} (no dispatch route)"
-                }
-        op.execute(cpu, mem)
+        val startTStates = cpu.tStates
+        val targetTStates = startTStates + input.tStatesToRun
+        while (cpu.tStates < targetTStates) {
+            val curOp =
+                dispatcher.decodeAt(cpu, mem)
+                    ?: run {
+                        val opcodeByte = mem.read(cpu.pc)
+                        return "no op for opcode 0x${"%02X".format(opcodeByte)} (no dispatch route)"
+                    }
+            curOp.execute(cpu, mem)
+        }
 
         if (cpu.af != want.af) return "af mismatch: ${hex4(cpu.af)} vs ${hex4(want.af)}"
         if (cpu.bc != want.bc) return "bc mismatch: ${hex4(cpu.bc)} vs ${hex4(want.bc)}"
