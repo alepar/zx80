@@ -1,0 +1,23 @@
+{
+  "name": "bubblesort_4",
+  "load_at": 0,
+  "entry": 0,
+  "max_cycles": 5000,
+  "stop_on": "HALT",
+  "initial_memory": {
+    "0x100": 4,
+    "0x101": 1,
+    "0x102": 3,
+    "0x103": 2
+  },
+  "expect": {
+    "pc": 25,
+    "halted": true,
+    "memory": {
+      "0x100": 1,
+      "0x101": 2,
+      "0x102": 3,
+      "0x103": 4
+    }
+  }
+}
