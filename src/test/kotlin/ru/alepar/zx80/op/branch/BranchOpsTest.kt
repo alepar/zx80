@@ -33,4 +33,22 @@ class BranchOpsTest {
         assertThat((d.main[0xF2] as JpAbsCc).mnemonic { 0 }).isEqualTo("JP P, nn")
         assertThat((d.main[0xFA] as JpAbsCc).mnemonic { 0 }).isEqualTo("JP M, nn")
     }
+
+    @Test
+    fun `installInto registers JR e at 0x18 and DJNZ e at 0x10`() {
+        val d = Decoder()
+        BranchOps.installInto(d)
+        assertThat(d.main[0x18]).isSameAs(JrRel)
+        assertThat(d.main[0x10]).isSameAs(Djnz)
+    }
+
+    @Test
+    fun `installInto registers JR cc, e at 0x20 (NZ), 0x28 (Z), 0x30 (NC), 0x38 (C)`() {
+        val d = Decoder()
+        BranchOps.installInto(d)
+        assertThat((d.main[0x20] as JrRelCc).mnemonic { 0 }).isEqualTo("JR NZ, e")
+        assertThat((d.main[0x28] as JrRelCc).mnemonic { 0 }).isEqualTo("JR Z, e")
+        assertThat((d.main[0x30] as JrRelCc).mnemonic { 0 }).isEqualTo("JR NC, e")
+        assertThat((d.main[0x38] as JrRelCc).mnemonic { 0 }).isEqualTo("JR C, e")
+    }
 }

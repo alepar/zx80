@@ -11,6 +11,7 @@ import ru.alepar.zx80.cpu.Decoder
 object BranchOps {
     fun installInto(d: Decoder) {
         installJpFamily(d)
+        installJrAndDjnz(d)
     }
 
     private fun installJpFamily(d: Decoder) {
@@ -21,5 +22,15 @@ object BranchOps {
             val opcode = 0xC2 or (cccBits shl 3)
             d.main[opcode] = JpAbsCc(cond = Condition.fromBits(cccBits))
         }
+    }
+
+    private fun installJrAndDjnz(d: Decoder) {
+        d.main[0x18] = JrRel
+        d.main[0x10] = Djnz
+        // JR cc, e — 0x20 (NZ), 0x28 (Z), 0x30 (NC), 0x38 (C)
+        d.main[0x20] = JrRelCc(cond = Condition.NZ)
+        d.main[0x28] = JrRelCc(cond = Condition.Z)
+        d.main[0x30] = JrRelCc(cond = Condition.NC)
+        d.main[0x38] = JrRelCc(cond = Condition.C)
     }
 }
