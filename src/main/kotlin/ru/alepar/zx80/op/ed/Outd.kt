@@ -13,11 +13,15 @@ object Outd : Op {
 
     override fun execute(cpu: Cpu, mem: Memory) {
         val byte = mem.read(cpu.hl)
+        val oldL = cpu.l
         cpu.b = (cpu.b - 1) and 0xFF
         cpu.io.write(cpu.bc, byte)
         cpu.hl = (cpu.hl - 1) and 0xFFFF
         var f = Flags.N
         if (cpu.b == 0) f = f or Flags.Z
+        // X/Y from n = (byte + L) and 0xFF per Zilog NMOS (L before HL update)
+        val n = (byte + oldL) and 0xFF
+        f = f or (n and 0x28)
         cpu.f = f
         cpu.pc = (cpu.pc + 2) and 0xFFFF
         cpu.bumpR(2)

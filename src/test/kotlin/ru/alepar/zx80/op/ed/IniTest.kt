@@ -46,4 +46,18 @@ class IniTest {
     fun `mnemonic`() {
         assertThat(Ini.mnemonic { 0 }).isEqualTo("INI")
     }
+
+    @Test
+    fun `INI X and Y reflect (portByte + (C+1)) and 0x28 with default IoBus`() {
+        // default IoBus returns 0xFF; C = 0x7F -> (0xFF + 0x80) and 0xFF = 0x7F; 0x7F and 0x28 =
+        // 0x28
+        val cpu =
+            Cpu().apply {
+                hl = 0x4000
+                bc = 0x017F
+            }
+        Ini.execute(cpu, Memory())
+        assertThat(cpu.f and Flags.X).isNotZero
+        assertThat(cpu.f and Flags.Y).isNotZero
+    }
 }

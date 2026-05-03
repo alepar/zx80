@@ -67,4 +67,20 @@ class LdiTest {
     fun `mnemonic`() {
         assertThat(Ldi.mnemonic { 0 }).isEqualTo("LDI")
     }
+
+    @Test
+    fun `LDI sets X and Y from (transferredByte + A) bits 5 and 3`() {
+        val cpu =
+            Cpu().apply {
+                hl = 0x4000
+                de = 0x5000
+                bc = 0x0001
+                a = 0x10
+            }
+        val mem = Memory().apply { write(0x4000, 0x18) }
+        Ldi.execute(cpu, mem)
+        // n = byte + A = 0x18 + 0x10 = 0x28 -> X+Y
+        assertThat(cpu.f and Flags.X).isNotZero
+        assertThat(cpu.f and Flags.Y).isNotZero
+    }
 }

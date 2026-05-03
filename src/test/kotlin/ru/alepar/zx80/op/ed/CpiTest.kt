@@ -62,4 +62,20 @@ class CpiTest {
     fun `mnemonic`() {
         assertThat(Cpi.mnemonic { 0 }).isEqualTo("CPI")
     }
+
+    @Test
+    fun `CPI sets X and Y from (A - mem at HL - H_after) bits 5 and 3`() {
+        val cpu =
+            Cpu().apply {
+                a = 0x30
+                hl = 0x4000
+                bc = 0x0001
+            }
+        val mem = Memory().apply { write(0x4000, 0x08) }
+        Cpi.execute(cpu, mem)
+        // diff = 0x30 - 0x08 = 0x28; H computed: (0x30 & 0xF) - (0x08 & 0xF) = 0 - 8 < 0 -> H=1
+        // n = 0x28 - 1 = 0x27 -> 0x27 and 0x28 = 0x20 -> only X
+        assertThat(cpu.f and Flags.X).isNotZero
+        assertThat(cpu.f and Flags.Y).isZero
+    }
 }

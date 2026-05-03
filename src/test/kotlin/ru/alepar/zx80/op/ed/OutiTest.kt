@@ -38,4 +38,18 @@ class OutiTest {
     fun `mnemonic`() {
         assertThat(Outi.mnemonic { 0 }).isEqualTo("OUTI")
     }
+
+    @Test
+    fun `OUTI sets X and Y from (portByte + L) bits 5 and 3`() {
+        val cpu =
+            Cpu().apply {
+                hl = 0x4018
+                bc = 0x0107
+            }
+        val mem = Memory().apply { write(0x4018, 0x10) }
+        // n = 0x10 + 0x18 = 0x28 -> X+Y
+        Outi.execute(cpu, mem)
+        assertThat(cpu.f and Flags.X).isNotZero
+        assertThat(cpu.f and Flags.Y).isNotZero
+    }
 }

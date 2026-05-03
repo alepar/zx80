@@ -27,4 +27,19 @@ class CpdTest {
     fun `mnemonic`() {
         assertThat(Cpd.mnemonic { 0 }).isEqualTo("CPD")
     }
+
+    @Test
+    fun `CPD sets X and Y from (A - mem at HL - H_after) bits 5 and 3`() {
+        val cpu =
+            Cpu().apply {
+                a = 0x30
+                hl = 0x4000
+                bc = 0x0001
+            }
+        val mem = Memory().apply { write(0x4000, 0x08) }
+        Cpd.execute(cpu, mem)
+        // n = 0x27 -> 0x27 and 0x28 = 0x20 -> only X
+        assertThat(cpu.f and Flags.X).isNotZero
+        assertThat(cpu.f and Flags.Y).isZero
+    }
 }

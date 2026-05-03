@@ -44,4 +44,20 @@ class LddTest {
     fun `mnemonic`() {
         assertThat(Ldd.mnemonic { 0 }).isEqualTo("LDD")
     }
+
+    @Test
+    fun `LDD sets X and Y from (transferredByte + A) bits 5 and 3`() {
+        val cpu =
+            Cpu().apply {
+                hl = 0x4000
+                de = 0x5000
+                bc = 0x0001
+                a = 0x20
+            }
+        val mem = Memory().apply { write(0x4000, 0x08) }
+        Ldd.execute(cpu, mem)
+        // n = 0x08 + 0x20 = 0x28 -> X+Y
+        assertThat(cpu.f and Flags.X).isNotZero
+        assertThat(cpu.f and Flags.Y).isNotZero
+    }
 }

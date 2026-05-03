@@ -25,6 +25,9 @@ object Ini : Op {
         cpu.b = (cpu.b - 1) and 0xFF
         var f = Flags.N
         if (cpu.b == 0) f = f or Flags.Z
+        // X/Y from n = (byte + ((C+1) and 0xFF)) and 0xFF per Zilog NMOS
+        val n = (byte + ((cpu.c + 1) and 0xFF)) and 0xFF
+        f = f or (n and 0x28)
         cpu.f = f
         cpu.pc = (cpu.pc + 2) and 0xFFFF
         cpu.bumpR(2)
