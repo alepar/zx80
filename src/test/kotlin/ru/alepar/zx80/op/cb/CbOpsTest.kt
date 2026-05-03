@@ -3,6 +3,8 @@ package ru.alepar.zx80.op.cb
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import ru.alepar.zx80.cpu.Decoder
+import ru.alepar.zx80.op.bit.BitHl
+import ru.alepar.zx80.op.bit.BitReg
 import ru.alepar.zx80.op.rot.RotShiftHl
 import ru.alepar.zx80.op.rot.RotShiftReg
 
@@ -37,5 +39,20 @@ class CbOpsTest {
         CbOps.installInto(d)
         val count = (0x00..0x3F).count { d.cb[it] != null }
         assertThat(count).isEqualTo(56)
+    }
+
+    @Test
+    fun `installInto registers BIT n,r at CB 0x40 to 0x7F (64 opcodes)`() {
+        val d = Decoder()
+        CbOps.installInto(d)
+        assertThat((d.cb[0x40] as BitReg).mnemonic { 0 }).isEqualTo("BIT 0, B")
+        assertThat((d.cb[0x46] as BitHl).mnemonic { 0 }).isEqualTo("BIT 0, (HL)")
+        assertThat((d.cb[0x47] as BitReg).mnemonic { 0 }).isEqualTo("BIT 0, A")
+        assertThat((d.cb[0x78] as BitReg).mnemonic { 0 }).isEqualTo("BIT 7, B")
+        assertThat((d.cb[0x7E] as BitHl).mnemonic { 0 }).isEqualTo("BIT 7, (HL)")
+        assertThat((d.cb[0x7F] as BitReg).mnemonic { 0 }).isEqualTo("BIT 7, A")
+
+        val count = (0x40..0x7F).count { d.cb[it] != null }
+        assertThat(count).isEqualTo(64)
     }
 }
