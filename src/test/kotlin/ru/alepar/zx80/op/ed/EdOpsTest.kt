@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import ru.alepar.zx80.cpu.Decoder
 import ru.alepar.zx80.cpu.RegPair
+import ru.alepar.zx80.op.misc.Im
 
 class EdOpsTest {
     @Test
@@ -119,6 +120,96 @@ class EdOpsTest {
             val op = d.ed[0x4B or (ppBits shl 4)]
             assertThat(op).isInstanceOf(LdPairFromAddr::class.java)
             assertThat(op!!.mnemonic { 0 }).isEqualTo("LD ${pair.mnemonic}, (nn)")
+        }
+    }
+
+    @Test
+    fun `installInto registers NEG at 7 alternate slots besides ED 0x44`() {
+        val d = Decoder()
+        EdOps.installInto(d)
+        val canonical = d.ed[0x44]
+        assertThat(canonical).isSameAs(Neg)
+        for (alt in listOf(0x4C, 0x54, 0x5C, 0x64, 0x6C, 0x74, 0x7C)) {
+            assertThat(d.ed[alt]).`as`("ED 0x%02X NEG alias", alt).isSameAs(Neg)
+        }
+    }
+
+    @Test
+    fun `installInto registers RETN at 3 alternate slots besides ED 0x45`() {
+        val d = Decoder()
+        EdOps.installInto(d)
+        assertThat(d.ed[0x45]).isSameAs(Retn)
+        for (alt in listOf(0x55, 0x65, 0x75)) {
+            assertThat(d.ed[alt]).`as`("ED 0x%02X RETN alias", alt).isSameAs(Retn)
+        }
+    }
+
+    @Test
+    fun `installInto registers RETI at 3 alternate slots besides ED 0x4D`() {
+        val d = Decoder()
+        EdOps.installInto(d)
+        assertThat(d.ed[0x4D]).isSameAs(Reti)
+        for (alt in listOf(0x5D, 0x6D, 0x7D)) {
+            assertThat(d.ed[alt]).`as`("ED 0x%02X RETI alias", alt).isSameAs(Reti)
+        }
+    }
+
+    @Test
+    fun `installInto registers IM 0 alias at ED 0x4E, 0x66, 0x6E`() {
+        val d = Decoder()
+        EdOps.installInto(d)
+        for (alt in listOf(0x4E, 0x66, 0x6E)) {
+            val op = d.ed[alt]
+            assertThat(op).`as`("ED 0x%02X is IM 0", alt).isInstanceOf(Im::class.java)
+            assertThat((op as Im).mode).`as`("ED 0x%02X mode", alt).isEqualTo(0)
+        }
+    }
+
+    @Test
+    fun `installInto registers IM 1 alias at ED 0x76`() {
+        val d = Decoder()
+        EdOps.installInto(d)
+        val op = d.ed[0x76]
+        assertThat(op).isInstanceOf(Im::class.java)
+        assertThat((op as Im).mode).isEqualTo(1)
+    }
+
+    @Test
+    fun `installInto registers IM 2 alias at ED 0x7E`() {
+        val d = Decoder()
+        EdOps.installInto(d)
+        val op = d.ed[0x7E]
+        assertThat(op).isInstanceOf(Im::class.java)
+        assertThat((op as Im).mode).isEqualTo(2)
+    }
+
+    @Test
+    fun `installInto leaves alternate slots NOT as EdNop`() {
+        val d = Decoder()
+        EdOps.installInto(d)
+        val aliasSlots =
+            listOf(
+                0x4C,
+                0x54,
+                0x5C,
+                0x64,
+                0x6C,
+                0x74,
+                0x7C, // NEG
+                0x55,
+                0x65,
+                0x75, // RETN
+                0x5D,
+                0x6D,
+                0x7D, // RETI
+                0x4E,
+                0x66,
+                0x6E,
+                0x76,
+                0x7E, // IM
+            )
+        for (slot in aliasSlots) {
+            assertThat(d.ed[slot]).`as`("ED 0x%02X must not be EdNop", slot).isNotSameAs(EdNop)
         }
     }
 

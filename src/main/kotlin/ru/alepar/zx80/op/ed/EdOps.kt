@@ -3,6 +3,7 @@ package ru.alepar.zx80.op.ed
 import ru.alepar.zx80.cpu.Decoder
 import ru.alepar.zx80.cpu.Reg
 import ru.alepar.zx80.cpu.RegPair
+import ru.alepar.zx80.op.misc.Im
 
 /**
  * Registers the remaining ED-prefixed Op family into decoder.ed (and the two main-table I/O
@@ -23,7 +24,38 @@ object EdOps {
         installSingleIo(d)
         installBlockIo(d)
         installMainTableIoStragglers(d)
+        installAlternateOpcodes(d)
         installEdNopFallback(d)
+    }
+
+    /**
+     * Installs Z80-standard alternate ED-prefix slots for NEG/RETN/RETI/IM. Real Z80 hardware
+     * decodes `010xxx100` as NEG (8 slots), `010xx0101` as RETN (4 slots), `010xx1101` as RETI (4
+     * slots), and specific patterns for IM 0/1/2 with multiple aliases each. We installed the
+     * canonical slots in earlier WUs; Phase G adds the rest. Must run BEFORE installEdNopFallback
+     * so EdNop doesn't overwrite the aliases.
+     */
+    private fun installAlternateOpcodes(d: Decoder) {
+        // NEG aliases (besides 0x44)
+        for (slot in listOf(0x4C, 0x54, 0x5C, 0x64, 0x6C, 0x74, 0x7C)) {
+            d.ed[slot] = Neg
+        }
+        // RETN aliases (besides 0x45)
+        for (slot in listOf(0x55, 0x65, 0x75)) {
+            d.ed[slot] = Retn
+        }
+        // RETI aliases (besides 0x4D)
+        for (slot in listOf(0x5D, 0x6D, 0x7D)) {
+            d.ed[slot] = Reti
+        }
+        // IM 0 aliases (besides 0x46)
+        for (slot in listOf(0x4E, 0x66, 0x6E)) {
+            d.ed[slot] = Im(0)
+        }
+        // IM 1 alias (besides 0x56)
+        d.ed[0x76] = Im(1)
+        // IM 2 alias (besides 0x5E)
+        d.ed[0x7E] = Im(2)
     }
 
     /**

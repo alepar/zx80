@@ -5,7 +5,7 @@ import ru.alepar.zx80.cpu.Memory
 import ru.alepar.zx80.op.Op
 import ru.alepar.zx80.op.OperandFetcher
 
-class Im(private val mode: Int) : Op {
+class Im(val mode: Int) : Op {
     init {
         require(mode in 0..2) { "IM mode must be 0, 1, or 2; got $mode" }
     }
