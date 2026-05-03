@@ -272,8 +272,8 @@ object Flags {
         val hFlag = oldF and H != 0
         var correction = 0
         var newC = cFlag
-        if (hFlag || (!n && (a and 0x0F) > 9)) correction = correction or 0x06
-        if (cFlag || (!n && a > 0x99)) {
+        if (hFlag || (a and 0x0F) > 9) correction = correction or 0x06
+        if (cFlag || a > 0x99) {
             correction = correction or 0x60
             newC = true
         }
