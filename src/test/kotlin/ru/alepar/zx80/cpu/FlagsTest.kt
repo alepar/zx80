@@ -729,4 +729,112 @@ class FlagsTest {
         assertThat(r.newF and Flags.C).isZero
         assertThat(r.newF and Flags.Z).isZero // 0x01 != 0
     }
+
+    @Test
+    fun `afterAdd sets X and Y from result bits 5 and 3`() {
+        // 0x10 + 0x18 = 0x28 -> X+Y both set
+        val r1 = Flags.afterAdd(0x10, 0x18, 0)
+        assertThat(r1.newF and Flags.X).isNotZero
+        assertThat(r1.newF and Flags.Y).isNotZero
+        // 0x10 + 0x10 = 0x20 -> only X
+        val r2 = Flags.afterAdd(0x10, 0x10, 0)
+        assertThat(r2.newF and Flags.X).isNotZero
+        assertThat(r2.newF and Flags.Y).isZero
+        // 0x00 + 0x08 = 0x08 -> only Y
+        val r3 = Flags.afterAdd(0x00, 0x08, 0)
+        assertThat(r3.newF and Flags.X).isZero
+        assertThat(r3.newF and Flags.Y).isNotZero
+        // 0x00 + 0x00 = 0x00 -> neither
+        val r4 = Flags.afterAdd(0x00, 0x00, 0)
+        assertThat(r4.newF and Flags.X).isZero
+        assertThat(r4.newF and Flags.Y).isZero
+    }
+
+    @Test
+    fun `afterSub sets X and Y from result bits 5 and 3`() {
+        // 0x30 - 0x08 = 0x28 -> X+Y both set
+        val r1 = Flags.afterSub(0x30, 0x08, 0)
+        assertThat(r1.newF and Flags.X).isNotZero
+        assertThat(r1.newF and Flags.Y).isNotZero
+        // 0x40 - 0x20 = 0x20 -> only X
+        val r2 = Flags.afterSub(0x40, 0x20, 0)
+        assertThat(r2.newF and Flags.X).isNotZero
+        assertThat(r2.newF and Flags.Y).isZero
+    }
+
+    @Test
+    fun `afterAnd sets X and Y from result bits 5 and 3`() {
+        // 0xFF and 0x28 = 0x28 -> X+Y
+        val r1 = Flags.afterAnd(0xFF, 0x28)
+        assertThat(r1.newF and Flags.X).isNotZero
+        assertThat(r1.newF and Flags.Y).isNotZero
+        // 0xFF and 0x20 = 0x20 -> only X
+        val r2 = Flags.afterAnd(0xFF, 0x20)
+        assertThat(r2.newF and Flags.X).isNotZero
+        assertThat(r2.newF and Flags.Y).isZero
+    }
+
+    @Test
+    fun `afterOr sets X and Y from result bits 5 and 3`() {
+        val r1 = Flags.afterOr(0x20, 0x08)
+        assertThat(r1.newF and Flags.X).isNotZero
+        assertThat(r1.newF and Flags.Y).isNotZero
+        val r2 = Flags.afterOr(0x00, 0x00)
+        assertThat(r2.newF and Flags.X).isZero
+        assertThat(r2.newF and Flags.Y).isZero
+    }
+
+    @Test
+    fun `afterXor sets X and Y from result bits 5 and 3`() {
+        val r1 = Flags.afterXor(0x00, 0x28)
+        assertThat(r1.newF and Flags.X).isNotZero
+        assertThat(r1.newF and Flags.Y).isNotZero
+        val r2 = Flags.afterXor(0xFF, 0xD7) // 0xFF xor 0xD7 = 0x28
+        assertThat(r2.newF and Flags.X).isNotZero
+        assertThat(r2.newF and Flags.Y).isNotZero
+    }
+
+    @Test
+    fun `afterInc sets X and Y from result bits 5 and 3`() {
+        val r1 = Flags.afterInc(0x27, 0) // 0x27 + 1 = 0x28
+        assertThat(r1.newF and Flags.X).isNotZero
+        assertThat(r1.newF and Flags.Y).isNotZero
+        val r2 = Flags.afterInc(0x07, 0) // 0x07 + 1 = 0x08
+        assertThat(r2.newF and Flags.X).isZero
+        assertThat(r2.newF and Flags.Y).isNotZero
+    }
+
+    @Test
+    fun `afterDec sets X and Y from result bits 5 and 3`() {
+        val r1 = Flags.afterDec(0x29, 0) // 0x29 - 1 = 0x28
+        assertThat(r1.newF and Flags.X).isNotZero
+        assertThat(r1.newF and Flags.Y).isNotZero
+        val r2 = Flags.afterDec(0x21, 0) // 0x21 - 1 = 0x20
+        assertThat(r2.newF and Flags.X).isNotZero
+        assertThat(r2.newF and Flags.Y).isZero
+    }
+
+    @Test
+    fun `afterCpl sets X and Y from result bits 5 and 3`() {
+        // 0xD7 xor 0xFF = 0x28 -> X+Y
+        val r1 = Flags.afterCpl(0xD7, 0)
+        assertThat(r1.newF and Flags.X).isNotZero
+        assertThat(r1.newF and Flags.Y).isNotZero
+        // 0xDF xor 0xFF = 0x20 -> only X
+        val r2 = Flags.afterCpl(0xDF, 0)
+        assertThat(r2.newF and Flags.X).isNotZero
+        assertThat(r2.newF and Flags.Y).isZero
+    }
+
+    @Test
+    fun `afterDaa sets X and Y from result bits 5 and 3`() {
+        // 0x28, no flags -> result = 0x28 (no correction needed) -> X+Y
+        val r1 = Flags.afterDaa(0x28, 0)
+        assertThat(r1.newF and Flags.X).isNotZero
+        assertThat(r1.newF and Flags.Y).isNotZero
+        // 0x20, no flags -> result = 0x20 -> only X
+        val r2 = Flags.afterDaa(0x20, 0)
+        assertThat(r2.newF and Flags.X).isNotZero
+        assertThat(r2.newF and Flags.Y).isZero
+    }
 }

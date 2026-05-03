@@ -42,6 +42,7 @@ object Flags {
         // Overflow: both operands have same sign bit, result has different sign bit
         if ((a xor b) and 0x80 == 0 && (a xor value) and 0x80 != 0) f = f or PV
         if (sum > 0xFF) f = f or C
+        f = f or (value and 0x28)
         return AluResult(value, f)
     }
 
@@ -67,6 +68,7 @@ object Flags {
         // Overflow: operands have different sign bits, and result has different sign bit from a
         if ((a xor b) and 0x80 != 0 && (a xor value) and 0x80 != 0) f = f or PV
         if (diff < 0) f = f or C
+        f = f or (value and 0x28)
         return AluResult(value, f)
     }
 
@@ -80,6 +82,7 @@ object Flags {
         if (value == 0) f = f or Z
         if (value and 0x80 != 0) f = f or S
         if (parity(value)) f = f or PV
+        f = f or (value and 0x28)
         return AluResult(value, f)
     }
 
@@ -93,6 +96,7 @@ object Flags {
         if (value == 0) f = f or Z
         if (value and 0x80 != 0) f = f or S
         if (parity(value)) f = f or PV
+        f = f or (value and 0x28)
         return AluResult(value, f)
     }
 
@@ -106,6 +110,7 @@ object Flags {
         if (value == 0) f = f or Z
         if (value and 0x80 != 0) f = f or S
         if (parity(value)) f = f or PV
+        f = f or (value and 0x28)
         return AluResult(value, f)
     }
 
@@ -128,6 +133,7 @@ object Flags {
         if (result and 0x80 != 0) f = f or S
         if ((v8 and 0x0F) + 1 > 0x0F) f = f or H
         if (v8 == 0x7F) f = f or PV
+        f = f or (result and 0x28)
         return AluResult(result, f)
     }
 
@@ -150,6 +156,7 @@ object Flags {
         if (result and 0x80 != 0) f = f or S
         if (v8 and 0x0F == 0) f = f or H // borrow when low nibble was 0
         if (v8 == 0x80) f = f or PV
+        f = f or (result and 0x28)
         return AluResult(result, f)
     }
 
@@ -228,7 +235,7 @@ object Flags {
     /** CPL: A = A xor 0xFF. H = 1, N = 1; S/Z/PV/C preserved from oldF. */
     fun afterCpl(a: Int, oldF: Int): AluResult {
         val value = (a and 0xFF) xor 0xFF
-        val f = (oldF and (S or Z or PV or C)) or H or N
+        val f = (oldF and (S or Z or PV or C)) or H or N or (value and 0x28)
         return AluResult(value, f)
     }
 
@@ -366,6 +373,7 @@ object Flags {
         if (parity(result)) f = f or PV
         if (newC) f = f or C
         if ((a xor result) and 0x10 != 0) f = f or H
+        f = f or (result and 0x28)
         return AluResult(result, f)
     }
 }
