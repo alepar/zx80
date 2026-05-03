@@ -16,6 +16,15 @@ object AluOps {
     fun installInto(d: Decoder) {
         installAluAReg(d)
         installAluAFromHl(d)
+        installAluAImm(d)
+    }
+
+    private fun installAluAImm(d: Decoder) {
+        // ALU A,n — opcode pattern 11 ooo 110 → 0xC6, 0xCE, 0xD6, 0xDE, 0xE6, 0xEE, 0xF6, 0xFE
+        for (oooBits in 0..7) {
+            val opcode = 0xC0 or (oooBits shl 3) or 0x06
+            d.main[opcode] = AluAImm(op = AluOp.fromBits(oooBits))
+        }
     }
 
     private fun installAluAFromHl(d: Decoder) {

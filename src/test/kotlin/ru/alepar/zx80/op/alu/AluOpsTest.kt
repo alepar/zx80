@@ -67,4 +67,18 @@ class AluOpsTest {
         assertThat((d.main[0xB6] as AluAFromHl).mnemonic { 0 }).isEqualTo("OR A, (HL)")
         assertThat((d.main[0xBE] as AluAFromHl).mnemonic { 0 }).isEqualTo("CP A, (HL)")
     }
+
+    @Test
+    fun `installInto registers ALU A,n at 0xC6, 0xCE, 0xD6, 0xDE, 0xE6, 0xEE, 0xF6, 0xFE`() {
+        val d = Decoder()
+        AluOps.installInto(d)
+        assertThat((d.main[0xC6] as AluAImm).mnemonic { 0 }).isEqualTo("ADD A, n")
+        assertThat((d.main[0xCE] as AluAImm).mnemonic { 0 }).isEqualTo("ADC A, n")
+        assertThat((d.main[0xD6] as AluAImm).mnemonic { 0 }).isEqualTo("SUB A, n")
+        assertThat((d.main[0xDE] as AluAImm).mnemonic { 0 }).isEqualTo("SBC A, n")
+        assertThat((d.main[0xE6] as AluAImm).mnemonic { 0 }).isEqualTo("AND A, n")
+        assertThat((d.main[0xEE] as AluAImm).mnemonic { 0 }).isEqualTo("XOR A, n")
+        assertThat((d.main[0xF6] as AluAImm).mnemonic { 0 }).isEqualTo("OR A, n")
+        assertThat((d.main[0xFE] as AluAImm).mnemonic { 0 }).isEqualTo("CP A, n")
+    }
 }
