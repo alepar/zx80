@@ -51,6 +51,10 @@ class ProgramsSuite(private val decoder: Decoder, private val programs: List<Pro
         for ((offset, b) in p.bytes.withIndex()) {
             mem.write(exp.load_at + offset, b.toInt() and 0xFF)
         }
+        // Apply pre-loaded memory bytes, if any.
+        exp.initial_memory?.forEach { (addrStr, byteValue) ->
+            mem.write(parseHex(addrStr), byteValue and 0xFF)
+        }
 
         var failure: String? = null
         try {

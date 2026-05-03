@@ -9,6 +9,11 @@ data class ProgramExpectation(
     val entry: Int,
     val max_cycles: Long,
     val stop_on: String = "HALT", // currently only HALT supported
+    /**
+     * Optional pre-loaded memory bytes applied AFTER the program is loaded but BEFORE execution
+     * begins. Address keys are hex with `0x` prefix (case insensitive). Values are in 0..255.
+     */
+    val initial_memory: Map<String, Int>? = null,
     val expect: ExpectedState,
 )
 

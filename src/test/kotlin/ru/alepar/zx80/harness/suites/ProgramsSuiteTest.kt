@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test
 import ru.alepar.zx80.cpu.Decoder
 import ru.alepar.zx80.harness.programs.ExpectedState
 import ru.alepar.zx80.harness.programs.ProgramExpectation
+import ru.alepar.zx80.op.OpTableBuilder
 
 class ProgramsSuiteTest {
     @Test
@@ -138,5 +139,41 @@ class ProgramsSuiteTest {
         val result = ((r.details as JsonObject)["results"]!!.jsonArray)[0].jsonObject
         assertThat(result["status"]!!.jsonPrimitive.content).isEqualTo("FAIL")
         assertThat(result["reason"]!!.jsonPrimitive.content).contains("max_cycles=12")
+    }
+
+    @Test
+    fun `applies initial_memory before run`() {
+        // Program: LD A,(0x100); HALT
+        val bytes = byteArrayOf(0x3A.toByte(), 0x00, 0x01, 0x76)
+        val exp =
+            ProgramExpectation(
+                name = "loads_initial",
+                load_at = 0,
+                entry = 0,
+                max_cycles = 100L,
+                initial_memory = mapOf("0x100" to 0xAB),
+                expect = ExpectedState(a = 0xAB, halted = true),
+            )
+        val decoder = OpTableBuilder.build()
+        val suite = ProgramsSuite(decoder, listOf(ProgramFixture(bytes, exp)))
+        val result = suite.run()
+        assertThat(result.passed).isEqualTo(1)
+    }
+
+    @Test
+    fun `initial_memory absent is back-compat`() {
+        val bytes = byteArrayOf(0x76) // HALT
+        val exp =
+            ProgramExpectation(
+                name = "halt_only",
+                load_at = 0,
+                entry = 0,
+                max_cycles = 8L,
+                expect = ExpectedState(pc = 1, halted = true),
+            )
+        val decoder = OpTableBuilder.build()
+        val suite = ProgramsSuite(decoder, listOf(ProgramFixture(bytes, exp)))
+        val result = suite.run()
+        assertThat(result.passed).isEqualTo(1)
     }
 }
