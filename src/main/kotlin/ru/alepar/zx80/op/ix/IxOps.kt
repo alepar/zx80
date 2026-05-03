@@ -2,6 +2,7 @@ package ru.alepar.zx80.op.ix
 
 import ru.alepar.zx80.cpu.Decoder
 import ru.alepar.zx80.cpu.IndexReg
+import ru.alepar.zx80.cpu.Reg
 
 /**
  * Registers the DD/FD-prefixed (IX/IY) Op family into decoder.dd and decoder.fd. Also registers the
@@ -11,6 +12,7 @@ object IxOps {
     fun installInto(d: Decoder) {
         installLdSpHlStraggler(d)
         installPairTouching(d)
+        installIndexedLd(d)
     }
 
     private fun installLdSpHlStraggler(d: Decoder) {
@@ -33,6 +35,17 @@ object IxOps {
             for (srcBits in 0..3) {
                 val opcode = 0x09 or (srcBits shl 4)
                 table[opcode] = AddIxPair(idx, srcBits)
+            }
+        }
+    }
+
+    private fun installIndexedLd(d: Decoder) {
+        for (idx in IndexReg.entries) {
+            val table = if (idx == IndexReg.IX) d.dd else d.fd
+            for (rrrBits in 0..7) {
+                if (rrrBits == 6) continue
+                table[0x46 or (rrrBits shl 3)] = LdRegFromIxd(idx, dst = Reg.fromBits(rrrBits))
+                table[0x70 or rrrBits] = LdIxdFromReg(idx, src = Reg.fromBits(rrrBits))
             }
         }
     }

@@ -45,12 +45,20 @@ class IxOpsTest {
     }
 
     @Test
-    fun `installInto fills 13 pair-touching opcodes per index in dd and fd tables`() {
+    fun `installInto registers LD r,(IX+d) at DD 0x46, 0x4E, 0x7E`() {
         val d = Decoder()
         IxOps.installInto(d)
-        val ddCount = d.dd.count { it != null }
-        val fdCount = d.fd.count { it != null }
-        assertThat(ddCount).isEqualTo(13)
-        assertThat(fdCount).isEqualTo(13)
+        assertThat((d.dd[0x46] as LdRegFromIxd).mnemonic { 0 }).isEqualTo("LD B, (IX+d)")
+        assertThat((d.dd[0x4E] as LdRegFromIxd).mnemonic { 0 }).isEqualTo("LD C, (IX+d)")
+        assertThat((d.dd[0x7E] as LdRegFromIxd).mnemonic { 0 }).isEqualTo("LD A, (IX+d)")
+    }
+
+    @Test
+    fun `installInto registers LD (IY+d) r at FD 0x70 to 0x77 (skipping rrr=110)`() {
+        val d = Decoder()
+        IxOps.installInto(d)
+        assertThat((d.fd[0x70] as LdIxdFromReg).mnemonic { 0 }).isEqualTo("LD (IY+d), B")
+        assertThat((d.fd[0x77] as LdIxdFromReg).mnemonic { 0 }).isEqualTo("LD (IY+d), A")
+        assertThat(d.fd[0x76]).isNull()
     }
 }
