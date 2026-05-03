@@ -46,6 +46,51 @@ class EdOpsTest {
     }
 
     @Test
+    fun `installInto registers IN A,(n) at 0xDB and OUT (n),A at 0xD3`() {
+        val d = Decoder()
+        EdOps.installInto(d)
+        assertThat(d.main[0xDB]).isSameAs(InAImm)
+        assertThat(d.main[0xD3]).isSameAs(OutImmA)
+    }
+
+    @Test
+    fun `installInto registers single I_O ED 40 50 58 60 68 78 (IN r, (C))`() {
+        val d = Decoder()
+        EdOps.installInto(d)
+        // ED 40, 48, 50, 58, 60, 68, 78 — non-(HL) targets.
+        for (rrrBits in listOf(0, 1, 2, 3, 4, 5, 7)) {
+            val op = d.ed[0x40 or (rrrBits shl 3)]
+            assertThat(op).isInstanceOf(InRC::class.java)
+        }
+        assertThat(d.ed[0x70]).isSameAs(InCFlags)
+    }
+
+    @Test
+    fun `installInto registers OUT (C) variants`() {
+        val d = Decoder()
+        EdOps.installInto(d)
+        for (rrrBits in listOf(0, 1, 2, 3, 4, 5, 7)) {
+            val op = d.ed[0x41 or (rrrBits shl 3)]
+            assertThat(op).isInstanceOf(OutCR::class.java)
+        }
+        assertThat(d.ed[0x71]).isSameAs(OutCZero)
+    }
+
+    @Test
+    fun `installInto registers block I_O at A2, AA, B2, BA, A3, AB, B3, BB`() {
+        val d = Decoder()
+        EdOps.installInto(d)
+        assertThat(d.ed[0xA2]).isSameAs(Ini)
+        assertThat(d.ed[0xAA]).isSameAs(Ind)
+        assertThat(d.ed[0xB2]).isSameAs(Inir)
+        assertThat(d.ed[0xBA]).isSameAs(Indr)
+        assertThat(d.ed[0xA3]).isSameAs(Outi)
+        assertThat(d.ed[0xAB]).isSameAs(Outd)
+        assertThat(d.ed[0xB3]).isSameAs(Otir)
+        assertThat(d.ed[0xBB]).isSameAs(Otdr)
+    }
+
+    @Test
     fun `installInto registers block compare at ED A1, A9, B1, B9`() {
         val d = Decoder()
         EdOps.installInto(d)

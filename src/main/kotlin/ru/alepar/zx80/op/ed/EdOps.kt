@@ -1,6 +1,7 @@
 package ru.alepar.zx80.op.ed
 
 import ru.alepar.zx80.cpu.Decoder
+import ru.alepar.zx80.cpu.Reg
 import ru.alepar.zx80.cpu.RegPair
 
 /**
@@ -19,6 +20,38 @@ object EdOps {
         installExtendedLdPair(d)
         installBlockMove(d)
         installBlockCompare(d)
+        installSingleIo(d)
+        installBlockIo(d)
+        installMainTableIoStragglers(d)
+    }
+
+    private fun installSingleIo(d: Decoder) {
+        for (rrrBits in 0..7) {
+            if (rrrBits == 6) {
+                d.ed[0x70] = InCFlags
+                d.ed[0x71] = OutCZero
+            } else {
+                val r = Reg.fromBits(rrrBits)
+                d.ed[0x40 or (rrrBits shl 3)] = InRC(r)
+                d.ed[0x41 or (rrrBits shl 3)] = OutCR(r)
+            }
+        }
+    }
+
+    private fun installBlockIo(d: Decoder) {
+        d.ed[0xA2] = Ini
+        d.ed[0xAA] = Ind
+        d.ed[0xB2] = Inir
+        d.ed[0xBA] = Indr
+        d.ed[0xA3] = Outi
+        d.ed[0xAB] = Outd
+        d.ed[0xB3] = Otir
+        d.ed[0xBB] = Otdr
+    }
+
+    private fun installMainTableIoStragglers(d: Decoder) {
+        d.main[0xDB] = InAImm
+        d.main[0xD3] = OutImmA
     }
 
     private fun installBlockCompare(d: Decoder) {
