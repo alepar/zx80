@@ -1,0 +1,56 @@
+package ru.alepar.zx80.op.alu
+
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
+import ru.alepar.zx80.cpu.Decoder
+
+class AluOpsTest {
+    @Test
+    fun `installInto registers ADD A,r at 0x80 through 0x87 minus 0x86`() {
+        val d = Decoder()
+        AluOps.installInto(d)
+        assertThat((d.main[0x80] as AluAReg).mnemonic { 0 }).isEqualTo("ADD A, B")
+        assertThat((d.main[0x81] as AluAReg).mnemonic { 0 }).isEqualTo("ADD A, C")
+        assertThat((d.main[0x87] as AluAReg).mnemonic { 0 }).isEqualTo("ADD A, A")
+    }
+
+    @Test
+    fun `installInto registers SUB A,r at 0x90 onwards`() {
+        val d = Decoder()
+        AluOps.installInto(d)
+        assertThat((d.main[0x90] as AluAReg).mnemonic { 0 }).isEqualTo("SUB A, B")
+        assertThat((d.main[0x97] as AluAReg).mnemonic { 0 }).isEqualTo("SUB A, A")
+    }
+
+    @Test
+    fun `installInto registers XOR A,r at 0xA8 onwards (note XOR at ooo=5)`() {
+        val d = Decoder()
+        AluOps.installInto(d)
+        assertThat((d.main[0xA8] as AluAReg).mnemonic { 0 }).isEqualTo("XOR A, B")
+        assertThat((d.main[0xAF] as AluAReg).mnemonic { 0 }).isEqualTo("XOR A, A")
+    }
+
+    @Test
+    fun `installInto registers OR A,r at 0xB0 onwards (note OR at ooo=6)`() {
+        val d = Decoder()
+        AluOps.installInto(d)
+        assertThat((d.main[0xB0] as AluAReg).mnemonic { 0 }).isEqualTo("OR A, B")
+        assertThat((d.main[0xB7] as AluAReg).mnemonic { 0 }).isEqualTo("OR A, A")
+    }
+
+    @Test
+    fun `installInto registers CP A,r at 0xB8 onwards`() {
+        val d = Decoder()
+        AluOps.installInto(d)
+        assertThat((d.main[0xB8] as AluAReg).mnemonic { 0 }).isEqualTo("CP A, B")
+        assertThat((d.main[0xBF] as AluAReg).mnemonic { 0 }).isEqualTo("CP A, A")
+    }
+
+    @Test
+    fun `installInto registers exactly 56 reg-source ALU opcodes in 0x80-0xBF`() {
+        val d = Decoder()
+        AluOps.installInto(d)
+        val count = (0x80..0xBF).count { d.main[it] is AluAReg }
+        assertThat(count).isEqualTo(56)
+    }
+}
