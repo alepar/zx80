@@ -20,6 +20,19 @@ object IxOps {
         installIndexedIncDec(d)
         installJpIx(d)
         installAluAHalves(d)
+        installIncDecHalves(d)
+    }
+
+    private fun installIncDecHalves(d: Decoder) {
+        for (idx in IndexReg.entries) {
+            val table = if (idx == IndexReg.IX) d.dd else d.fd
+            val high = if (idx == IndexReg.IX) IndexHalfReg.IXH else IndexHalfReg.IYH
+            val low = if (idx == IndexReg.IX) IndexHalfReg.IXL else IndexHalfReg.IYL
+            table[0x24] = IncIxHalf(high)
+            table[0x25] = DecIxHalf(high)
+            table[0x2C] = IncIxHalf(low)
+            table[0x2D] = DecIxHalf(low)
+        }
     }
 
     private fun installAluAHalves(d: Decoder) {

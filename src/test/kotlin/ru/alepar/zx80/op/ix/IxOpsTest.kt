@@ -114,4 +114,30 @@ class IxOpsTest {
         assertThat((d.fd[0x84] as AluAFromIxHalf).mnemonic { 0 }).isEqualTo("ADD A, IYH")
         assertThat((d.fd[0xAD] as AluAFromIxHalf).mnemonic { 0 }).isEqualTo("XOR A, IYL")
     }
+
+    @Test
+    fun `installInto registers INC IXH at DD 24 and DEC IXH at DD 25`() {
+        val d = Decoder()
+        IxOps.installInto(d)
+        assertThat((d.dd[0x24] as IncIxHalf).mnemonic { 0 }).isEqualTo("INC IXH")
+        assertThat((d.dd[0x25] as DecIxHalf).mnemonic { 0 }).isEqualTo("DEC IXH")
+    }
+
+    @Test
+    fun `installInto registers INC IXL at DD 2C and DEC IXL at DD 2D`() {
+        val d = Decoder()
+        IxOps.installInto(d)
+        assertThat((d.dd[0x2C] as IncIxHalf).mnemonic { 0 }).isEqualTo("INC IXL")
+        assertThat((d.dd[0x2D] as DecIxHalf).mnemonic { 0 }).isEqualTo("DEC IXL")
+    }
+
+    @Test
+    fun `installInto registers INC IYH at FD 24, DEC IYH at FD 25, INC IYL at FD 2C, DEC IYL at FD 2D`() {
+        val d = Decoder()
+        IxOps.installInto(d)
+        assertThat((d.fd[0x24] as IncIxHalf).mnemonic { 0 }).isEqualTo("INC IYH")
+        assertThat((d.fd[0x25] as DecIxHalf).mnemonic { 0 }).isEqualTo("DEC IYH")
+        assertThat((d.fd[0x2C] as IncIxHalf).mnemonic { 0 }).isEqualTo("INC IYL")
+        assertThat((d.fd[0x2D] as DecIxHalf).mnemonic { 0 }).isEqualTo("DEC IYL")
+    }
 }
