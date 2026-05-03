@@ -2,6 +2,7 @@ package ru.alepar.zx80.op
 
 import ru.alepar.zx80.cpu.Decoder
 import ru.alepar.zx80.op.ex.ExOps
+import ru.alepar.zx80.op.ld.LdOps
 import ru.alepar.zx80.op.misc.MiscOps
 
 /**
@@ -16,6 +17,7 @@ object OpTableBuilder {
         val d = Decoder()
         MiscOps.installInto(d)
         ExOps.installInto(d)
+        LdOps.installInto(d)
         return d
     }
 }
