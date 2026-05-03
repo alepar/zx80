@@ -2,6 +2,7 @@ package ru.alepar.zx80.op.ixcb
 
 import ru.alepar.zx80.cpu.Decoder
 import ru.alepar.zx80.cpu.IndexReg
+import ru.alepar.zx80.cpu.Reg
 import ru.alepar.zx80.op.Op
 import ru.alepar.zx80.op.rot.RotateOp
 
@@ -17,6 +18,7 @@ object IxCbOps {
         for (idx in IndexReg.entries) {
             val table = if (idx == IndexReg.IX) d.ddcb else d.fdcb
             installRotateShift(table, idx)
+            installRotateShiftCopyback(table, idx)
             installBit(table, idx)
             installRes(table, idx)
             installSet(table, idx)
@@ -25,10 +27,22 @@ object IxCbOps {
 
     private fun installRotateShift(table: Array<Op?>, idx: IndexReg) {
         for (oooBits in 0..7) {
-            if (oooBits == 6) continue // SLL — undocumented
+            // Phase 2.13: oooBits=6 (SLL) is now installed. Phase 2.12 added SLL to RotateOp; this
+            // table previously left it null per the documented-Z80-only carve-out.
             val op = RotateOp.fromBits(oooBits)
             val opcode = (oooBits shl 3) or 0x06
             table[opcode] = RotShiftIxd(idx, op)
+        }
+    }
+
+    private fun installRotateShiftCopyback(table: Array<Op?>, idx: IndexReg) {
+        for (oooBits in 0..7) {
+            val op = RotateOp.fromBits(oooBits)
+            for (rrrBits in 0..7) {
+                if (rrrBits == 6) continue // documented memory-only form, handled above
+                val opcode = (oooBits shl 3) or rrrBits
+                table[opcode] = RotShiftIxdCopyback(idx, op, Reg.fromBits(rrrBits))
+            }
         }
     }
 

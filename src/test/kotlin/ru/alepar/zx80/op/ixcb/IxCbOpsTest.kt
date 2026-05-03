@@ -28,33 +28,6 @@ class IxCbOpsTest {
     }
 
     @Test
-    fun `installInto leaves SLL slots (DDCB 0x36, FDCB 0x36) null`() {
-        val d = Decoder()
-        IxCbOps.installInto(d)
-        assertThat(d.ddcb[0x36]).isNull()
-        assertThat(d.fdcb[0x36]).isNull()
-    }
-
-    @Test
-    fun `installInto leaves undocumented copy-to-r rotate slots null (rrr is not 110)`() {
-        val d = Decoder()
-        IxCbOps.installInto(d)
-        assertThat(d.ddcb[0x00]).isNull()
-        assertThat(d.ddcb[0x07]).isNull()
-        assertThat(d.ddcb[0x37]).isNull()
-    }
-
-    @Test
-    fun `installInto registers exactly 7 documented rotate-shift opcodes per index`() {
-        val d = Decoder()
-        IxCbOps.installInto(d)
-        val ddcbRotShiftCount = (0x00..0x3F).count { d.ddcb[it] != null }
-        val fdcbRotShiftCount = (0x00..0x3F).count { d.fdcb[it] != null }
-        assertThat(ddcbRotShiftCount).isEqualTo(7)
-        assertThat(fdcbRotShiftCount).isEqualTo(7)
-    }
-
-    @Test
     fun `installInto registers BIT n (IX+d) at DDCB 0x46 0x4E 0x56 to 0x7E`() {
         val d = Decoder()
         IxCbOps.installInto(d)
@@ -102,12 +75,34 @@ class IxCbOpsTest {
     }
 
     @Test
-    fun `installInto fills exactly 31 documented opcodes per index, 62 total`() {
+    fun `installInto registers SLL (IX+d) at DDCB 0x36`() {
         val d = Decoder()
         IxCbOps.installInto(d)
-        val ddcbCount = d.ddcb.count { it != null }
-        val fdcbCount = d.fdcb.count { it != null }
-        assertThat(ddcbCount).isEqualTo(31)
-        assertThat(fdcbCount).isEqualTo(31)
+        assertThat((d.ddcb[0x36] as RotShiftIxd).mnemonic { 0 }).isEqualTo("SLL (IX+d)")
+        assertThat((d.fdcb[0x36] as RotShiftIxd).mnemonic { 0 }).isEqualTo("SLL (IY+d)")
+    }
+
+    @Test
+    fun `installInto registers RotShiftIxdCopyback at non-rrr=6 slots`() {
+        val d = Decoder()
+        IxCbOps.installInto(d)
+        // DDCB 0x00 = RLC (IX+d), B
+        assertThat((d.ddcb[0x00] as RotShiftIxdCopyback).mnemonic { 0 }).isEqualTo("RLC (IX+d), B")
+        // DDCB 0x07 = RLC (IX+d), A
+        assertThat((d.ddcb[0x07] as RotShiftIxdCopyback).mnemonic { 0 }).isEqualTo("RLC (IX+d), A")
+        // DDCB 0x30 = SLL (IX+d), B (oooBits=6, rrr=0)
+        assertThat((d.ddcb[0x30] as RotShiftIxdCopyback).mnemonic { 0 }).isEqualTo("SLL (IX+d), B")
+        // FDCB 0x3F = SRL (IY+d), A (oooBits=7, rrr=7)
+        assertThat((d.fdcb[0x3F] as RotShiftIxdCopyback).mnemonic { 0 }).isEqualTo("SRL (IY+d), A")
+    }
+
+    @Test
+    fun `installInto fills the entire rotate-shift block 0x00-0x3F under DDCB and FDCB`() {
+        val d = Decoder()
+        IxCbOps.installInto(d)
+        val ddCount = (0x00..0x3F).count { d.ddcb[it] != null }
+        val fdCount = (0x00..0x3F).count { d.fdcb[it] != null }
+        assertThat(ddCount).isEqualTo(64)
+        assertThat(fdCount).isEqualTo(64)
     }
 }
