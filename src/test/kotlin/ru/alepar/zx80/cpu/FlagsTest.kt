@@ -437,7 +437,7 @@ class FlagsTest {
     @Test
     fun `afterScf sets C, clears H and N, preserves S Z PV`() {
         val oldF = Flags.S or Flags.Z or Flags.PV or Flags.H or Flags.N
-        val newF = Flags.afterScf(oldF)
+        val newF = Flags.afterScf(oldA = 0, oldF = oldF)
         assertThat(newF and Flags.S).isNotZero
         assertThat(newF and Flags.Z).isNotZero
         assertThat(newF and Flags.PV).isNotZero
@@ -449,18 +449,45 @@ class FlagsTest {
     @Test
     fun `afterCcf toggles C, sets H to oldC, clears N, preserves S Z PV`() {
         var oldF = Flags.C or Flags.S
-        var newF = Flags.afterCcf(oldF)
+        var newF = Flags.afterCcf(oldA = 0, oldF = oldF)
         assertThat(newF and Flags.C).isZero
         assertThat(newF and Flags.H).isNotZero
         assertThat(newF and Flags.N).isZero
         assertThat(newF and Flags.S).isNotZero
 
         oldF = Flags.S or Flags.Z
-        newF = Flags.afterCcf(oldF)
+        newF = Flags.afterCcf(oldA = 0, oldF = oldF)
         assertThat(newF and Flags.C).isNotZero
         assertThat(newF and Flags.H).isZero
         assertThat(newF and Flags.S).isNotZero
         assertThat(newF and Flags.Z).isNotZero
+    }
+
+    @Test
+    fun `afterScf computes X and Y from (oldA or newF) and 0x28 per Zilog NMOS rule`() {
+        // oldA = 0x00, oldF = 0x00 -> newF before X/Y has C set (0x01); (0x00 | 0x01) and 0x28 = 0
+        val f1 = Flags.afterScf(oldA = 0x00, oldF = 0x00)
+        assertThat(f1 and Flags.X).isZero
+        assertThat(f1 and Flags.Y).isZero
+
+        // oldA = 0x28, oldF = 0x00 -> (0x28 | 0x01) and 0x28 = 0x28 -> X+Y
+        val f2 = Flags.afterScf(oldA = 0x28, oldF = 0x00)
+        assertThat(f2 and Flags.X).isNotZero
+        assertThat(f2 and Flags.Y).isNotZero
+
+        // oldA = 0x00, oldF = 0x20 (X already set) -> (0x00 | (0x20|0x01)) and 0x28 = 0x20 -> only
+        // X
+        val f3 = Flags.afterScf(oldA = 0x00, oldF = 0x20)
+        assertThat(f3 and Flags.X).isNotZero
+        assertThat(f3 and Flags.Y).isZero
+    }
+
+    @Test
+    fun `afterCcf computes X and Y from (oldA or newF) and 0x28`() {
+        // oldA = 0x28, oldF = 0x00 -> newF before X/Y is C=1 H=0 -> (0x28 | 0x01) and 0x28 = 0x28
+        val f = Flags.afterCcf(oldA = 0x28, oldF = 0x00)
+        assertThat(f and Flags.X).isNotZero
+        assertThat(f and Flags.Y).isNotZero
     }
 
     @Test

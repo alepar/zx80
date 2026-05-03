@@ -26,7 +26,8 @@ class BitReg(private val n: Int, private val src: Reg) : Op {
         val bit = (operand shr n) and 1
         var f = cpu.f and Flags.C
         f = f or Flags.H
-        if (bit == 0) f = f or Flags.Z
+        if (bit == 0) f = f or (Flags.Z or Flags.PV) // PV mirrors Z
+        if (n == 7 && bit != 0) f = f or Flags.S
         f = f or (operand and 0x28) // X/Y from operand
         cpu.f = f
         cpu.pc = (cpu.pc + 2) and 0xFFFF

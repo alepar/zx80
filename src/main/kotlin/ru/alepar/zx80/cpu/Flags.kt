@@ -263,19 +263,25 @@ object Flags {
     }
 
     /**
-     * SCF: set carry flag. C=1; H=0; N=0; S/Z/PV preserved. Returns just the new F (A is
-     * unchanged).
+     * SCF: set carry flag. C=1; H=0; N=0; S/Z/PV preserved. X/Y per Zilog NMOS: (oldA or oldF) and
+     * 0x28 — i.e. the X/Y bits leak from both oldA and the prior F.
      */
-    fun afterScf(oldF: Int): Int = (oldF and (S or Z or PV)) or C
+    fun afterScf(oldA: Int, oldF: Int): Int {
+        var f = (oldF and (S or Z or PV)) or C
+        f = f or ((oldA or oldF) and 0x28)
+        return f
+    }
 
     /**
-     * CCF: complement carry flag. C=!oldC; H=oldC; N=0; S/Z/PV preserved. Returns just the new F.
+     * CCF: complement carry flag. C=!oldC; H=oldC; N=0; S/Z/PV preserved. X/Y per Zilog NMOS: (oldA
+     * or oldF) and 0x28.
      */
-    fun afterCcf(oldF: Int): Int {
+    fun afterCcf(oldA: Int, oldF: Int): Int {
         val oldC = oldF and C
         var f = oldF and (S or Z or PV)
         if (oldC == 0) f = f or C // toggle to 1
         if (oldC != 0) f = f or H // H gets oldC
+        f = f or ((oldA or oldF) and 0x28)
         return f
     }
 

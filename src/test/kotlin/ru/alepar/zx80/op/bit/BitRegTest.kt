@@ -97,4 +97,41 @@ class BitRegTest {
         assertThat(cpu3.f and Flags.X).isZero
         assertThat(cpu3.f and Flags.Y).isNotZero
     }
+
+    @Test
+    fun `BIT n r mirrors PV from Z (PV set when bit is 0)`() {
+        val cpu = Cpu().apply { b = 0x00 }
+        BitReg(0, Reg.B).execute(cpu, Memory())
+        assertThat(cpu.f and Flags.Z).isNotZero
+        assertThat(cpu.f and Flags.PV).isNotZero
+    }
+
+    @Test
+    fun `BIT n r clears PV when bit is 1 (since Z is clear)`() {
+        val cpu = Cpu().apply { b = 0xFF }
+        BitReg(0, Reg.B).execute(cpu, Memory())
+        assertThat(cpu.f and Flags.Z).isZero
+        assertThat(cpu.f and Flags.PV).isZero
+    }
+
+    @Test
+    fun `BIT 7 r sets S when bit 7 is 1`() {
+        val cpu = Cpu().apply { b = 0x80 }
+        BitReg(7, Reg.B).execute(cpu, Memory())
+        assertThat(cpu.f and Flags.S).isNotZero
+    }
+
+    @Test
+    fun `BIT 7 r clears S when bit 7 is 0`() {
+        val cpu = Cpu().apply { b = 0x00 }
+        BitReg(7, Reg.B).execute(cpu, Memory())
+        assertThat(cpu.f and Flags.S).isZero
+    }
+
+    @Test
+    fun `BIT n r leaves S clear when n is not 7`() {
+        val cpu = Cpu().apply { b = 0xFF }
+        BitReg(3, Reg.B).execute(cpu, Memory())
+        assertThat(cpu.f and Flags.S).isZero
+    }
 }

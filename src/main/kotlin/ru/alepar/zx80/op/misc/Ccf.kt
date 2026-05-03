@@ -15,7 +15,7 @@ object Ccf : Op {
     override val baseCycles = 4
 
     override fun execute(cpu: Cpu, mem: Memory) {
-        cpu.f = Flags.afterCcf(cpu.f)
+        cpu.f = Flags.afterCcf(oldA = cpu.a, oldF = cpu.f)
         cpu.pc = (cpu.pc + 1) and 0xFFFF
         cpu.bumpR()
         cpu.tStates += baseCycles
