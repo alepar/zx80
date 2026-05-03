@@ -1,6 +1,7 @@
 package ru.alepar.zx80.op.ed
 
 import ru.alepar.zx80.cpu.Decoder
+import ru.alepar.zx80.cpu.RegPair
 
 /**
  * Registers the remaining ED-prefixed Op family into decoder.ed (and the two main-table I/O
@@ -15,6 +16,15 @@ object EdOps {
         installNeg(d)
         installReturns(d)
         installRrdRld(d)
+        installExtendedLdPair(d)
+    }
+
+    private fun installExtendedLdPair(d: Decoder) {
+        for (ppBits in 0..3) {
+            val pair = RegPair.fromBits(ppBits)
+            d.ed[0x43 or (ppBits shl 4)] = LdAddrFromPair(pair)
+            d.ed[0x4B or (ppBits shl 4)] = LdPairFromAddr(pair)
+        }
     }
 
     private fun installRegisterTransfers(d: Decoder) {
