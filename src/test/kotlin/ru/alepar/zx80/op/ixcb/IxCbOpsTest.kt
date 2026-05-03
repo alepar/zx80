@@ -60,8 +60,6 @@ class IxCbOpsTest {
         assertThat((d.ddcb[0x86] as ResIxd).mnemonic { 0 }).isEqualTo("RES 0, (IX+d)")
         assertThat((d.ddcb[0x8E] as ResIxd).mnemonic { 0 }).isEqualTo("RES 1, (IX+d)")
         assertThat((d.ddcb[0xBE] as ResIxd).mnemonic { 0 }).isEqualTo("RES 7, (IX+d)")
-        val count = (0x80..0xBF).count { d.ddcb[it] != null }
-        assertThat(count).isEqualTo(8)
     }
 
     @Test
@@ -102,6 +100,30 @@ class IxCbOpsTest {
         IxCbOps.installInto(d)
         val ddCount = (0x00..0x3F).count { d.ddcb[it] != null }
         val fdCount = (0x00..0x3F).count { d.fdcb[it] != null }
+        assertThat(ddCount).isEqualTo(64)
+        assertThat(fdCount).isEqualTo(64)
+    }
+
+    @Test
+    fun `installInto registers ResIxdCopyback at non-rrr=6 slots`() {
+        val d = Decoder()
+        IxCbOps.installInto(d)
+        // DDCB 0x80 = RES 0, (IX+d), B
+        assertThat((d.ddcb[0x80] as ResIxdCopyback).mnemonic { 0 }).isEqualTo("RES 0, (IX+d), B")
+        // DDCB 0x87 = RES 0, (IX+d), A
+        assertThat((d.ddcb[0x87] as ResIxdCopyback).mnemonic { 0 }).isEqualTo("RES 0, (IX+d), A")
+        // DDCB 0xBF = RES 7, (IX+d), A
+        assertThat((d.ddcb[0xBF] as ResIxdCopyback).mnemonic { 0 }).isEqualTo("RES 7, (IX+d), A")
+        // FDCB 0xB0 = RES 6, (IY+d), B
+        assertThat((d.fdcb[0xB0] as ResIxdCopyback).mnemonic { 0 }).isEqualTo("RES 6, (IY+d), B")
+    }
+
+    @Test
+    fun `installInto fills the entire RES block 0x80-0xBF under DDCB and FDCB`() {
+        val d = Decoder()
+        IxCbOps.installInto(d)
+        val ddCount = (0x80..0xBF).count { d.ddcb[it] != null }
+        val fdCount = (0x80..0xBF).count { d.fdcb[it] != null }
         assertThat(ddCount).isEqualTo(64)
         assertThat(fdCount).isEqualTo(64)
     }

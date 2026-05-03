@@ -21,6 +21,7 @@ object IxCbOps {
             installRotateShiftCopyback(table, idx)
             installBit(table, idx)
             installRes(table, idx)
+            installResCopyback(table, idx)
             installSet(table, idx)
         }
     }
@@ -57,6 +58,16 @@ object IxCbOps {
         for (n in 0..7) {
             val opcode = 0x80 or (n shl 3) or 0x06
             table[opcode] = ResIxd(idx, n)
+        }
+    }
+
+    private fun installResCopyback(table: Array<Op?>, idx: IndexReg) {
+        for (n in 0..7) {
+            for (rrrBits in 0..7) {
+                if (rrrBits == 6) continue
+                val opcode = 0x80 or (n shl 3) or rrrBits
+                table[opcode] = ResIxdCopyback(idx, n, Reg.fromBits(rrrBits))
+            }
         }
     }
 
