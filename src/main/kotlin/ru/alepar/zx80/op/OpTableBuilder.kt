@@ -2,6 +2,7 @@ package ru.alepar.zx80.op
 
 import ru.alepar.zx80.cpu.Decoder
 import ru.alepar.zx80.op.alu.AluOps
+import ru.alepar.zx80.op.branch.BranchOps
 import ru.alepar.zx80.op.ex.ExOps
 import ru.alepar.zx80.op.ld.LdOps
 import ru.alepar.zx80.op.misc.MiscOps
@@ -20,6 +21,7 @@ object OpTableBuilder {
         ExOps.installInto(d)
         LdOps.installInto(d)
         AluOps.installInto(d)
+        BranchOps.installInto(d)
         return d
     }
 }
