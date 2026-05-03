@@ -6,6 +6,7 @@ import ru.alepar.zx80.op.branch.BranchOps
 import ru.alepar.zx80.op.ex.ExOps
 import ru.alepar.zx80.op.ld.LdOps
 import ru.alepar.zx80.op.misc.MiscOps
+import ru.alepar.zx80.op.rot.RotOps
 import ru.alepar.zx80.op.stack.StackOps
 
 /**
@@ -24,6 +25,7 @@ object OpTableBuilder {
         AluOps.installInto(d)
         BranchOps.installInto(d)
         StackOps.installInto(d)
+        RotOps.installInto(d)
         return d
     }
 }
