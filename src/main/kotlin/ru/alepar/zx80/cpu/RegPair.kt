@@ -1,17 +1,19 @@
 package ru.alepar.zx80.cpu
 
 /**
- * The four 16-bit register pairs that LD `rr,nn` and similar opcodes can name. Uses the BC/DE/HL/SP
- * encoding (bits 4-5 of the opcode).
+ * The 16-bit register pairs that opcodes can name. The standard `rr` encoding (BC/DE/HL/SP) is used
+ * by LD `rr,nn` and similar opcodes (bits 4-5 of the opcode); see [fromBits].
  *
- * Note: PUSH/POP use a different encoding where bits=11 means AF instead of SP. That's a separate
- * concern and lives in its own factory (`fromPushPopBits`) when those opcodes land.
+ * PUSH/POP use a different encoding where bits=11 means **AF** instead of SP. The `AF` value here
+ * is only valid for those opcodes; use [fromPushPopBits] to decode it. `fromBits` (the standard
+ * encoding) does NOT return `AF`.
  */
 enum class RegPair(val mnemonic: String) {
     BC("BC"),
     DE("DE"),
     HL("HL"),
-    SP("SP");
+    SP("SP"),
+    AF("AF");
 
     fun read(cpu: Cpu): Int =
         when (this) {
@@ -19,6 +21,7 @@ enum class RegPair(val mnemonic: String) {
             DE -> cpu.de
             HL -> cpu.hl
             SP -> cpu.sp
+            AF -> cpu.af
         }
 
     fun write(cpu: Cpu, value: Int) {
@@ -28,17 +31,28 @@ enum class RegPair(val mnemonic: String) {
             DE -> cpu.de = v
             HL -> cpu.hl = v
             SP -> cpu.sp = v
+            AF -> cpu.af = v
         }
     }
 
     companion object {
-        /** Map a Z80 register-pair bit pattern (low 2 bits used) to [RegPair]. */
+        /** Standard rr encoding: 00=BC, 01=DE, 10=HL, 11=SP. Used by LD rr,nn etc. */
         fun fromBits(bits: Int): RegPair =
             when (bits and 0x03) {
                 0 -> BC
                 1 -> DE
                 2 -> HL
                 3 -> SP
+                else -> error("unreachable")
+            }
+
+        /** PUSH/POP encoding: 00=BC, 01=DE, 10=HL, 11=AF. */
+        fun fromPushPopBits(bits: Int): RegPair =
+            when (bits and 0x03) {
+                0 -> BC
+                1 -> DE
+                2 -> HL
+                3 -> AF
                 else -> error("unreachable")
             }
     }

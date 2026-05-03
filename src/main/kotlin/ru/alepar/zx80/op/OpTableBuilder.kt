@@ -6,6 +6,7 @@ import ru.alepar.zx80.op.branch.BranchOps
 import ru.alepar.zx80.op.ex.ExOps
 import ru.alepar.zx80.op.ld.LdOps
 import ru.alepar.zx80.op.misc.MiscOps
+import ru.alepar.zx80.op.stack.StackOps
 
 /**
  * Builds the populated [Decoder] for production. Per-family fragments (e.g. `MiscOps`, `ExOps`,
@@ -22,6 +23,7 @@ object OpTableBuilder {
         LdOps.installInto(d)
         AluOps.installInto(d)
         BranchOps.installInto(d)
+        StackOps.installInto(d)
         return d
     }
 }

@@ -63,4 +63,43 @@ class RegPairTest {
         assertThat(RegPair.fromBits(0xFC)).isEqualTo(RegPair.BC)
         assertThat(RegPair.fromBits(0xFD)).isEqualTo(RegPair.DE)
     }
+
+    @Test
+    fun `AF reads and writes cpu af`() {
+        val cpu =
+            Cpu().apply {
+                a = 0x12
+                f = 0x34
+            }
+        assertThat(RegPair.AF.read(cpu)).isEqualTo(0x1234)
+
+        RegPair.AF.write(cpu, 0xABCD)
+        assertThat(cpu.a).isEqualTo(0xAB)
+        assertThat(cpu.f).isEqualTo(0xCD)
+        assertThat(cpu.af).isEqualTo(0xABCD)
+    }
+
+    @Test
+    fun `AF mnemonic`() {
+        assertThat(RegPair.AF.mnemonic).isEqualTo("AF")
+    }
+
+    @Test
+    fun `fromPushPopBits maps PUSH POP bit patterns BC=0, DE=1, HL=2, AF=3`() {
+        assertThat(RegPair.fromPushPopBits(0)).isEqualTo(RegPair.BC)
+        assertThat(RegPair.fromPushPopBits(1)).isEqualTo(RegPair.DE)
+        assertThat(RegPair.fromPushPopBits(2)).isEqualTo(RegPair.HL)
+        assertThat(RegPair.fromPushPopBits(3)).isEqualTo(RegPair.AF)
+    }
+
+    @Test
+    fun `fromPushPopBits masks to lowest 2 bits`() {
+        assertThat(RegPair.fromPushPopBits(0xFC)).isEqualTo(RegPair.BC)
+        assertThat(RegPair.fromPushPopBits(0xFF)).isEqualTo(RegPair.AF)
+    }
+
+    @Test
+    fun `fromBits still maps bits=3 to SP (unchanged)`() {
+        assertThat(RegPair.fromBits(3)).isEqualTo(RegPair.SP)
+    }
 }
