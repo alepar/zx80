@@ -150,4 +150,59 @@ class IxOpsTest {
         assertThat((d.fd[0x26] as LdIxHalfImm).mnemonic { 0 }).isEqualTo("LD IYH, n")
         assertThat((d.fd[0x2E] as LdIxHalfImm).mnemonic { 0 }).isEqualTo("LD IYL, n")
     }
+
+    @Test
+    fun `installInto fills 49 entries in 0x40-0x7F under DD prefix`() {
+        val d = Decoder()
+        IxOps.installInto(d)
+        val count = (0x40..0x7F).count { d.dd[it] != null }
+        // 64 slots, minus HALT (0x76) = 63. The 14 (HL) variants in this range
+        // are already populated by Phase 2.8 as LdRegFromIxd / LdIxdFromReg, so
+        // they ARE non-null. Therefore expect 63.
+        assertThat(count).isEqualTo(63)
+    }
+
+    @Test
+    fun `installInto fills 49 entries in 0x40-0x7F under FD prefix`() {
+        val d = Decoder()
+        IxOps.installInto(d)
+        val count = (0x40..0x7F).count { d.fd[it] != null }
+        assertThat(count).isEqualTo(63)
+    }
+
+    @Test
+    fun `installInto registers half-touching LD r,r at representative DD positions`() {
+        val d = Decoder()
+        IxOps.installInto(d)
+        // DD 60 = LD IXH, B (dst=H=4, src=B=0)
+        assertThat((d.dd[0x60] as LdIxHalfFromReg).mnemonic { 0 }).isEqualTo("LD IXH, B")
+        // DD 65 = LD IXH, IXL (dst=H=4, src=L=5)
+        assertThat((d.dd[0x65] as LdIxHalfFromIxHalf).mnemonic { 0 }).isEqualTo("LD IXH, IXL")
+        // DD 6C = LD IXL, IXH (dst=L=5, src=H=4)
+        assertThat((d.dd[0x6C] as LdIxHalfFromIxHalf).mnemonic { 0 }).isEqualTo("LD IXL, IXH")
+        // DD 7C = LD A, IXH (dst=A=7, src=H=4)
+        assertThat((d.dd[0x7C] as LdRegFromIxHalf).mnemonic { 0 }).isEqualTo("LD A, IXH")
+        // DD 7D = LD A, IXL (dst=A=7, src=L=5)
+        assertThat((d.dd[0x7D] as LdRegFromIxHalf).mnemonic { 0 }).isEqualTo("LD A, IXL")
+        // DD 78 = LD A, B (no half) — LdRegRegPrefixed
+        assertThat((d.dd[0x78] as LdRegRegPrefixed).mnemonic { 0 }).isEqualTo("LD A, B")
+    }
+
+    @Test
+    fun `installInto registers half-touching LD r,r at representative FD positions`() {
+        val d = Decoder()
+        IxOps.installInto(d)
+        assertThat((d.fd[0x60] as LdIxHalfFromReg).mnemonic { 0 }).isEqualTo("LD IYH, B")
+        assertThat((d.fd[0x7C] as LdRegFromIxHalf).mnemonic { 0 }).isEqualTo("LD A, IYH")
+        assertThat((d.fd[0x65] as LdIxHalfFromIxHalf).mnemonic { 0 }).isEqualTo("LD IYH, IYL")
+        assertThat((d.fd[0x78] as LdRegRegPrefixed).mnemonic { 0 }).isEqualTo("LD A, B")
+    }
+
+    @Test
+    fun `installInto leaves DD HALT slot at 0x76 alone (it's not a valid LD pattern)`() {
+        val d = Decoder()
+        IxOps.installInto(d)
+        assertThat(d.dd[0x76]).isNull()
+        assertThat(d.fd[0x76]).isNull()
+    }
 }

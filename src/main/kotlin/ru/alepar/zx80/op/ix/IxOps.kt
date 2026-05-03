@@ -4,6 +4,7 @@ import ru.alepar.zx80.cpu.Decoder
 import ru.alepar.zx80.cpu.IndexHalfReg
 import ru.alepar.zx80.cpu.IndexReg
 import ru.alepar.zx80.cpu.Reg
+import ru.alepar.zx80.op.Op
 import ru.alepar.zx80.op.alu.AluOp
 
 /**
@@ -22,7 +23,55 @@ object IxOps {
         installAluAHalves(d)
         installIncDecHalves(d)
         installLdHalfImm(d)
+        installLdRegRegPrefixed(d)
     }
+
+    private fun installLdRegRegPrefixed(d: Decoder) {
+        // Precompute the unique LdRegRegPrefixed instances (no-half-touching patterns)
+        // and reuse across both prefixes.
+        val sharedNoHalf =
+            Array(8) { dstBits ->
+                Array<Op?>(8) { srcBits ->
+                    if (dstBits in setOf(4, 5) || srcBits in setOf(4, 5)) {
+                        null // half-touching — handled per-prefix below
+                    } else if (dstBits == 6 || srcBits == 6) {
+                        null // (IX+d) — already installed by Phase 2.8
+                    } else {
+                        LdRegRegPrefixed(src = Reg.fromBits(srcBits), dst = Reg.fromBits(dstBits))
+                    }
+                }
+            }
+
+        for (idx in IndexReg.entries) {
+            val table = if (idx == IndexReg.IX) d.dd else d.fd
+            val high = if (idx == IndexReg.IX) IndexHalfReg.IXH else IndexHalfReg.IYH
+            val low = if (idx == IndexReg.IX) IndexHalfReg.IXL else IndexHalfReg.IYL
+            for (dstBits in 0..7) {
+                for (srcBits in 0..7) {
+                    val opcode = 0x40 or (dstBits shl 3) or srcBits
+                    if (opcode == 0x76) continue // HALT
+                    if (dstBits == 6 || srcBits == 6) continue // (IX+d) — Phase 2.8
+                    val dstHalf = halfFor(dstBits, high, low)
+                    val srcHalf = halfFor(srcBits, high, low)
+                    table[opcode] =
+                        when {
+                            dstHalf != null && srcHalf != null ->
+                                LdIxHalfFromIxHalf(dstHalf, srcHalf)
+                            dstHalf != null -> LdIxHalfFromReg(dstHalf, Reg.fromBits(srcBits))
+                            srcHalf != null -> LdRegFromIxHalf(Reg.fromBits(dstBits), srcHalf)
+                            else -> sharedNoHalf[dstBits][srcBits]
+                        }
+                }
+            }
+        }
+    }
+
+    private fun halfFor(bits: Int, high: IndexHalfReg, low: IndexHalfReg): IndexHalfReg? =
+        when (bits) {
+            4 -> high
+            5 -> low
+            else -> null
+        }
 
     private fun installLdHalfImm(d: Decoder) {
         for (idx in IndexReg.entries) {
