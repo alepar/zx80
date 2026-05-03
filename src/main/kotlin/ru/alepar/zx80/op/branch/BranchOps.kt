@@ -5,14 +5,15 @@ import ru.alepar.zx80.cpu.Decoder
 
 /**
  * Registers the branch Op family (JP, JR, DJNZ, CALL, RET, RST and their conditional variants) into
- * the decoder. Called by [ru.alepar.zx80.op.OpTableBuilder]. Subsequent WUs extend this fragment
- * with the actual installations.
+ * the decoder. Called by [ru.alepar.zx80.op.OpTableBuilder].
  */
 object BranchOps {
     fun installInto(d: Decoder) {
         installJpFamily(d)
         installJrAndDjnz(d)
         installCallFamily(d)
+        installRetFamily(d)
+        installRstFamily(d)
     }
 
     private fun installJpFamily(d: Decoder) {
@@ -35,10 +36,26 @@ object BranchOps {
 
     private fun installCallFamily(d: Decoder) {
         d.main[0xCD] = CallAbs
-        // CALL cc, nn — pattern 11 ccc 100 → C4, CC, D4, DC, E4, EC, F4, FC
         for (cccBits in 0..7) {
             val opcode = 0xC4 or (cccBits shl 3)
             d.main[opcode] = CallAbsCc(cond = Condition.fromBits(cccBits))
+        }
+    }
+
+    private fun installRetFamily(d: Decoder) {
+        d.main[0xC9] = Ret
+        // RET cc — pattern 11 ccc 000 → C0, C8, D0, D8, E0, E8, F0, F8
+        for (cccBits in 0..7) {
+            val opcode = 0xC0 or (cccBits shl 3)
+            d.main[opcode] = RetCc(cond = Condition.fromBits(cccBits))
+        }
+    }
+
+    private fun installRstFamily(d: Decoder) {
+        // RST p — pattern 11 ttt 111 → C7, CF, D7, DF, E7, EF, F7, FF
+        for (tttBits in 0..7) {
+            val opcode = 0xC7 or (tttBits shl 3)
+            d.main[opcode] = Rst(target = tttBits * 8)
         }
     }
 }

@@ -72,4 +72,39 @@ class BranchOpsTest {
         assertThat((d.main[0xF4] as CallAbsCc).mnemonic { 0 }).isEqualTo("CALL P, nn")
         assertThat((d.main[0xFC] as CallAbsCc).mnemonic { 0 }).isEqualTo("CALL M, nn")
     }
+
+    @Test
+    fun `installInto registers RET at 0xC9`() {
+        val d = Decoder()
+        BranchOps.installInto(d)
+        assertThat(d.main[0xC9]).isSameAs(Ret)
+    }
+
+    @Test
+    fun `installInto registers RET cc at 0xC0 (NZ) through 0xF8 (M)`() {
+        val d = Decoder()
+        BranchOps.installInto(d)
+        assertThat((d.main[0xC0] as RetCc).mnemonic { 0 }).isEqualTo("RET NZ")
+        assertThat((d.main[0xC8] as RetCc).mnemonic { 0 }).isEqualTo("RET Z")
+        assertThat((d.main[0xD0] as RetCc).mnemonic { 0 }).isEqualTo("RET NC")
+        assertThat((d.main[0xD8] as RetCc).mnemonic { 0 }).isEqualTo("RET C")
+        assertThat((d.main[0xE0] as RetCc).mnemonic { 0 }).isEqualTo("RET PO")
+        assertThat((d.main[0xE8] as RetCc).mnemonic { 0 }).isEqualTo("RET PE")
+        assertThat((d.main[0xF0] as RetCc).mnemonic { 0 }).isEqualTo("RET P")
+        assertThat((d.main[0xF8] as RetCc).mnemonic { 0 }).isEqualTo("RET M")
+    }
+
+    @Test
+    fun `installInto registers RST p at 0xC7 (00H) through 0xFF (38H)`() {
+        val d = Decoder()
+        BranchOps.installInto(d)
+        assertThat((d.main[0xC7] as Rst).mnemonic { 0 }).isEqualTo("RST 00H")
+        assertThat((d.main[0xCF] as Rst).mnemonic { 0 }).isEqualTo("RST 08H")
+        assertThat((d.main[0xD7] as Rst).mnemonic { 0 }).isEqualTo("RST 10H")
+        assertThat((d.main[0xDF] as Rst).mnemonic { 0 }).isEqualTo("RST 18H")
+        assertThat((d.main[0xE7] as Rst).mnemonic { 0 }).isEqualTo("RST 20H")
+        assertThat((d.main[0xEF] as Rst).mnemonic { 0 }).isEqualTo("RST 28H")
+        assertThat((d.main[0xF7] as Rst).mnemonic { 0 }).isEqualTo("RST 30H")
+        assertThat((d.main[0xFF] as Rst).mnemonic { 0 }).isEqualTo("RST 38H")
+    }
 }
