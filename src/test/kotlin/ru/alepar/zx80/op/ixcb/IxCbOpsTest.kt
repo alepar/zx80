@@ -68,8 +68,6 @@ class IxCbOpsTest {
         IxCbOps.installInto(d)
         assertThat((d.fdcb[0xC6] as SetIxd).mnemonic { 0 }).isEqualTo("SET 0, (IY+d)")
         assertThat((d.fdcb[0xFE] as SetIxd).mnemonic { 0 }).isEqualTo("SET 7, (IY+d)")
-        val count = (0xC0..0xFF).count { d.fdcb[it] != null }
-        assertThat(count).isEqualTo(8)
     }
 
     @Test
@@ -126,5 +124,41 @@ class IxCbOpsTest {
         val fdCount = (0x80..0xBF).count { d.fdcb[it] != null }
         assertThat(ddCount).isEqualTo(64)
         assertThat(fdCount).isEqualTo(64)
+    }
+
+    @Test
+    fun `installInto registers SetIxdCopyback at non-rrr=6 slots`() {
+        val d = Decoder()
+        IxCbOps.installInto(d)
+        // DDCB 0xC0 = SET 0, (IX+d), B
+        assertThat((d.ddcb[0xC0] as SetIxdCopyback).mnemonic { 0 }).isEqualTo("SET 0, (IX+d), B")
+        // DDCB 0xC7 = SET 0, (IX+d), A
+        assertThat((d.ddcb[0xC7] as SetIxdCopyback).mnemonic { 0 }).isEqualTo("SET 0, (IX+d), A")
+        // DDCB 0xFF = SET 7, (IX+d), A
+        assertThat((d.ddcb[0xFF] as SetIxdCopyback).mnemonic { 0 }).isEqualTo("SET 7, (IX+d), A")
+        // FDCB 0xCF = SET 1, (IY+d), A
+        assertThat((d.fdcb[0xCF] as SetIxdCopyback).mnemonic { 0 }).isEqualTo("SET 1, (IY+d), A")
+    }
+
+    @Test
+    fun `installInto fills the entire SET block 0xC0-0xFF under DDCB and FDCB`() {
+        val d = Decoder()
+        IxCbOps.installInto(d)
+        val ddCount = (0xC0..0xFF).count { d.ddcb[it] != null }
+        val fdCount = (0xC0..0xFF).count { d.fdcb[it] != null }
+        assertThat(ddCount).isEqualTo(64)
+        assertThat(fdCount).isEqualTo(64)
+    }
+
+    @Test
+    fun `installInto fills 200 slots in DDCB and FDCB tables (BIT mirror intentionally out of scope)`() {
+        val d = Decoder()
+        IxCbOps.installInto(d)
+        // 64 (rotshift block) + 8 (BIT block — documented rrr=6 only; BIT undocumented mirror is
+        // out of scope per spec) + 64 (RES block) + 64 (SET block) = 200.
+        val ddCount = (0..255).count { d.ddcb[it] != null }
+        val fdCount = (0..255).count { d.fdcb[it] != null }
+        assertThat(ddCount).isEqualTo(200)
+        assertThat(fdCount).isEqualTo(200)
     }
 }
