@@ -45,22 +45,34 @@ class ZexdocCommand : CliktCommand(name = "zexdoc") {
         echo("PASS: all tests OK", err = true)
     }
 
-    /** Small wrapper around `System.out` so we can stream chars as ZEXDOC emits them. */
-    private class SystemOutAppendable : Appendable {
+    /**
+     * Streams chars to `System.out` as ZEXDOC emits them AND captures them into a buffer so the
+     * post-run `result.output.contains("Tests complete")` check actually has text to read.
+     */
+    internal class SystemOutAppendable : Appendable {
+        private val captured = StringBuilder()
+
         override fun append(c: Char): Appendable {
             print(c)
             System.out.flush()
+            captured.append(c)
             return this
         }
 
         override fun append(csq: CharSequence?): Appendable {
-            print(csq ?: "null")
+            val s = csq ?: "null"
+            print(s)
+            captured.append(s)
             return this
         }
 
         override fun append(csq: CharSequence?, start: Int, end: Int): Appendable {
-            print((csq ?: "null").subSequence(start, end))
+            val s = (csq ?: "null").subSequence(start, end)
+            print(s)
+            captured.append(s)
             return this
         }
+
+        override fun toString(): String = captured.toString()
     }
 }
