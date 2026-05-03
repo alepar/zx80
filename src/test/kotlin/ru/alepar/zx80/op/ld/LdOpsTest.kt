@@ -76,4 +76,14 @@ class LdOpsTest {
         LdOps.installInto(d)
         assertThat(d.main[0x36]).isSameAs(LdHlMemImm)
     }
+
+    @Test
+    fun `installInto registers LD rr, nn at 0x01, 0x11, 0x21, 0x31`() {
+        val d = Decoder()
+        LdOps.installInto(d)
+        assertThat((d.main[0x01] as LdPairImm).mnemonic { 0 }).isEqualTo("LD BC, nn")
+        assertThat((d.main[0x11] as LdPairImm).mnemonic { 0 }).isEqualTo("LD DE, nn")
+        assertThat((d.main[0x21] as LdPairImm).mnemonic { 0 }).isEqualTo("LD HL, nn")
+        assertThat((d.main[0x31] as LdPairImm).mnemonic { 0 }).isEqualTo("LD SP, nn")
+    }
 }

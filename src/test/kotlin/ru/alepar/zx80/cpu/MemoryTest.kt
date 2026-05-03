@@ -77,4 +77,40 @@ class MemoryTest {
             .isInstanceOf(IllegalArgumentException::class.java)
             .hasMessageContaining("overflows")
     }
+
+    @Test
+    fun `readWord reads little-endian 16-bit word at addr (low byte first)`() {
+        val mem =
+            Memory().apply {
+                write(0x100, 0xCD) // low
+                write(0x101, 0xAB) // high
+            }
+        assertThat(mem.readWord(0x100)).isEqualTo(0xABCD)
+    }
+
+    @Test
+    fun `readWord wraps mod 64K when addr+1 crosses 0xFFFF`() {
+        val mem =
+            Memory().apply {
+                write(0xFFFF, 0xCD)
+                write(0x0000, 0xAB)
+            }
+        assertThat(mem.readWord(0xFFFF)).isEqualTo(0xABCD)
+    }
+
+    @Test
+    fun `writeWord writes little-endian 16-bit word at addr (low byte first)`() {
+        val mem = Memory()
+        mem.writeWord(0x100, 0xABCD)
+        assertThat(mem.read(0x100)).isEqualTo(0xCD)
+        assertThat(mem.read(0x101)).isEqualTo(0xAB)
+    }
+
+    @Test
+    fun `writeWord masks value to 16 bits`() {
+        val mem = Memory()
+        mem.writeWord(0x100, 0x1ABCD)
+        assertThat(mem.read(0x100)).isEqualTo(0xCD)
+        assertThat(mem.read(0x101)).isEqualTo(0xAB)
+    }
 }

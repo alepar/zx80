@@ -2,6 +2,7 @@ package ru.alepar.zx80.op.ld
 
 import ru.alepar.zx80.cpu.Decoder
 import ru.alepar.zx80.cpu.Reg
+import ru.alepar.zx80.cpu.RegPair
 
 /**
  * Registers the LD Op family into the decoder. Called by [ru.alepar.zx80.op.OpTableBuilder].
@@ -15,6 +16,16 @@ object LdOps {
     fun installInto(d: Decoder) {
         installRegToReg(d)
         installImmediate(d)
+        installPairImmediate(d)
+    }
+
+    private fun installPairImmediate(d: Decoder) {
+        // LD rr, nn — opcode pattern: 00 pp 0001 where pp is RegPair bits.
+        // Opcodes: 0x01 (BC), 0x11 (DE), 0x21 (HL), 0x31 (SP).
+        for (pairBits in 0..3) {
+            val opcode = 0x01 or (pairBits shl 4)
+            d.main[opcode] = LdPairImm(pair = RegPair.fromBits(pairBits))
+        }
     }
 
     private fun installImmediate(d: Decoder) {

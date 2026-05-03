@@ -17,6 +17,21 @@ class Memory {
         bytes[addr and ADDR_MASK] = (value and 0xFF).toByte()
     }
 
+    /**
+     * Read a 16-bit little-endian word at `addr`. Low byte at `addr`, high byte at `addr + 1` (mod
+     * 64K). Returns Int in 0..0xFFFF.
+     */
+    fun readWord(addr: Int): Int = read(addr) or (read(addr + 1) shl 8)
+
+    /**
+     * Write a 16-bit value as little-endian. Low byte at `addr`, high byte at `addr + 1` (mod 64K).
+     * Value masked to 16 bits.
+     */
+    fun writeWord(addr: Int, value: Int) {
+        write(addr, value and 0xFF)
+        write(addr + 1, (value ushr 8) and 0xFF)
+    }
+
     fun loadAt(addr: Int, payload: ByteArray) {
         require(addr in 0..ADDR_MASK) { "load address out of range: 0x${addr.toString(16)}" }
         require(payload.size <= SIZE - addr) {
