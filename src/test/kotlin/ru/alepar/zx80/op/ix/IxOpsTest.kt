@@ -140,4 +140,14 @@ class IxOpsTest {
         assertThat((d.fd[0x2C] as IncIxHalf).mnemonic { 0 }).isEqualTo("INC IYL")
         assertThat((d.fd[0x2D] as DecIxHalf).mnemonic { 0 }).isEqualTo("DEC IYL")
     }
+
+    @Test
+    fun `installInto registers LD half,n at DD 26, DD 2E, FD 26, FD 2E`() {
+        val d = Decoder()
+        IxOps.installInto(d)
+        assertThat((d.dd[0x26] as LdIxHalfImm).mnemonic { 0 }).isEqualTo("LD IXH, n")
+        assertThat((d.dd[0x2E] as LdIxHalfImm).mnemonic { 0 }).isEqualTo("LD IXL, n")
+        assertThat((d.fd[0x26] as LdIxHalfImm).mnemonic { 0 }).isEqualTo("LD IYH, n")
+        assertThat((d.fd[0x2E] as LdIxHalfImm).mnemonic { 0 }).isEqualTo("LD IYL, n")
+    }
 }
