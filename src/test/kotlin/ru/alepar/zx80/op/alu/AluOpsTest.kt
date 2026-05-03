@@ -131,4 +131,24 @@ class AluOpsTest {
         assertThat((d.main[0x29] as AddHlPair).mnemonic { 0 }).isEqualTo("ADD HL, HL")
         assertThat((d.main[0x39] as AddHlPair).mnemonic { 0 }).isEqualTo("ADD HL, SP")
     }
+
+    @Test
+    fun `installInto registers INC rr at 0x03, 0x13, 0x23, 0x33`() {
+        val d = Decoder()
+        AluOps.installInto(d)
+        assertThat((d.main[0x03] as IncPair).mnemonic { 0 }).isEqualTo("INC BC")
+        assertThat((d.main[0x13] as IncPair).mnemonic { 0 }).isEqualTo("INC DE")
+        assertThat((d.main[0x23] as IncPair).mnemonic { 0 }).isEqualTo("INC HL")
+        assertThat((d.main[0x33] as IncPair).mnemonic { 0 }).isEqualTo("INC SP")
+    }
+
+    @Test
+    fun `installInto registers DEC rr at 0x0B, 0x1B, 0x2B, 0x3B`() {
+        val d = Decoder()
+        AluOps.installInto(d)
+        assertThat((d.main[0x0B] as DecPair).mnemonic { 0 }).isEqualTo("DEC BC")
+        assertThat((d.main[0x1B] as DecPair).mnemonic { 0 }).isEqualTo("DEC DE")
+        assertThat((d.main[0x2B] as DecPair).mnemonic { 0 }).isEqualTo("DEC HL")
+        assertThat((d.main[0x3B] as DecPair).mnemonic { 0 }).isEqualTo("DEC SP")
+    }
 }

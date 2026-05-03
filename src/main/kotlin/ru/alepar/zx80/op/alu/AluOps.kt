@@ -21,6 +21,16 @@ object AluOps {
         installInc(d)
         installDec(d)
         installAddHl(d)
+        installIncDecPair(d)
+    }
+
+    private fun installIncDecPair(d: Decoder) {
+        // INC rr — 00 dd 0011 → 0x03, 0x13, 0x23, 0x33
+        // DEC rr — 00 dd 1011 → 0x0B, 0x1B, 0x2B, 0x3B
+        for (ddBits in 0..3) {
+            d.main[0x03 or (ddBits shl 4)] = IncPair(dst = RegPair.fromBits(ddBits))
+            d.main[0x0B or (ddBits shl 4)] = DecPair(dst = RegPair.fromBits(ddBits))
+        }
     }
 
     private fun installAddHl(d: Decoder) {
