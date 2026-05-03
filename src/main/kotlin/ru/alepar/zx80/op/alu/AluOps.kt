@@ -17,6 +17,24 @@ object AluOps {
         installAluAReg(d)
         installAluAFromHl(d)
         installAluAImm(d)
+        installInc(d)
+        installDec(d)
+    }
+
+    private fun installInc(d: Decoder) {
+        // INC r — pattern 00 rrr 100 → 0x04, 0x0C, 0x14, 0x1C, 0x24, 0x2C, 0x34, 0x3C
+        for (rrrBits in 0..7) {
+            val opcode = 0x04 or (rrrBits shl 3)
+            d.main[opcode] = if (rrrBits == 6) IncHlMem else IncReg(dst = Reg.fromBits(rrrBits))
+        }
+    }
+
+    private fun installDec(d: Decoder) {
+        // DEC r — pattern 00 rrr 101 → 0x05, 0x0D, 0x15, 0x1D, 0x25, 0x2D, 0x35, 0x3D
+        for (rrrBits in 0..7) {
+            val opcode = 0x05 or (rrrBits shl 3)
+            d.main[opcode] = if (rrrBits == 6) DecHlMem else DecReg(dst = Reg.fromBits(rrrBits))
+        }
     }
 
     private fun installAluAImm(d: Decoder) {
