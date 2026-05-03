@@ -14,6 +14,18 @@ import ru.alepar.zx80.cpu.Reg
 object LdOps {
     fun installInto(d: Decoder) {
         installRegToReg(d)
+        installImmediate(d)
+    }
+
+    private fun installImmediate(d: Decoder) {
+        // LD r, n — opcode pattern: 00 rrr 110 where rrr is dst register bits.
+        // Opcodes: 0x06 (B), 0x0E (C), 0x16 (D), 0x1E (E), 0x26 (H), 0x2E (L), 0x3E (A).
+        for (dstBits in 0..7) {
+            if (dstBits == 6) continue // 0x36 = LD (HL), n, registered separately
+            val opcode = 0x06 or (dstBits shl 3)
+            d.main[opcode] = LdRegImm(dst = Reg.fromBits(dstBits))
+        }
+        d.main[0x36] = LdHlMemImm
     }
 
     private fun installRegToReg(d: Decoder) {

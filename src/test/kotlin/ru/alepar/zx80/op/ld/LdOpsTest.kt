@@ -56,4 +56,24 @@ class LdOpsTest {
         val count = (0x40..0x7F).count { d.main[it] != null }
         assertThat(count).isEqualTo(63)
     }
+
+    @Test
+    fun `installInto registers LD r, n at 0x06, 0x0E, 0x16, 0x1E, 0x26, 0x2E, 0x3E`() {
+        val d = Decoder()
+        LdOps.installInto(d)
+        assertThat((d.main[0x06] as LdRegImm).mnemonic { 0 }).isEqualTo("LD B, n")
+        assertThat((d.main[0x0E] as LdRegImm).mnemonic { 0 }).isEqualTo("LD C, n")
+        assertThat((d.main[0x16] as LdRegImm).mnemonic { 0 }).isEqualTo("LD D, n")
+        assertThat((d.main[0x1E] as LdRegImm).mnemonic { 0 }).isEqualTo("LD E, n")
+        assertThat((d.main[0x26] as LdRegImm).mnemonic { 0 }).isEqualTo("LD H, n")
+        assertThat((d.main[0x2E] as LdRegImm).mnemonic { 0 }).isEqualTo("LD L, n")
+        assertThat((d.main[0x3E] as LdRegImm).mnemonic { 0 }).isEqualTo("LD A, n")
+    }
+
+    @Test
+    fun `installInto registers LD (HL), n at 0x36`() {
+        val d = Decoder()
+        LdOps.installInto(d)
+        assertThat(d.main[0x36]).isSameAs(LdHlMemImm)
+    }
 }
