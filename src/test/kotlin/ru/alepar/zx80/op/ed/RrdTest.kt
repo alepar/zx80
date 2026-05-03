@@ -46,4 +46,19 @@ class RrdTest {
     fun `mnemonic`() {
         assertThat(Rrd.mnemonic { 0 }).isEqualTo("RRD")
     }
+
+    @Test
+    fun `RRD sets X and Y from new A bits 5 and 3`() {
+        val cpu =
+            Cpu().apply {
+                a = 0x20 // high nibble keeps; low nibble becomes m's low nibble
+                hl = 0x4000
+            }
+        val mem = Memory().apply { write(0x4000, 0x88) } // m's low nibble = 8
+        Rrd.execute(cpu, mem)
+        // new A = (0x20 & 0xF0) | (0x88 & 0x0F) = 0x28 -> X+Y
+        assertThat(cpu.a).isEqualTo(0x28)
+        assertThat(cpu.f and Flags.X).isNotZero
+        assertThat(cpu.f and Flags.Y).isNotZero
+    }
 }

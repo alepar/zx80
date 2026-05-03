@@ -24,6 +24,7 @@ object LdAR : Op {
         if (cpu.a == 0) f = f or Flags.Z
         if (cpu.a and 0x80 != 0) f = f or Flags.S
         if (cpu.iff2) f = f or Flags.PV
+        f = f or (cpu.a and 0x28) // X/Y from result
         cpu.f = f
         cpu.pc = (cpu.pc + 2) and 0xFFFF
         cpu.bumpR(2)

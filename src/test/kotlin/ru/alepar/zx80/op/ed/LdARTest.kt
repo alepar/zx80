@@ -40,4 +40,21 @@ class LdARTest {
     fun `mnemonic`() {
         assertThat(LdAR.mnemonic { 0 }).isEqualTo("LD A, R")
     }
+
+    @Test
+    fun `LD A, R sets X and Y from result A bits 5 and 3`() {
+        val cpu = Cpu().apply { r = 0x28 }
+        LdAR.execute(cpu, Memory())
+        // A is loaded from r before bumpR(2). Verify X/Y in F match A's X/Y bits
+        assertThat(cpu.f and Flags.X).isEqualTo(cpu.a and Flags.X)
+        assertThat(cpu.f and Flags.Y).isEqualTo(cpu.a and Flags.Y)
+    }
+
+    @Test
+    fun `LD A, R X and Y match the byte loaded into A`() {
+        val cpu = Cpu().apply { r = 0x07 }
+        LdAR.execute(cpu, Memory())
+        val expected = cpu.a and 0x28
+        assertThat(cpu.f and 0x28).isEqualTo(expected)
+    }
 }

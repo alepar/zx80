@@ -29,4 +29,20 @@ class RldTest {
     fun `mnemonic`() {
         assertThat(Rld.mnemonic { 0 }).isEqualTo("RLD")
     }
+
+    @Test
+    fun `RLD sets X and Y from new A bits 5 and 3`() {
+        val cpu =
+            Cpu().apply {
+                a = 0x22 // high nibble keeps after the rotate
+                hl = 0x4000
+            }
+        val mem = Memory().apply { write(0x4000, 0x88) }
+        Rld.execute(cpu, mem)
+        // RLD: new mem high nibble = old mem low; new mem low = old A low; new A low = old mem high
+        // new A = (0x22 & 0xF0) | ((0x88 >> 4) & 0xF) = 0x20 | 0x8 = 0x28 -> X+Y
+        assertThat(cpu.a).isEqualTo(0x28)
+        assertThat(cpu.f and Flags.X).isNotZero
+        assertThat(cpu.f and Flags.Y).isNotZero
+    }
 }

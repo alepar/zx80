@@ -75,4 +75,25 @@ class LdAITest {
         assertThat(LdAI.operandLength).isZero
         assertThat(LdAI.baseCycles).isEqualTo(9)
     }
+
+    @Test
+    fun `LD A, I sets X and Y from result A bits 5 and 3`() {
+        val cpu = Cpu().apply { i = 0x28 }
+        LdAI.execute(cpu, Memory())
+        // A = 0x28 -> X+Y both set
+        assertThat(cpu.f and Flags.X).isNotZero
+        assertThat(cpu.f and Flags.Y).isNotZero
+
+        val cpu2 = Cpu().apply { i = 0x20 }
+        LdAI.execute(cpu2, Memory())
+        // A = 0x20 -> only X
+        assertThat(cpu2.f and Flags.X).isNotZero
+        assertThat(cpu2.f and Flags.Y).isZero
+
+        val cpu3 = Cpu().apply { i = 0x08 }
+        LdAI.execute(cpu3, Memory())
+        // A = 0x08 -> only Y
+        assertThat(cpu3.f and Flags.X).isZero
+        assertThat(cpu3.f and Flags.Y).isNotZero
+    }
 }
