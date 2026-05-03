@@ -11,7 +11,7 @@
     "0x103": 52
   },
   "expect": {
-    "pc": 26,
+    "pc": 25,
     "halted": true,
     "a": 194,
     "memory": {

@@ -5,7 +5,7 @@
   "max_cycles": 8,
   "stop_on": "HALT",
   "expect": {
-    "pc": 1,
+    "pc": 0,
     "halted": true
   }
 }

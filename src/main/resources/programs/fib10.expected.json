@@ -5,7 +5,7 @@
   "max_cycles": 1000,
   "stop_on": "HALT",
   "expect": {
-    "pc": 17,
+    "pc": 16,
     "halted": true,
     "hl": 89,
     "memory": {

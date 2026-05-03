@@ -7,7 +7,7 @@ import ru.alepar.zx80.cpu.Memory
 
 class HaltTest {
     @Test
-    fun `Halt sets halted flag, advances pc by 1, increments r, adds 4 T-states`() {
+    fun `Halt sets halted flag, leaves pc at the HALT byte, increments r, adds 4 T-states`() {
         val cpu =
             Cpu().apply {
                 pc = 0x100
@@ -17,7 +17,8 @@ class HaltTest {
             }
         Halt.execute(cpu, Memory())
         assertThat(cpu.halted).isTrue
-        assertThat(cpu.pc).isEqualTo(0x101)
+        // Phase F: real Z80 leaves PC at the HALT byte; INT acknowledge advances PC past HALT.
+        assertThat(cpu.pc).isEqualTo(0x100)
         assertThat(cpu.r).isEqualTo(1)
         assertThat(cpu.tStates).isEqualTo(4L)
     }

@@ -11,7 +11,7 @@
     "0x103": 2
   },
   "expect": {
-    "pc": 25,
+    "pc": 24,
     "halted": true,
     "memory": {
       "0x100": 1,

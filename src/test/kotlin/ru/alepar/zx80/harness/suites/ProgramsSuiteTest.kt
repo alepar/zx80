@@ -169,7 +169,8 @@ class ProgramsSuiteTest {
                 load_at = 0,
                 entry = 0,
                 max_cycles = 8L,
-                expect = ExpectedState(pc = 1, halted = true),
+                // Phase F: HALT leaves PC at the HALT byte (Z80 hardware behavior).
+                expect = ExpectedState(pc = 0, halted = true),
             )
         val decoder = OpTableBuilder.build()
         val suite = ProgramsSuite(decoder, listOf(ProgramFixture(bytes, exp)))

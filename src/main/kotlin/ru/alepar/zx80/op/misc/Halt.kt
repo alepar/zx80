@@ -11,9 +11,11 @@ object Halt : Op {
 
     override fun execute(cpu: Cpu, mem: Memory) {
         cpu.halted = true
-        cpu.pc = (cpu.pc + 1) and 0xFFFF
         cpu.bumpR()
         cpu.tStates += baseCycles
+        // Phase F: Z80 hardware leaves PC at the HALT byte during halted state. The dispatcher's
+        // !cpu.halted guard prevents re-execution; on INT acknowledge, the interrupt mechanism is
+        // responsible for advancing PC past the HALT.
     }
 
     override fun mnemonic(operands: OperandFetcher) = "HALT"
