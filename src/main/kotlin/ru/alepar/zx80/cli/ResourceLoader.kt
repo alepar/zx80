@@ -27,7 +27,7 @@ object ResourceLoader {
             ProgramFixture(bytes = bytes, expectation = exp)
         }
 
-    private val PROGRAM_NAMES = listOf("nop_loop") // expand as we add programs
+    private val PROGRAM_NAMES = listOf("nop_loop", "fib10")
 
     private fun classpathLines(path: String): Sequence<String> {
         // Eagerly read all lines, then expose as a sequence: the underlying stream
