@@ -18,6 +18,8 @@ object IxCbOps {
             val table = if (idx == IndexReg.IX) d.ddcb else d.fdcb
             installRotateShift(table, idx)
             installBit(table, idx)
+            installRes(table, idx)
+            installSet(table, idx)
         }
     }
 
@@ -34,6 +36,20 @@ object IxCbOps {
         for (n in 0..7) {
             val opcode = 0x40 or (n shl 3) or 0x06
             table[opcode] = BitIxd(idx, n)
+        }
+    }
+
+    private fun installRes(table: Array<Op?>, idx: IndexReg) {
+        for (n in 0..7) {
+            val opcode = 0x80 or (n shl 3) or 0x06
+            table[opcode] = ResIxd(idx, n)
+        }
+    }
+
+    private fun installSet(table: Array<Op?>, idx: IndexReg) {
+        for (n in 0..7) {
+            val opcode = 0xC0 or (n shl 3) or 0x06
+            table[opcode] = SetIxd(idx, n)
         }
     }
 }

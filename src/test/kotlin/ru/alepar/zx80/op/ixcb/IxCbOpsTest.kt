@@ -79,4 +79,35 @@ class IxCbOpsTest {
         val ddcbBitCount = (0x40..0x7F).count { d.ddcb[it] != null }
         assertThat(ddcbBitCount).isEqualTo(8)
     }
+
+    @Test
+    fun `installInto registers RES n (IX+d) at DDCB 0x86 to 0xBE`() {
+        val d = Decoder()
+        IxCbOps.installInto(d)
+        assertThat((d.ddcb[0x86] as ResIxd).mnemonic { 0 }).isEqualTo("RES 0, (IX+d)")
+        assertThat((d.ddcb[0x8E] as ResIxd).mnemonic { 0 }).isEqualTo("RES 1, (IX+d)")
+        assertThat((d.ddcb[0xBE] as ResIxd).mnemonic { 0 }).isEqualTo("RES 7, (IX+d)")
+        val count = (0x80..0xBF).count { d.ddcb[it] != null }
+        assertThat(count).isEqualTo(8)
+    }
+
+    @Test
+    fun `installInto registers SET n (IY+d) at FDCB 0xC6 to 0xFE`() {
+        val d = Decoder()
+        IxCbOps.installInto(d)
+        assertThat((d.fdcb[0xC6] as SetIxd).mnemonic { 0 }).isEqualTo("SET 0, (IY+d)")
+        assertThat((d.fdcb[0xFE] as SetIxd).mnemonic { 0 }).isEqualTo("SET 7, (IY+d)")
+        val count = (0xC0..0xFF).count { d.fdcb[it] != null }
+        assertThat(count).isEqualTo(8)
+    }
+
+    @Test
+    fun `installInto fills exactly 31 documented opcodes per index, 62 total`() {
+        val d = Decoder()
+        IxCbOps.installInto(d)
+        val ddcbCount = d.ddcb.count { it != null }
+        val fdcbCount = d.fdcb.count { it != null }
+        assertThat(ddcbCount).isEqualTo(31)
+        assertThat(fdcbCount).isEqualTo(31)
+    }
 }
