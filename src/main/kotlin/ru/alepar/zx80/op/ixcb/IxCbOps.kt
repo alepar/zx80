@@ -17,6 +17,7 @@ object IxCbOps {
         for (idx in IndexReg.entries) {
             val table = if (idx == IndexReg.IX) d.ddcb else d.fdcb
             installRotateShift(table, idx)
+            installBit(table, idx)
         }
     }
 
@@ -26,6 +27,13 @@ object IxCbOps {
             val op = RotateOp.fromBits(oooBits)
             val opcode = (oooBits shl 3) or 0x06
             table[opcode] = RotShiftIxd(idx, op)
+        }
+    }
+
+    private fun installBit(table: Array<Op?>, idx: IndexReg) {
+        for (n in 0..7) {
+            val opcode = 0x40 or (n shl 3) or 0x06
+            table[opcode] = BitIxd(idx, n)
         }
     }
 }

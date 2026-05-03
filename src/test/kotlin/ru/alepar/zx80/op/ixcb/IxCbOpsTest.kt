@@ -53,4 +53,30 @@ class IxCbOpsTest {
         assertThat(ddcbRotShiftCount).isEqualTo(7)
         assertThat(fdcbRotShiftCount).isEqualTo(7)
     }
+
+    @Test
+    fun `installInto registers BIT n (IX+d) at DDCB 0x46 0x4E 0x56 to 0x7E`() {
+        val d = Decoder()
+        IxCbOps.installInto(d)
+        assertThat((d.ddcb[0x46] as BitIxd).mnemonic { 0 }).isEqualTo("BIT 0, (IX+d)")
+        assertThat((d.ddcb[0x4E] as BitIxd).mnemonic { 0 }).isEqualTo("BIT 1, (IX+d)")
+        assertThat((d.ddcb[0x76] as BitIxd).mnemonic { 0 }).isEqualTo("BIT 6, (IX+d)")
+        assertThat((d.ddcb[0x7E] as BitIxd).mnemonic { 0 }).isEqualTo("BIT 7, (IX+d)")
+    }
+
+    @Test
+    fun `installInto registers BIT n (IY+d) at FDCB 0x46 to 0x7E`() {
+        val d = Decoder()
+        IxCbOps.installInto(d)
+        assertThat((d.fdcb[0x46] as BitIxd).mnemonic { 0 }).isEqualTo("BIT 0, (IY+d)")
+        assertThat((d.fdcb[0x7E] as BitIxd).mnemonic { 0 }).isEqualTo("BIT 7, (IY+d)")
+    }
+
+    @Test
+    fun `installInto registers exactly 8 BIT opcodes per index in DDCB 0x40 to 0x7F`() {
+        val d = Decoder()
+        IxCbOps.installInto(d)
+        val ddcbBitCount = (0x40..0x7F).count { d.ddcb[it] != null }
+        assertThat(ddcbBitCount).isEqualTo(8)
+    }
 }
