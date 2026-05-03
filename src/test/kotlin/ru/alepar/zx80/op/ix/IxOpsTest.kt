@@ -61,4 +61,27 @@ class IxOpsTest {
         assertThat((d.fd[0x77] as LdIxdFromReg).mnemonic { 0 }).isEqualTo("LD (IY+d), A")
         assertThat(d.fd[0x76]).isNull()
     }
+
+    @Test
+    fun `installInto registers LD (IX+d) n at DD 0x36`() {
+        val d = Decoder()
+        IxOps.installInto(d)
+        assertThat((d.dd[0x36] as LdIxdImm).mnemonic { 0 }).isEqualTo("LD (IX+d), n")
+    }
+
+    @Test
+    fun `installInto registers ALU A,(IX+d) at DD 0x86 and 0xBE`() {
+        val d = Decoder()
+        IxOps.installInto(d)
+        assertThat((d.dd[0x86] as AluAFromIxd).mnemonic { 0 }).isEqualTo("ADD A, (IX+d)")
+        assertThat((d.dd[0xBE] as AluAFromIxd).mnemonic { 0 }).isEqualTo("CP A, (IX+d)")
+    }
+
+    @Test
+    fun `installInto registers INC (IX+d) at DD 0x34 and DEC (IY+d) at FD 0x35`() {
+        val d = Decoder()
+        IxOps.installInto(d)
+        assertThat((d.dd[0x34] as IncIxd).mnemonic { 0 }).isEqualTo("INC (IX+d)")
+        assertThat((d.fd[0x35] as DecIxd).mnemonic { 0 }).isEqualTo("DEC (IY+d)")
+    }
 }

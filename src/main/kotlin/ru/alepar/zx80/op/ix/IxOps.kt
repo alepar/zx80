@@ -3,6 +3,7 @@ package ru.alepar.zx80.op.ix
 import ru.alepar.zx80.cpu.Decoder
 import ru.alepar.zx80.cpu.IndexReg
 import ru.alepar.zx80.cpu.Reg
+import ru.alepar.zx80.op.alu.AluOp
 
 /**
  * Registers the DD/FD-prefixed (IX/IY) Op family into decoder.dd and decoder.fd. Also registers the
@@ -13,6 +14,9 @@ object IxOps {
         installLdSpHlStraggler(d)
         installPairTouching(d)
         installIndexedLd(d)
+        installIndexedLdImm(d)
+        installIndexedAlu(d)
+        installIndexedIncDec(d)
     }
 
     private fun installLdSpHlStraggler(d: Decoder) {
@@ -47,6 +51,31 @@ object IxOps {
                 table[0x46 or (rrrBits shl 3)] = LdRegFromIxd(idx, dst = Reg.fromBits(rrrBits))
                 table[0x70 or rrrBits] = LdIxdFromReg(idx, src = Reg.fromBits(rrrBits))
             }
+        }
+    }
+
+    private fun installIndexedLdImm(d: Decoder) {
+        for (idx in IndexReg.entries) {
+            val table = if (idx == IndexReg.IX) d.dd else d.fd
+            table[0x36] = LdIxdImm(idx)
+        }
+    }
+
+    private fun installIndexedAlu(d: Decoder) {
+        for (idx in IndexReg.entries) {
+            val table = if (idx == IndexReg.IX) d.dd else d.fd
+            for (oooBits in 0..7) {
+                val opcode = 0x86 or (oooBits shl 3)
+                table[opcode] = AluAFromIxd(idx, op = AluOp.fromBits(oooBits))
+            }
+        }
+    }
+
+    private fun installIndexedIncDec(d: Decoder) {
+        for (idx in IndexReg.entries) {
+            val table = if (idx == IndexReg.IX) d.dd else d.fd
+            table[0x34] = IncIxd(idx)
+            table[0x35] = DecIxd(idx)
         }
     }
 }
