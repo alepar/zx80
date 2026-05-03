@@ -37,11 +37,18 @@ data class FuseInputCase(
 )
 
 /**
+ * A `PR` (port read) event from a FUSE expected file. Ordered by T-state offset within the test;
+ * the FUSE harness will pop these in order from a `QueueIoBus` to satisfy `IN`/`INI` etc.
+ */
+data class PortRead(val port: Int, val byte: Int)
+
+/**
  * Expected post-instruction state (from `tests.expected`).
  *
  * Same shape as the input case, except that:
- * - The state line is preceded by zero or more event lines (lines starting with whitespace) that we
- *   ignore.
+ * - The state line is preceded by zero or more event lines (lines starting with whitespace). PR
+ *   (port read) events are captured into [portReads]; all other event types (MC, MR, MW, PW, ...)
+ *   are ignored.
  * - The memory section has zero or one block `addr byte... -1` and is NOT followed by a standalone
  *   `-1` terminator — a blank line (or EOF) marks end of the test.
  */
@@ -68,6 +75,7 @@ data class FuseExpectedCase(
     val halted: Boolean,
     val tStatesAfter: Int,
     val memory: List<Pair<Int, ByteArray>>,
+    val portReads: List<PortRead> = emptyList(),
 )
 
 object FuseTestParser {
@@ -120,8 +128,10 @@ object FuseTestParser {
         val result = mutableListOf<FuseExpectedCase>()
         while (true) {
             val name = it.nextNonBlankOrNull() ?: break
+            val portReads = mutableListOf<PortRead>()
             val stateLine =
-                it.skipEventsAndNext() ?: error("missing state line for '$name' in tests.expected")
+                it.collectEventsAndNext(portReads)
+                    ?: error("missing state line for '$name' in tests.expected")
             val regs = stateLine.splitTokens(STATE_TOKEN_COUNT, name)
             val ctrl =
                 it.nextRequired("control line for '$name'").splitTokens(CONTROL_TOKEN_COUNT, name)
@@ -150,6 +160,7 @@ object FuseTestParser {
                     halted = ctrl[5] == "1",
                     tStatesAfter = ctrl[6].toInt(),
                     memory = mem,
+                    portReads = portReads.toList(),
                 )
             )
         }
@@ -205,12 +216,23 @@ object FuseTestParser {
         return next()
     }
 
-    /** Skip event lines (start with whitespace) and return the next non-event, non-blank line. */
-    private fun Iterator<String>.skipEventsAndNext(): String? {
+    /**
+     * Walk event lines (start with whitespace) capturing any `PR` (port read) events into [sink],
+     * and return the next non-event, non-blank line (the state line). Other event types (MC, MR,
+     * MW, PW, etc.) are ignored. Format of a PR line is `<tstate> PR <port> <byte>` after trim;
+     * port and byte are hex.
+     */
+    private fun Iterator<String>.collectEventsAndNext(sink: MutableList<PortRead>): String? {
         while (hasNext()) {
             val line = next()
             if (line.isBlank()) continue
-            if (line.startsWith(' ') || line.startsWith('\t')) continue
+            if (line.startsWith(' ') || line.startsWith('\t')) {
+                val parts = line.trim().split(Regex("\\s+"))
+                if (parts.size >= 4 && parts[1] == "PR") {
+                    sink.add(PortRead(port = parts[2].toInt(16), byte = parts[3].toInt(16)))
+                }
+                continue
+            }
             return line
         }
         return null

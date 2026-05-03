@@ -10,6 +10,7 @@ import ru.alepar.zx80.cpu.Memory
 import ru.alepar.zx80.harness.SuiteResult
 import ru.alepar.zx80.harness.fuse.FuseExpectedCase
 import ru.alepar.zx80.harness.fuse.FuseInputCase
+import ru.alepar.zx80.harness.io.QueueIoBus
 
 /**
  * Runs every FUSE test case against the configured Decoder, reporting pass/fail by exact CPU +
@@ -63,6 +64,9 @@ class FuseSuite(
     /** Execute one case. Returns null on pass, or a short description on fail. */
     private fun runOne(input: FuseInputCase, want: FuseExpectedCase): String? {
         val cpu = Cpu().apply { loadFrom(input) }
+        // Phase F: drive cpu.io from the per-test PR (port-read) events. The default NoIoBus
+        // returns 0xFF, which causes IN/INI/etc. to fail the FUSE flag/result comparisons.
+        cpu.io = QueueIoBus(want.portReads)
         val mem =
             Memory().apply {
                 for ((addr, bytes) in input.memory) {

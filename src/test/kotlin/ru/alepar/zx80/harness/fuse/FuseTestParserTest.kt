@@ -217,6 +217,64 @@ class FuseTestParserTest {
     }
 
     @Test
+    fun `parseExpected captures PR events with port and byte`() {
+        val src =
+            """
+            bigtest
+                0 MC 0000
+                4 MR 0000 DB
+                8 MC 0001
+               12 MR 0001 04
+               16 PR 4204 99
+            0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0002 0000
+            00 02 0 0 0 0 11
+            """
+                .trimIndent()
+        val cases = FuseTestParser.parseExpected(src.lineSequence())
+        assertThat(cases).hasSize(1)
+        val case = cases[0]
+        assertThat(case.name).isEqualTo("bigtest")
+        assertThat(case.portReads).hasSize(1)
+        assertThat(case.portReads[0].port).isEqualTo(0x4204)
+        assertThat(case.portReads[0].byte).isEqualTo(0x99)
+    }
+
+    @Test
+    fun `parseExpected captures multiple PR events in order`() {
+        val src =
+            """
+            multipr
+                0 PR 0001 11
+                4 PR 0002 22
+                8 PR 0003 33
+            0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0001 0000
+            00 01 0 0 0 0 4
+            """
+                .trimIndent()
+        val case = FuseTestParser.parseExpected(src.lineSequence()).single()
+        assertThat(case.portReads).hasSize(3)
+        assertThat(case.portReads[0].port).isEqualTo(0x0001)
+        assertThat(case.portReads[0].byte).isEqualTo(0x11)
+        assertThat(case.portReads[2].port).isEqualTo(0x0003)
+        assertThat(case.portReads[2].byte).isEqualTo(0x33)
+    }
+
+    @Test
+    fun `parseExpected returns empty portReads when no PR events`() {
+        val src =
+            """
+            nopr
+                0 MC 0000
+                4 MR 0000 00
+            0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0001 0000
+            00 01 0 0 0 0 4
+            """
+                .trimIndent()
+        val case = FuseTestParser.parseExpected(src.lineSequence()).single()
+        assertThat(case.portReads).isEmpty()
+    }
+
+    @Test
     fun `parses the entire vendored tests_in file`() {
         val resource =
             requireNotNull(this::class.java.getResourceAsStream("/fuse/tests.in")) {
