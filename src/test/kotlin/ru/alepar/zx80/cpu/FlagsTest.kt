@@ -275,4 +275,112 @@ class FlagsTest {
         assertThat(r.newF and Flags.H).isNotZero
         assertThat(r.newF and Flags.C).isZero
     }
+
+    @Test
+    fun `afterAddWord 0x1234 + 0x5678 with no carry`() {
+        val r = Flags.afterAddWord(0x1234, 0x5678, oldF = 0)
+        assertThat(r.value).isEqualTo(0x68AC)
+        assertThat(r.newF and Flags.N).isZero
+        assertThat(r.newF and Flags.C).isZero
+        assertThat(r.newF and Flags.H).isZero
+    }
+
+    @Test
+    fun `afterAddWord half-carry boundary 0x0FFF + 0x0001 sets H`() {
+        val r = Flags.afterAddWord(0x0FFF, 0x0001, oldF = 0)
+        assertThat(r.value).isEqualTo(0x1000)
+        assertThat(r.newF and Flags.H).isNotZero
+        assertThat(r.newF and Flags.C).isZero
+    }
+
+    @Test
+    fun `afterAddWord carry boundary 0xFFFF + 0x0001 wraps and sets C`() {
+        val r = Flags.afterAddWord(0xFFFF, 0x0001, oldF = 0)
+        assertThat(r.value).isZero
+        assertThat(r.newF and Flags.C).isNotZero
+        assertThat(r.newF and Flags.H).isNotZero
+    }
+
+    @Test
+    fun `afterAddWord preserves S, Z, PV from oldF`() {
+        val oldF = Flags.S or Flags.Z or Flags.PV or Flags.C
+        val r = Flags.afterAddWord(0x1234, 0x0001, oldF)
+        assertThat(r.newF and Flags.S).isNotZero
+        assertThat(r.newF and Flags.Z).isNotZero
+        assertThat(r.newF and Flags.PV).isNotZero
+        assertThat(r.newF and Flags.C).isZero
+        assertThat(r.newF and Flags.N).isZero
+    }
+
+    @Test
+    fun `afterAdcWord 0x0001 + 0x0001 + carry=1 = 0x0003, all flag categories computed`() {
+        val r = Flags.afterAdcWord(0x0001, 0x0001, oldF = Flags.C)
+        assertThat(r.value).isEqualTo(0x0003)
+        assertThat(r.newF and Flags.S).isZero
+        assertThat(r.newF and Flags.Z).isZero
+        assertThat(r.newF and Flags.N).isZero
+        assertThat(r.newF and Flags.C).isZero
+    }
+
+    @Test
+    fun `afterAdcWord half-carry from bit 11`() {
+        val r = Flags.afterAdcWord(0x0FFE, 0x0001, oldF = Flags.C)
+        assertThat(r.value).isEqualTo(0x1000)
+        assertThat(r.newF and Flags.H).isNotZero
+    }
+
+    @Test
+    fun `afterAdcWord overflow at 0x7FFF + 0x0001 sets V and S`() {
+        val r = Flags.afterAdcWord(0x7FFF, 0x0001, oldF = 0)
+        assertThat(r.value).isEqualTo(0x8000)
+        assertThat(r.newF and Flags.PV).isNotZero
+        assertThat(r.newF and Flags.S).isNotZero
+    }
+
+    @Test
+    fun `afterAdcWord zero result with carry-out`() {
+        val r = Flags.afterAdcWord(0xFFFF, 0x0001, oldF = 0)
+        assertThat(r.value).isZero
+        assertThat(r.newF and Flags.Z).isNotZero
+        assertThat(r.newF and Flags.C).isNotZero
+    }
+
+    @Test
+    fun `afterSbcWord 0x0005 - 0x0002 - borrow=0`() {
+        val r = Flags.afterSbcWord(0x0005, 0x0002, oldF = 0)
+        assertThat(r.value).isEqualTo(0x0003)
+        assertThat(r.newF and Flags.N).isNotZero
+        assertThat(r.newF and Flags.C).isZero
+    }
+
+    @Test
+    fun `afterSbcWord folds in borrow-in`() {
+        val r = Flags.afterSbcWord(0x0005, 0x0002, oldF = Flags.C)
+        assertThat(r.value).isEqualTo(0x0002)
+    }
+
+    @Test
+    fun `afterSbcWord borrow at 0x0000 - 0x0001 wraps to 0xFFFF, sets C, S, H`() {
+        val r = Flags.afterSbcWord(0x0000, 0x0001, oldF = 0)
+        assertThat(r.value).isEqualTo(0xFFFF)
+        assertThat(r.newF and Flags.C).isNotZero
+        assertThat(r.newF and Flags.S).isNotZero
+        assertThat(r.newF and Flags.H).isNotZero
+    }
+
+    @Test
+    fun `afterSbcWord overflow 0x8000 - 0x0001 sets V`() {
+        val r = Flags.afterSbcWord(0x8000, 0x0001, oldF = 0)
+        assertThat(r.value).isEqualTo(0x7FFF)
+        assertThat(r.newF and Flags.PV).isNotZero
+        assertThat(r.newF and Flags.S).isZero
+    }
+
+    @Test
+    fun `afterSbcWord equal operands sets Z`() {
+        val r = Flags.afterSbcWord(0x1234, 0x1234, oldF = 0)
+        assertThat(r.value).isZero
+        assertThat(r.newF and Flags.Z).isNotZero
+        assertThat(r.newF and Flags.N).isNotZero
+    }
 }

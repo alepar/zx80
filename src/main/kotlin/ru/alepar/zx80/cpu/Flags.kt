@@ -152,4 +152,64 @@ object Flags {
         if (v8 == 0x80) f = f or PV
         return AluResult(result, f)
     }
+
+    /**
+     * 16-bit ADD: a + b. Only H, N, C are computed; S, Z, P/V are PRESERVED from oldF. (Unique to
+     * ADD HL,rr; ADC/SBC HL,rr compute all flags.)
+     * - H = carry from bit 11 (i.e. (a & 0x0FFF) + (b & 0x0FFF) > 0x0FFF).
+     * - N = 0.
+     * - C = sum > 0xFFFF.
+     */
+    fun afterAddWord(a: Int, b: Int, oldF: Int): AluResult {
+        val sum = a + b
+        val value = sum and 0xFFFF
+        var f = oldF and (S or Z or PV) // preserve these
+        if ((a and 0x0FFF) + (b and 0x0FFF) > 0x0FFF) f = f or H
+        if (sum > 0xFFFF) f = f or C
+        return AluResult(value, f)
+    }
+
+    /**
+     * 16-bit ADC: a + b + carry. ALL flags computed.
+     * - S = bit 15 of result.
+     * - Z = result == 0.
+     * - H = carry from bit 11 (with carry-in folded).
+     * - P/V = signed overflow at bit 15.
+     * - N = 0.
+     * - C = sum > 0xFFFF.
+     */
+    fun afterAdcWord(a: Int, b: Int, oldF: Int): AluResult {
+        val carry = if (oldF and C != 0) 1 else 0
+        val sum = a + b + carry
+        val value = sum and 0xFFFF
+        var f = 0
+        if (value == 0) f = f or Z
+        if (value and 0x8000 != 0) f = f or S
+        if ((a and 0x0FFF) + (b and 0x0FFF) + carry > 0x0FFF) f = f or H
+        if ((a xor b) and 0x8000 == 0 && (a xor value) and 0x8000 != 0) f = f or PV
+        if (sum > 0xFFFF) f = f or C
+        return AluResult(value, f)
+    }
+
+    /**
+     * 16-bit SBC: a - b - borrow. ALL flags computed.
+     * - S = bit 15 of result.
+     * - Z = result == 0.
+     * - H = borrow from bit 12 (with borrow-in folded).
+     * - P/V = signed overflow.
+     * - N = 1.
+     * - C = a - b - borrow < 0.
+     */
+    fun afterSbcWord(a: Int, b: Int, oldF: Int): AluResult {
+        val borrow = if (oldF and C != 0) 1 else 0
+        val diff = a - b - borrow
+        val value = diff and 0xFFFF
+        var f = N
+        if (value == 0) f = f or Z
+        if (value and 0x8000 != 0) f = f or S
+        if ((a and 0x0FFF) - (b and 0x0FFF) - borrow < 0) f = f or H
+        if ((a xor b) and 0x8000 != 0 && (a xor value) and 0x8000 != 0) f = f or PV
+        if (diff < 0) f = f or C
+        return AluResult(value, f)
+    }
 }
