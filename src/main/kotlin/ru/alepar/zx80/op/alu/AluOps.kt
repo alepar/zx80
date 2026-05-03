@@ -15,6 +15,15 @@ import ru.alepar.zx80.cpu.Reg
 object AluOps {
     fun installInto(d: Decoder) {
         installAluAReg(d)
+        installAluAFromHl(d)
+    }
+
+    private fun installAluAFromHl(d: Decoder) {
+        // ALU A,(HL) — opcode pattern 10 ooo 110 → 0x86, 0x8E, 0x96, 0x9E, 0xA6, 0xAE, 0xB6, 0xBE
+        for (oooBits in 0..7) {
+            val opcode = 0x80 or (oooBits shl 3) or 0x06
+            d.main[opcode] = AluAFromHl(op = AluOp.fromBits(oooBits))
+        }
     }
 
     private fun installAluAReg(d: Decoder) {

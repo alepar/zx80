@@ -53,4 +53,18 @@ class AluOpsTest {
         val count = (0x80..0xBF).count { d.main[it] is AluAReg }
         assertThat(count).isEqualTo(56)
     }
+
+    @Test
+    fun `installInto registers ALU A,(HL) at 0x86, 0x8E, 0x96, 0x9E, 0xA6, 0xAE, 0xB6, 0xBE`() {
+        val d = Decoder()
+        AluOps.installInto(d)
+        assertThat((d.main[0x86] as AluAFromHl).mnemonic { 0 }).isEqualTo("ADD A, (HL)")
+        assertThat((d.main[0x8E] as AluAFromHl).mnemonic { 0 }).isEqualTo("ADC A, (HL)")
+        assertThat((d.main[0x96] as AluAFromHl).mnemonic { 0 }).isEqualTo("SUB A, (HL)")
+        assertThat((d.main[0x9E] as AluAFromHl).mnemonic { 0 }).isEqualTo("SBC A, (HL)")
+        assertThat((d.main[0xA6] as AluAFromHl).mnemonic { 0 }).isEqualTo("AND A, (HL)")
+        assertThat((d.main[0xAE] as AluAFromHl).mnemonic { 0 }).isEqualTo("XOR A, (HL)")
+        assertThat((d.main[0xB6] as AluAFromHl).mnemonic { 0 }).isEqualTo("OR A, (HL)")
+        assertThat((d.main[0xBE] as AluAFromHl).mnemonic { 0 }).isEqualTo("CP A, (HL)")
+    }
 }
