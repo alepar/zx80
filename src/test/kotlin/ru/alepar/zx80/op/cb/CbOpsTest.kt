@@ -7,6 +7,8 @@ import ru.alepar.zx80.op.bit.BitHl
 import ru.alepar.zx80.op.bit.BitReg
 import ru.alepar.zx80.op.bit.ResHl
 import ru.alepar.zx80.op.bit.ResReg
+import ru.alepar.zx80.op.bit.SetHl
+import ru.alepar.zx80.op.bit.SetReg
 import ru.alepar.zx80.op.rot.RotShiftHl
 import ru.alepar.zx80.op.rot.RotShiftReg
 
@@ -71,5 +73,28 @@ class CbOpsTest {
 
         val count = (0x80..0xBF).count { d.cb[it] != null }
         assertThat(count).isEqualTo(64)
+    }
+
+    @Test
+    fun `installInto registers SET n,r at CB 0xC0 to 0xFF (64 opcodes)`() {
+        val d = Decoder()
+        CbOps.installInto(d)
+        assertThat((d.cb[0xC0] as SetReg).mnemonic { 0 }).isEqualTo("SET 0, B")
+        assertThat((d.cb[0xC6] as SetHl).mnemonic { 0 }).isEqualTo("SET 0, (HL)")
+        assertThat((d.cb[0xC7] as SetReg).mnemonic { 0 }).isEqualTo("SET 0, A")
+        assertThat((d.cb[0xF8] as SetReg).mnemonic { 0 }).isEqualTo("SET 7, B")
+        assertThat((d.cb[0xFE] as SetHl).mnemonic { 0 }).isEqualTo("SET 7, (HL)")
+        assertThat((d.cb[0xFF] as SetReg).mnemonic { 0 }).isEqualTo("SET 7, A")
+
+        val count = (0xC0..0xFF).count { d.cb[it] != null }
+        assertThat(count).isEqualTo(64)
+    }
+
+    @Test
+    fun `installInto fills 248 documented CB opcodes (256 minus 8 SLL slots)`() {
+        val d = Decoder()
+        CbOps.installInto(d)
+        val total = d.cb.count { it != null }
+        assertThat(total).isEqualTo(248)
     }
 }
