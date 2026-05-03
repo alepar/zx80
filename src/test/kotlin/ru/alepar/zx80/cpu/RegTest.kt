@@ -1,6 +1,7 @@
 package ru.alepar.zx80.cpu
 
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 
 class RegTest {
@@ -63,5 +64,29 @@ class RegTest {
         assertThat(Reg.H.mnemonic).isEqualTo("H")
         assertThat(Reg.L.mnemonic).isEqualTo("L")
         assertThat(Reg.A.mnemonic).isEqualTo("A")
+    }
+
+    @Test
+    fun `fromBits maps Z80 r-field bit patterns to Reg`() {
+        assertThat(Reg.fromBits(0)).isEqualTo(Reg.B)
+        assertThat(Reg.fromBits(1)).isEqualTo(Reg.C)
+        assertThat(Reg.fromBits(2)).isEqualTo(Reg.D)
+        assertThat(Reg.fromBits(3)).isEqualTo(Reg.E)
+        assertThat(Reg.fromBits(4)).isEqualTo(Reg.H)
+        assertThat(Reg.fromBits(5)).isEqualTo(Reg.L)
+        assertThat(Reg.fromBits(7)).isEqualTo(Reg.A)
+    }
+
+    @Test
+    fun `fromBits rejects bits=6 because (HL) is not a register`() {
+        assertThatThrownBy { Reg.fromBits(6) }
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessageContaining("(HL)")
+    }
+
+    @Test
+    fun `fromBits rejects bits outside 0 to 7`() {
+        assertThatThrownBy { Reg.fromBits(8) }.isInstanceOf(IllegalArgumentException::class.java)
+        assertThatThrownBy { Reg.fromBits(-1) }.isInstanceOf(IllegalArgumentException::class.java)
     }
 }

@@ -8,7 +8,14 @@ import ru.alepar.zx80.cpu.Memory
  * is responsible for advancing PC, incrementing `r`, accumulating T-states, and updating flags.
  */
 interface Op {
-    /** Bytes after the opcode byte that this instruction consumes (n, nn, d). */
+    /**
+     * Bytes after the opcode byte (and any prefixes) that this instruction consumes — the operand
+     * bytes (n, nn, d). Informational metadata; not read by the runtime today, but reserved for
+     * future disassembler use.
+     *
+     * Each Op is responsible for advancing PC inside `execute()` by `1 + prefixBytes +
+     * operandLength`.
+     */
     val operandLength: Int
 
     /**

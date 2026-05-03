@@ -38,4 +38,26 @@ enum class Reg(val mnemonic: String) {
             A -> cpu.a = v
         }
     }
+
+    companion object {
+        /**
+         * Map a Z80 r-field bit pattern (0..7) to the corresponding [Reg]. Bits=6 means `(HL)` — a
+         * memory access, not a register — and is rejected. Callers handling `(HL)`-bearing opcodes
+         * branch on bits before calling this.
+         */
+        fun fromBits(bits: Int): Reg {
+            require(bits in 0..7) { "bits must be in 0..7; got $bits" }
+            require(bits != 6) { "bits=6 is (HL), not a register" }
+            return when (bits) {
+                0 -> B
+                1 -> C
+                2 -> D
+                3 -> E
+                4 -> H
+                5 -> L
+                7 -> A
+                else -> error("unreachable")
+            }
+        }
+    }
 }
