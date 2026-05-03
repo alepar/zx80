@@ -84,4 +84,12 @@ class IxOpsTest {
         assertThat((d.dd[0x34] as IncIxd).mnemonic { 0 }).isEqualTo("INC (IX+d)")
         assertThat((d.fd[0x35] as DecIxd).mnemonic { 0 }).isEqualTo("DEC (IY+d)")
     }
+
+    @Test
+    fun `installInto registers JP (IX) at DD 0xE9 and JP (IY) at FD 0xE9`() {
+        val d = Decoder()
+        IxOps.installInto(d)
+        assertThat((d.dd[0xE9] as JpIx).mnemonic { 0 }).isEqualTo("JP (IX)")
+        assertThat((d.fd[0xE9] as JpIx).mnemonic { 0 }).isEqualTo("JP (IY)")
+    }
 }

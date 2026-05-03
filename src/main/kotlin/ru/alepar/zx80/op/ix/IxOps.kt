@@ -17,6 +17,7 @@ object IxOps {
         installIndexedLdImm(d)
         installIndexedAlu(d)
         installIndexedIncDec(d)
+        installJpIx(d)
     }
 
     private fun installLdSpHlStraggler(d: Decoder) {
@@ -76,6 +77,13 @@ object IxOps {
             val table = if (idx == IndexReg.IX) d.dd else d.fd
             table[0x34] = IncIxd(idx)
             table[0x35] = DecIxd(idx)
+        }
+    }
+
+    private fun installJpIx(d: Decoder) {
+        for (idx in IndexReg.entries) {
+            val table = if (idx == IndexReg.IX) d.dd else d.fd
+            table[0xE9] = JpIx(idx)
         }
     }
 }
