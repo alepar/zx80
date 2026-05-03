@@ -383,4 +383,148 @@ class FlagsTest {
         assertThat(r.newF and Flags.Z).isNotZero
         assertThat(r.newF and Flags.N).isNotZero
     }
+
+    @Test
+    fun `afterRotateA sets C from newC, clears H and N, preserves S Z PV`() {
+        val oldF = Flags.S or Flags.Z or Flags.PV or Flags.N or Flags.H or Flags.C
+        val r = Flags.afterRotateA(rotated = 0x42, newC = false, oldF = oldF)
+        assertThat(r.value).isEqualTo(0x42)
+        assertThat(r.newF and Flags.S).isNotZero
+        assertThat(r.newF and Flags.Z).isNotZero
+        assertThat(r.newF and Flags.PV).isNotZero
+        assertThat(r.newF and Flags.N).isZero
+        assertThat(r.newF and Flags.H).isZero
+        assertThat(r.newF and Flags.C).isZero
+    }
+
+    @Test
+    fun `afterRotateA sets C when newC is true`() {
+        val r = Flags.afterRotateA(rotated = 0x80, newC = true, oldF = 0)
+        assertThat(r.newF and Flags.C).isNotZero
+    }
+
+    @Test
+    fun `afterRotateA masks rotated to 8 bits`() {
+        val r = Flags.afterRotateA(rotated = 0x1FF, newC = false, oldF = 0)
+        assertThat(r.value).isEqualTo(0xFF)
+    }
+
+    @Test
+    fun `afterCpl xors A with 0xFF, sets H and N, preserves S Z PV C`() {
+        val oldF = Flags.S or Flags.Z or Flags.PV or Flags.C
+        val r = Flags.afterCpl(0x12, oldF)
+        assertThat(r.value).isEqualTo(0xED)
+        assertThat(r.newF and Flags.S).isNotZero
+        assertThat(r.newF and Flags.Z).isNotZero
+        assertThat(r.newF and Flags.PV).isNotZero
+        assertThat(r.newF and Flags.C).isNotZero
+        assertThat(r.newF and Flags.H).isNotZero
+        assertThat(r.newF and Flags.N).isNotZero
+    }
+
+    @Test
+    fun `afterCpl 0x00 gives 0xFF`() {
+        val r = Flags.afterCpl(0x00, 0)
+        assertThat(r.value).isEqualTo(0xFF)
+    }
+
+    @Test
+    fun `afterCpl 0xFF gives 0x00`() {
+        val r = Flags.afterCpl(0xFF, 0)
+        assertThat(r.value).isZero
+    }
+
+    @Test
+    fun `afterScf sets C, clears H and N, preserves S Z PV`() {
+        val oldF = Flags.S or Flags.Z or Flags.PV or Flags.H or Flags.N
+        val newF = Flags.afterScf(oldF)
+        assertThat(newF and Flags.S).isNotZero
+        assertThat(newF and Flags.Z).isNotZero
+        assertThat(newF and Flags.PV).isNotZero
+        assertThat(newF and Flags.H).isZero
+        assertThat(newF and Flags.N).isZero
+        assertThat(newF and Flags.C).isNotZero
+    }
+
+    @Test
+    fun `afterCcf toggles C, sets H to oldC, clears N, preserves S Z PV`() {
+        var oldF = Flags.C or Flags.S
+        var newF = Flags.afterCcf(oldF)
+        assertThat(newF and Flags.C).isZero
+        assertThat(newF and Flags.H).isNotZero
+        assertThat(newF and Flags.N).isZero
+        assertThat(newF and Flags.S).isNotZero
+
+        oldF = Flags.S or Flags.Z
+        newF = Flags.afterCcf(oldF)
+        assertThat(newF and Flags.C).isNotZero
+        assertThat(newF and Flags.H).isZero
+        assertThat(newF and Flags.S).isNotZero
+        assertThat(newF and Flags.Z).isNotZero
+    }
+
+    @Test
+    fun `afterDaa after ADD 0x09 plus 0x01 = 0x0A, no flags set, adjusts to 0x10 with H`() {
+        val r = Flags.afterDaa(0x0A, oldF = 0)
+        assertThat(r.value).isEqualTo(0x10)
+        assertThat(r.newF and Flags.H).isNotZero
+        assertThat(r.newF and Flags.C).isZero
+        assertThat(r.newF and Flags.N).isZero
+    }
+
+    @Test
+    fun `afterDaa after ADD 0x99 plus 0x01 = 0x9A, adjusts to 0x00 with C and Z`() {
+        val r = Flags.afterDaa(0x9A, oldF = 0)
+        assertThat(r.value).isZero
+        assertThat(r.newF and Flags.Z).isNotZero
+        assertThat(r.newF and Flags.C).isNotZero
+    }
+
+    @Test
+    fun `afterDaa A=0x00 N=0 no flags is no-op (Z set)`() {
+        val r = Flags.afterDaa(0x00, oldF = 0)
+        assertThat(r.value).isZero
+        assertThat(r.newF and Flags.Z).isNotZero
+        assertThat(r.newF and Flags.C).isZero
+    }
+
+    @Test
+    fun `afterDaa A=0x00 N=1 C=1 (after sub borrow) gives 0xA0 with S and C`() {
+        val r = Flags.afterDaa(0x00, oldF = Flags.N or Flags.C)
+        assertThat(r.value).isEqualTo(0xA0)
+        assertThat(r.newF and Flags.S).isNotZero
+        assertThat(r.newF and Flags.C).isNotZero
+        assertThat(r.newF and Flags.N).isNotZero
+    }
+
+    @Test
+    fun `afterDaa preserves N flag`() {
+        var r = Flags.afterDaa(0x12, oldF = 0)
+        assertThat(r.newF and Flags.N).isZero
+
+        r = Flags.afterDaa(0x12, oldF = Flags.N)
+        assertThat(r.newF and Flags.N).isNotZero
+    }
+
+    @Test
+    fun `afterDaa parity flag set for even bit count in result`() {
+        val r = Flags.afterDaa(0x33, oldF = 0)
+        assertThat(r.value).isEqualTo(0x33)
+        assertThat(r.newF and Flags.PV).isNotZero
+    }
+
+    @Test
+    fun `afterDaa H flag computed from result-vs-input bit 4 difference`() {
+        val r = Flags.afterDaa(0x0A, oldF = 0)
+        assertThat(r.newF and Flags.H).isNotZero
+    }
+
+    @Test
+    fun `afterDaa S flag set when result bit 7 is set`() {
+        var r = Flags.afterDaa(0x9A, oldF = 0)
+        assertThat(r.newF and Flags.S).isZero
+
+        r = Flags.afterDaa(0x82, oldF = 0)
+        assertThat(r.newF and Flags.S).isNotZero
+    }
 }

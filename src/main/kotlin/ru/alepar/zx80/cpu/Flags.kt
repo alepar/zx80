@@ -212,4 +212,78 @@ object Flags {
         if (diff < 0) f = f or C
         return AluResult(value, f)
     }
+
+    /**
+     * Common flag rules for the 4 rotate-A opcodes (RLCA, RRCA, RLA, RRA): C = newC (the bit
+     * shifted out); H = 0; N = 0; S/Z/PV preserved from oldF.
+     *
+     * Caller computes the rotated value and newC; this helper packages the result + new F.
+     */
+    fun afterRotateA(rotated: Int, newC: Boolean, oldF: Int): AluResult {
+        var f = oldF and (S or Z or PV)
+        if (newC) f = f or C
+        return AluResult(rotated and 0xFF, f)
+    }
+
+    /** CPL: A = A xor 0xFF. H = 1, N = 1; S/Z/PV/C preserved from oldF. */
+    fun afterCpl(a: Int, oldF: Int): AluResult {
+        val value = (a and 0xFF) xor 0xFF
+        val f = (oldF and (S or Z or PV or C)) or H or N
+        return AluResult(value, f)
+    }
+
+    /**
+     * SCF: set carry flag. C=1; H=0; N=0; S/Z/PV preserved. Returns just the new F (A is
+     * unchanged).
+     */
+    fun afterScf(oldF: Int): Int = (oldF and (S or Z or PV)) or C
+
+    /**
+     * CCF: complement carry flag. C=!oldC; H=oldC; N=0; S/Z/PV preserved. Returns just the new F.
+     */
+    fun afterCcf(oldF: Int): Int {
+        val oldC = oldF and C
+        var f = oldF and (S or Z or PV)
+        if (oldC == 0) f = f or C // toggle to 1
+        if (oldC != 0) f = f or H // H gets oldC
+        return f
+    }
+
+    /**
+     * BCD adjust accumulator after a previous arithmetic operation. Behavior depends on N, H, C
+     * flags from the previous op.
+     *
+     * Algorithm (standard table-based):
+     * - if N=0 (after add): if H or low nibble > 9: correction |= 0x06; if C or A > 0x99:
+     *   correction |= 0x60, set new C; A += correction.
+     * - else (after sub): if H: correction |= 0x06; if C: correction |= 0x60; A -= correction.
+     *
+     * Flags after:
+     * - S = bit 7 of result.
+     * - Z = result == 0.
+     * - H = bit-4 differs between A and result (covers add and sub paths).
+     * - P/V = parity of result.
+     * - N = preserved from oldF.
+     * - C = potentially set if high-nibble correction was applied.
+     */
+    fun afterDaa(a: Int, oldF: Int): AluResult {
+        val n = oldF and N != 0
+        val cFlag = oldF and C != 0
+        val hFlag = oldF and H != 0
+        var correction = 0
+        var newC = cFlag
+        if (hFlag || (!n && (a and 0x0F) > 9)) correction = correction or 0x06
+        if (cFlag || (!n && a > 0x99)) {
+            correction = correction or 0x60
+            newC = true
+        }
+        val result = (if (n) a - correction else a + correction) and 0xFF
+        var f = oldF and N // preserve N
+        if (result == 0) f = f or Z
+        if (result and 0x80 != 0) f = f or S
+        if (parity(result)) f = f or PV
+        if (newC) f = f or C
+        if ((a xor result) and 0x10 != 0) f = f or H
+        return AluResult(result, f)
+    }
 }
