@@ -121,4 +121,14 @@ class AluOpsTest {
         AluOps.installInto(d)
         assertThat(d.main[0x35]).isSameAs(DecHlMem)
     }
+
+    @Test
+    fun `installInto registers ADD HL,rr at 0x09, 0x19, 0x29, 0x39`() {
+        val d = Decoder()
+        AluOps.installInto(d)
+        assertThat((d.main[0x09] as AddHlPair).mnemonic { 0 }).isEqualTo("ADD HL, BC")
+        assertThat((d.main[0x19] as AddHlPair).mnemonic { 0 }).isEqualTo("ADD HL, DE")
+        assertThat((d.main[0x29] as AddHlPair).mnemonic { 0 }).isEqualTo("ADD HL, HL")
+        assertThat((d.main[0x39] as AddHlPair).mnemonic { 0 }).isEqualTo("ADD HL, SP")
+    }
 }

@@ -2,6 +2,7 @@ package ru.alepar.zx80.op.alu
 
 import ru.alepar.zx80.cpu.Decoder
 import ru.alepar.zx80.cpu.Reg
+import ru.alepar.zx80.cpu.RegPair
 
 /**
  * Registers the 8-bit ALU + INC/DEC Op family into the decoder. Called by
@@ -19,6 +20,15 @@ object AluOps {
         installAluAImm(d)
         installInc(d)
         installDec(d)
+        installAddHl(d)
+    }
+
+    private fun installAddHl(d: Decoder) {
+        // ADD HL,rr — 00 ss 1001 → 0x09, 0x19, 0x29, 0x39
+        for (ssBits in 0..3) {
+            val opcode = 0x09 or (ssBits shl 4)
+            d.main[opcode] = AddHlPair(src = RegPair.fromBits(ssBits))
+        }
     }
 
     private fun installInc(d: Decoder) {
