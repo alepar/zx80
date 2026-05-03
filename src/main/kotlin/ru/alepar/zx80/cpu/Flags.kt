@@ -173,6 +173,7 @@ object Flags {
         var f = oldF and (S or Z or PV) // preserve these
         if ((a and 0x0FFF) + (b and 0x0FFF) > 0x0FFF) f = f or H
         if (sum > 0xFFFF) f = f or C
+        f = f or ((value ushr 8) and 0x28)
         return AluResult(value, f)
     }
 
@@ -195,6 +196,7 @@ object Flags {
         if ((a and 0x0FFF) + (b and 0x0FFF) + carry > 0x0FFF) f = f or H
         if ((a xor b) and 0x8000 == 0 && (a xor value) and 0x8000 != 0) f = f or PV
         if (sum > 0xFFFF) f = f or C
+        f = f or ((value ushr 8) and 0x28)
         return AluResult(value, f)
     }
 
@@ -217,6 +219,7 @@ object Flags {
         if ((a and 0x0FFF) - (b and 0x0FFF) - borrow < 0) f = f or H
         if ((a xor b) and 0x8000 != 0 && (a xor value) and 0x8000 != 0) f = f or PV
         if (diff < 0) f = f or C
+        f = f or ((value ushr 8) and 0x28)
         return AluResult(value, f)
     }
 
@@ -227,9 +230,11 @@ object Flags {
      * Caller computes the rotated value and newC; this helper packages the result + new F.
      */
     fun afterRotateA(rotated: Int, newC: Boolean, oldF: Int): AluResult {
+        val value = rotated and 0xFF
         var f = oldF and (S or Z or PV)
         if (newC) f = f or C
-        return AluResult(rotated and 0xFF, f)
+        f = f or (value and 0x28)
+        return AluResult(value, f)
     }
 
     /** CPL: A = A xor 0xFF. H = 1, N = 1; S/Z/PV/C preserved from oldF. */
@@ -352,6 +357,7 @@ object Flags {
         if (result and 0x80 != 0) f = f or S
         if (parity(result)) f = f or PV
         if (newC) f = f or C
+        f = f or (result and 0x28)
         return f
     }
 

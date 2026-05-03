@@ -837,4 +837,72 @@ class FlagsTest {
         assertThat(r2.newF and Flags.X).isNotZero
         assertThat(r2.newF and Flags.Y).isZero
     }
+
+    @Test
+    fun `afterAddWord sets X and Y from result high byte bits 5 and 3`() {
+        // 0x1020 + 0x1808 = 0x2828 -> high byte 0x28 -> X+Y
+        val r1 = Flags.afterAddWord(0x1020, 0x1808, 0)
+        assertThat(r1.newF and Flags.X).isNotZero
+        assertThat(r1.newF and Flags.Y).isNotZero
+        // 0x1000 + 0x1000 = 0x2000 -> high byte 0x20 -> only X
+        val r2 = Flags.afterAddWord(0x1000, 0x1000, 0)
+        assertThat(r2.newF and Flags.X).isNotZero
+        assertThat(r2.newF and Flags.Y).isZero
+        // 0x0000 + 0x0800 = 0x0800 -> high byte 0x08 -> only Y
+        val r3 = Flags.afterAddWord(0x0000, 0x0800, 0)
+        assertThat(r3.newF and Flags.X).isZero
+        assertThat(r3.newF and Flags.Y).isNotZero
+    }
+
+    @Test
+    fun `afterAdcWord sets X and Y from result high byte bits 5 and 3`() {
+        // 0x1020 + 0x1808 = 0x2828, no carry -> high byte 0x28 -> X+Y
+        val r1 = Flags.afterAdcWord(0x1020, 0x1808, 0)
+        assertThat(r1.newF and Flags.X).isNotZero
+        assertThat(r1.newF and Flags.Y).isNotZero
+        // 0x1000 + 0x1000 with carry-in C=1 = 0x2001 -> high byte 0x20 -> only X
+        val r2 = Flags.afterAdcWord(0x1000, 0x1000, Flags.C)
+        assertThat(r2.newF and Flags.X).isNotZero
+        assertThat(r2.newF and Flags.Y).isZero
+    }
+
+    @Test
+    fun `afterSbcWord sets X and Y from result high byte bits 5 and 3`() {
+        // 0x4000 - 0x1800 = 0x2800 -> high byte 0x28
+        val r1 = Flags.afterSbcWord(0x4000, 0x1800, 0)
+        assertThat(r1.newF and Flags.X).isNotZero
+        assertThat(r1.newF and Flags.Y).isNotZero
+        // 0x3000 - 0x1000 = 0x2000 -> high byte 0x20 -> only X
+        val r2 = Flags.afterSbcWord(0x3000, 0x1000, 0)
+        assertThat(r2.newF and Flags.X).isNotZero
+        assertThat(r2.newF and Flags.Y).isZero
+    }
+
+    @Test
+    fun `afterRotateA sets X and Y from result bits 5 and 3`() {
+        // rotated value = 0x28 -> X+Y both set
+        val r1 = Flags.afterRotateA(0x28, false, 0)
+        assertThat(r1.newF and Flags.X).isNotZero
+        assertThat(r1.newF and Flags.Y).isNotZero
+        // rotated value = 0x00 -> neither
+        val r2 = Flags.afterRotateA(0x00, false, 0)
+        assertThat(r2.newF and Flags.X).isZero
+        assertThat(r2.newF and Flags.Y).isZero
+    }
+
+    @Test
+    fun `RLC RRC RL RR SLA SRA SLL SRL set X and Y from result bits 5 and 3`() {
+        // RLC of 0x14 -> bit 7 was 0, shift left -> 0x28 -> X+Y
+        val rlc = Flags.afterRlc(0x14)
+        assertThat(rlc.newF and Flags.X).isNotZero
+        assertThat(rlc.newF and Flags.Y).isNotZero
+        // SLA of 0x14 -> 0x28
+        val sla = Flags.afterSla(0x14)
+        assertThat(sla.newF and Flags.X).isNotZero
+        assertThat(sla.newF and Flags.Y).isNotZero
+        // SRL of 0x50 -> 0x28
+        val srl = Flags.afterSrl(0x50)
+        assertThat(srl.newF and Flags.X).isNotZero
+        assertThat(srl.newF and Flags.Y).isNotZero
+    }
 }
