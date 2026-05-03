@@ -6,14 +6,29 @@ import ru.alepar.zx80.cpu.Decoder
 
 class EdOpsTest {
     @Test
-    fun `installInto on empty Decoder leaves ed table as before`() {
+    fun `installInto registers register transfers at ED 47, 4F, 57, 5F`() {
         val d = Decoder()
-        val priorEdInstalled = d.ed.count { it != null }
         EdOps.installInto(d)
-        val newEdInstalled = d.ed.count { it != null }
-        // After full Phase 2.10: register transfers (4) + NEG (1) + RETN (1) + RETI (1)
-        // + RRD (1) + RLD (1) + LD (nn),rr (4) + LD rr,(nn) (4) + block move (4)
-        // + block compare (4) + single I/O (16) + block I/O (8) = 49 ed entries.
-        assertThat(newEdInstalled).isGreaterThanOrEqualTo(priorEdInstalled)
+        assertThat(d.ed[0x47]).isSameAs(LdIA)
+        assertThat(d.ed[0x4F]).isSameAs(LdRA)
+        assertThat(d.ed[0x57]).isSameAs(LdAI)
+        assertThat(d.ed[0x5F]).isSameAs(LdAR)
+    }
+
+    @Test
+    fun `installInto registers NEG at ED 44, RETN at 45, RETI at 4D`() {
+        val d = Decoder()
+        EdOps.installInto(d)
+        assertThat(d.ed[0x44]).isSameAs(Neg)
+        assertThat(d.ed[0x45]).isSameAs(Retn)
+        assertThat(d.ed[0x4D]).isSameAs(Reti)
+    }
+
+    @Test
+    fun `installInto registers RRD at ED 67, RLD at 6F`() {
+        val d = Decoder()
+        EdOps.installInto(d)
+        assertThat(d.ed[0x67]).isSameAs(Rrd)
+        assertThat(d.ed[0x6F]).isSameAs(Rld)
     }
 }
