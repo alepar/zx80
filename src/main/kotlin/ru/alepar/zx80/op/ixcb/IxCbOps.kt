@@ -9,9 +9,11 @@ import ru.alepar.zx80.op.rot.RotateOp
 /**
  * Registers the documented DDCB/FDCB-prefixed Op family into decoder.ddcb and decoder.fdcb.
  *
- * Documented opcodes only at rrr=110 slots (where target is (IX+d) / (IY+d)). The other ~225 slots
- * per table are undocumented "copy to r" variants and stay null per the project's
- * documented-Z80-only non-goal.
+ * Documented opcodes are at rrr=110 slots (where target is (IX+d) / (IY+d)). For the rotate/shift,
+ * RES, and SET blocks the other rrr slots are undocumented "copy to r" variants implemented as
+ * separate ops. For the BIT block (Phase F), the undocumented mirror slots all map to the same
+ * BitIxd instance as the documented form — BIT has no result so the rrr field is ignored on real
+ * Z80 hardware.
  */
 object IxCbOps {
     fun installInto(d: Decoder) {
@@ -49,9 +51,16 @@ object IxCbOps {
     }
 
     private fun installBit(table: Array<Op?>, idx: IndexReg) {
+        // Phase F: install the BIT op at all 8 rrr slots per (n, prefix). The undocumented
+        // BIT n,r,(IX+d) mirror slots (rrr != 6) behave identically to the documented BIT n,(IX+d)
+        // form on real Z80 hardware — BIT has no result, so the register field is ignored. ZEXDOC
+        // doesn't exercise these mirrors but FUSE does.
         for (n in 0..7) {
-            val opcode = 0x40 or (n shl 3) or 0x06
-            table[opcode] = BitIxd(idx, n)
+            val opInstance = BitIxd(idx, n)
+            for (rrrBits in 0..7) {
+                val opcode = 0x40 or (n shl 3) or rrrBits
+                table[opcode] = opInstance
+            }
         }
     }
 

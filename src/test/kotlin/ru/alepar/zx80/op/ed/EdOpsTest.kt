@@ -121,4 +121,19 @@ class EdOpsTest {
             assertThat(op!!.mnemonic { 0 }).isEqualTo("LD ${pair.mnemonic}, (nn)")
         }
     }
+
+    @Test
+    fun `installInto fills all null ED slots with EdNop`() {
+        val d = Decoder()
+        EdOps.installInto(d)
+        // Spot-check: ED 0x00 (no documented op there) is now EdNop
+        assertThat(d.ed[0x00]).isSameAs(EdNop)
+        // ED 0xFF (no documented op) is also EdNop
+        assertThat(d.ed[0xFF]).isSameAs(EdNop)
+        // Documented ED slots are NOT replaced — ED 0x44 = NEG should remain
+        assertThat(d.ed[0x44]).isNotSameAs(EdNop)
+        // Total ED slots are now 256 of 256 non-null
+        val nonNull = (0..255).count { d.ed[it] != null }
+        assertThat(nonNull).isEqualTo(256)
+    }
 }

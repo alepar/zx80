@@ -1,6 +1,7 @@
 package ru.alepar.zx80.cpu
 
 import ru.alepar.zx80.op.Op
+import ru.alepar.zx80.op.ix.DdFdNopPrefix
 
 /**
  * Decodes the instruction at `cpu.pc` by reading bytes from `mem` and following any prefix (CB / ED
@@ -29,10 +30,10 @@ class Dispatcher(private val decoder: Decoder) {
         mem: Memory,
     ): Op? {
         val b1 = mem.read(cpu.pc + 1)
-        return if (b1 == 0xCB) {
-            cbTable[mem.read(cpu.pc + 3)]
-        } else {
-            prefixTable[b1]
-        }
+        if (b1 == 0xCB) return cbTable[mem.read(cpu.pc + 3)]
+        // Phase F: when a DD/FD prefix is followed by an opcode that doesn't exist in the
+        // DD/FD table (e.g. 0x00 NOP, or another DD/FD/ED/CB prefix), real Z80 treats the
+        // prefix as a 4-T-state no-op and re-dispatches starting at the next byte.
+        return prefixTable[b1] ?: DdFdNopPrefix
     }
 }

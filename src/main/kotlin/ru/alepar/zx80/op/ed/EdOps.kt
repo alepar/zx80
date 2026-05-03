@@ -23,6 +23,21 @@ object EdOps {
         installSingleIo(d)
         installBlockIo(d)
         installMainTableIoStragglers(d)
+        installEdNopFallback(d)
+    }
+
+    /**
+     * Phase F: fill any still-null ED slot with `EdNop`. Real Z80 hardware treats unmapped
+     * ED-prefixed opcodes (ED 0x00-0x3F, parts of ED 0x80-0x9F, ED 0xC0-0xFF) as 8-cycle 2-byte
+     * NOPs. Without this fallback the dispatcher would crash on any FUSE/ZEXDOC test that hits an
+     * unmapped slot.
+     */
+    private fun installEdNopFallback(d: Decoder) {
+        for (i in 0..255) {
+            if (d.ed[i] == null) {
+                d.ed[i] = EdNop
+            }
+        }
     }
 
     private fun installSingleIo(d: Decoder) {

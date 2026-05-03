@@ -46,11 +46,13 @@ class IxCbOpsTest {
     }
 
     @Test
-    fun `installInto registers exactly 8 BIT opcodes per index in DDCB 0x40 to 0x7F`() {
+    fun `installInto fills the entire BIT block 0x40 to 0x7F under DDCB and FDCB (Phase F mirror)`() {
         val d = Decoder()
         IxCbOps.installInto(d)
         val ddcbBitCount = (0x40..0x7F).count { d.ddcb[it] != null }
-        assertThat(ddcbBitCount).isEqualTo(8)
+        val fdcbBitCount = (0x40..0x7F).count { d.fdcb[it] != null }
+        assertThat(ddcbBitCount).isEqualTo(64)
+        assertThat(fdcbBitCount).isEqualTo(64)
     }
 
     @Test
@@ -151,14 +153,39 @@ class IxCbOpsTest {
     }
 
     @Test
-    fun `installInto fills 200 slots in DDCB and FDCB tables (BIT mirror intentionally out of scope)`() {
+    fun `installInto fills 256 slots in DDCB and FDCB tables (Phase F adds BIT mirror)`() {
         val d = Decoder()
         IxCbOps.installInto(d)
-        // 64 (rotshift block) + 8 (BIT block — documented rrr=6 only; BIT undocumented mirror is
-        // out of scope per spec) + 64 (RES block) + 64 (SET block) = 200.
+        // 64 (rotshift block) + 64 (BIT block — Phase F adds undocumented mirror at all 8 rrr) +
+        // 64 (RES block) + 64 (SET block) = 256.
         val ddCount = (0..255).count { d.ddcb[it] != null }
         val fdCount = (0..255).count { d.fdcb[it] != null }
-        assertThat(ddCount).isEqualTo(200)
-        assertThat(fdCount).isEqualTo(200)
+        assertThat(ddCount).isEqualTo(256)
+        assertThat(fdCount).isEqualTo(256)
+    }
+
+    @Test
+    fun `installBit fills all 8 rrr slots per (n, prefix) with the same BitIxd instance`() {
+        val d = Decoder()
+        IxCbOps.installInto(d)
+        // For BIT 0,(IX+d): documented at DDCB 0x46 (rrr=110); mirror slots at 0x40-0x45, 0x47.
+        val canonical = d.ddcb[0x46]
+        assertThat(canonical).isInstanceOf(BitIxd::class.java)
+        for (rrrBits in 0..7) {
+            val opcode = 0x40 or rrrBits
+            assertThat(d.ddcb[opcode]).isSameAs(canonical)
+        }
+    }
+
+    @Test
+    fun `installBit fills mirror slots for FD prefix and all bit positions`() {
+        val d = Decoder()
+        IxCbOps.installInto(d)
+        // BIT 7,(IY+d) at FDCB 0x40+0x38+0x06 = 0x7E; mirrors at 0x78-0x7D, 0x7F
+        val canonical = d.fdcb[0x7E]
+        for (rrrBits in 0..7) {
+            val opcode = 0x40 or (7 shl 3) or rrrBits
+            assertThat(d.fdcb[opcode]).isSameAs(canonical)
+        }
     }
 }
