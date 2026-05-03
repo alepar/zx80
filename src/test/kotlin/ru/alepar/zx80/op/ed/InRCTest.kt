@@ -66,4 +66,35 @@ class InRCTest {
         assertThat(InRC(Reg.A).mnemonic { 0 }).isEqualTo("IN A, (C)")
         assertThat(InRC(Reg.E).mnemonic { 0 }).isEqualTo("IN E, (C)")
     }
+
+    @Test
+    fun `IN r (C) sets cpu memptr to BC plus 1`() {
+        val cpu =
+            Cpu().apply {
+                bc = 0x27FF
+                memptr = 0
+            }
+        InRC(Reg.D).execute(cpu, Memory())
+        assertThat(cpu.memptr).isEqualTo(0x2800)
+    }
+
+    @Test
+    fun `IN r (C) wraps memptr at 16 bits`() {
+        val cpu = Cpu().apply { bc = 0xFFFF }
+        InRC(Reg.D).execute(cpu, Memory())
+        assertThat(cpu.memptr).isEqualTo(0x0000)
+    }
+
+    @Test
+    fun `IN r (C) sets X and Y from byte read NOT from memptr`() {
+        val cpu =
+            Cpu().apply {
+                bc = 0x27FF
+                memptr = 0
+            }
+        // default IoBus returns 0xFF -> X+Y both set
+        InRC(Reg.D).execute(cpu, Memory())
+        assertThat(cpu.f and Flags.X).isNotZero
+        assertThat(cpu.f and Flags.Y).isNotZero
+    }
 }

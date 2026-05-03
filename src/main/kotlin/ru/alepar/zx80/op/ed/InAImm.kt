@@ -17,6 +17,7 @@ object InAImm : Op {
     override fun execute(cpu: Cpu, mem: Memory) {
         val n = mem.read(cpu.pc + 1)
         val port = (cpu.a shl 8) or n
+        cpu.memptr = (port + 1) and 0xFFFF
         cpu.a = cpu.io.read(port) and 0xFF
         cpu.pc = (cpu.pc + 2) and 0xFFFF
         cpu.bumpR()

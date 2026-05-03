@@ -88,4 +88,38 @@ class BitIxdTest {
         assertThat(op.operandLength).isZero
         assertThat(op.baseCycles).isEqualTo(20)
     }
+
+    @Test
+    fun `BIT n (IX+d) sets cpu memptr to IX plus d and X-Y from memptr high byte`() {
+        val cpu =
+            Cpu().apply {
+                ix = 0x2010
+                memptr = 0
+            }
+        val mem =
+            Memory().apply {
+                write(0x102, 0x18)
+                write(0x2010 + 0x18, 0xFF)
+            }
+        cpu.pc = 0x100
+        BitIxd(IndexReg.IX, 0).execute(cpu, mem)
+        assertThat(cpu.memptr).isEqualTo(0x2028)
+        assertThat(cpu.f and Flags.X).isNotZero
+        assertThat(cpu.f and Flags.Y).isZero
+    }
+
+    @Test
+    fun `BIT n (IY+d) handles negative displacement and updates memptr`() {
+        val cpu = Cpu().apply { iy = 0x2828 }
+        val mem =
+            Memory().apply {
+                write(0x102, 0xF0)
+                write(0x2828 - 16, 0xFF)
+            }
+        cpu.pc = 0x100
+        BitIxd(IndexReg.IY, 0).execute(cpu, mem)
+        assertThat(cpu.memptr).isEqualTo(0x2818)
+        assertThat(cpu.f and Flags.X).isNotZero
+        assertThat(cpu.f and Flags.Y).isNotZero
+    }
 }

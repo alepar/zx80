@@ -145,6 +145,7 @@ class FuseSuite(
         iff2 = input.iff2
         im = input.im
         halted = input.halted
+        memptr = input.memptr
         tStates = 0
     }
 

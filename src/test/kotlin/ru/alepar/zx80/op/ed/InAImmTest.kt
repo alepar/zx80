@@ -63,4 +63,32 @@ class InAImmTest {
         assertThat(InAImm.operandLength).isEqualTo(1)
         assertThat(InAImm.baseCycles).isEqualTo(11)
     }
+
+    @Test
+    fun `IN A (n) sets cpu memptr to (A shl 8 or n) plus 1`() {
+        val cpu =
+            Cpu().apply {
+                a = 0x27
+                memptr = 0
+            }
+        val mem = Memory().apply { write(0x101, 0xFF) }
+        cpu.pc = 0x100
+        InAImm.execute(cpu, mem)
+        // port = (0x27 shl 8) | 0xFF = 0x27FF; memptr = 0x27FF + 1 = 0x2800
+        assertThat(cpu.memptr).isEqualTo(0x2800)
+    }
+
+    @Test
+    fun `IN A (n) does not modify F`() {
+        val cpu =
+            Cpu().apply {
+                a = 0x10
+                f = 0x55
+                memptr = 0
+            }
+        val mem = Memory().apply { write(0x101, 0x00) }
+        cpu.pc = 0x100
+        InAImm.execute(cpu, mem)
+        assertThat(cpu.f).isEqualTo(0x55)
+    }
 }

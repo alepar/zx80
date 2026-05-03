@@ -29,10 +29,13 @@ class BitIxd(private val idx: IndexReg, private val n: Int) : Op {
     override fun execute(cpu: Cpu, mem: Memory) {
         val d = mem.read(cpu.pc + 2).toByte().toInt()
         val addr = (idx.read(cpu) + d) and 0xFFFF
+        cpu.memptr = addr // BIT n,(IX/IY+d) sets MEMPTR to the effective address
         val bit = (mem.read(addr) shr n) and 1
         var f = cpu.f and Flags.C
         f = f or Flags.H
-        if (bit == 0) f = f or Flags.Z
+        if (bit == 0) f = f or (Flags.Z or Flags.PV)
+        if (n == 7 && bit != 0) f = f or Flags.S
+        f = f or ((cpu.memptr ushr 8) and 0x28)
         cpu.f = f
         cpu.pc = (cpu.pc + 4) and 0xFFFF
         cpu.bumpR(2)

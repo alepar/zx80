@@ -17,12 +17,14 @@ class InRC(private val dst: Reg) : Op {
     override val baseCycles = 12
 
     override fun execute(cpu: Cpu, mem: Memory) {
+        cpu.memptr = (cpu.bc + 1) and 0xFFFF
         val byte = cpu.io.read(cpu.bc) and 0xFF
         dst.write(cpu, byte)
         var f = cpu.f and Flags.C
         if (byte == 0) f = f or Flags.Z
         if (byte and 0x80 != 0) f = f or Flags.S
         if (Flags.parity(byte)) f = f or Flags.PV
+        f = f or (byte and 0x28) // X/Y from byte read (Z80 IN r,(C) spec)
         cpu.f = f
         cpu.pc = (cpu.pc + 2) and 0xFFFF
         cpu.bumpR(2)

@@ -39,4 +39,30 @@ class BitHlTest {
         assertThat(op.operandLength).isZero
         assertThat(op.baseCycles).isEqualTo(12)
     }
+
+    @Test
+    fun `BIT n (HL) sets X and Y from cpu memptr high byte`() {
+        val cpu =
+            Cpu().apply {
+                hl = 0x4000
+                memptr = 0x2814
+            }
+        val mem = Memory().apply { write(0x4000, 0xFF) }
+        BitHl(0).execute(cpu, mem)
+        assertThat(cpu.f and Flags.X).isNotZero
+        assertThat(cpu.f and Flags.Y).isNotZero
+    }
+
+    @Test
+    fun `BIT n (HL) X and Y come from memptr high byte even when bit-tested byte differs`() {
+        val cpu =
+            Cpu().apply {
+                hl = 0x4000
+                memptr = 0x2000
+            }
+        val mem = Memory().apply { write(0x4000, 0x28) }
+        BitHl(0).execute(cpu, mem)
+        assertThat(cpu.f and Flags.X).isNotZero
+        assertThat(cpu.f and Flags.Y).isZero
+    }
 }

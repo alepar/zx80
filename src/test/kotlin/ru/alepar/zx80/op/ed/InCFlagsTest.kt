@@ -35,4 +35,28 @@ class InCFlagsTest {
     fun `mnemonic`() {
         assertThat(InCFlags.mnemonic { 0 }).isEqualTo("IN (C)")
     }
+
+    @Test
+    fun `IN (C) sets cpu memptr to BC plus 1`() {
+        val cpu =
+            Cpu().apply {
+                bc = 0x27FF
+                memptr = 0
+            }
+        InCFlags.execute(cpu, Memory())
+        assertThat(cpu.memptr).isEqualTo(0x2800)
+    }
+
+    @Test
+    fun `IN (C) sets X and Y from byte read`() {
+        val cpu =
+            Cpu().apply {
+                bc = 0x27FF
+                memptr = 0
+            }
+        InCFlags.execute(cpu, Memory())
+        // default IoBus returns 0xFF -> X+Y
+        assertThat(cpu.f and Flags.X).isNotZero
+        assertThat(cpu.f and Flags.Y).isNotZero
+    }
 }

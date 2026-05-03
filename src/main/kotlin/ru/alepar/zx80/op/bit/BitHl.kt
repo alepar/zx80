@@ -22,7 +22,9 @@ class BitHl(private val n: Int) : Op {
         val bit = (mem.read(cpu.hl) shr n) and 1
         var f = cpu.f and Flags.C
         f = f or Flags.H
-        if (bit == 0) f = f or Flags.Z
+        if (bit == 0) f = f or (Flags.Z or Flags.PV) // PV mirrors Z (Z80 quirk)
+        if (n == 7 && bit != 0) f = f or Flags.S
+        f = f or ((cpu.memptr ushr 8) and 0x28) // X/Y from MEMPTR high byte
         cpu.f = f
         cpu.pc = (cpu.pc + 2) and 0xFFFF
         cpu.bumpR(2)

@@ -38,6 +38,13 @@ class Cpu {
     var i: Int = 0
     var r: Int = 0
 
+    /**
+     * MEMPTR (a.k.a. WZ) — undocumented internal 16-bit register that leaks into the X/Y flag bits
+     * for BIT n,(HL), BIT n,(IX/IY+d), IN r,(C), and IN A,(n). Initialized from FUSE input cases;
+     * only the 5 leaking-into-flags op classes update or consume it (Phase E scope).
+     */
+    var memptr: Int = 0
+
     // Interrupt state
     var iff1: Boolean = false
     var iff2: Boolean = false
