@@ -7,15 +7,30 @@ import ru.alepar.zx80.cpu.Decoder
 class BranchOpsTest {
 
     @Test
-    fun `installInto on empty Decoder installs nothing yet (skeleton)`() {
+    fun `installInto registers JP nn at 0xC3`() {
         val d = Decoder()
         BranchOps.installInto(d)
-        // WUs 2.4-2..5 add real registrations; for now just verify
-        // the call doesn't crash and the function exists.
-        val totalInstalled =
-            listOf(d.main, d.cb, d.ed, d.dd, d.fd, d.ddcb, d.fdcb).sumOf { table ->
-                table.count { it != null }
-            }
-        assertThat(totalInstalled).isZero
+        assertThat(d.main[0xC3]).isSameAs(JpAbs)
+    }
+
+    @Test
+    fun `installInto registers JP (HL) at 0xE9`() {
+        val d = Decoder()
+        BranchOps.installInto(d)
+        assertThat(d.main[0xE9]).isSameAs(JpHl)
+    }
+
+    @Test
+    fun `installInto registers JP cc, nn at 0xC2 (NZ), 0xCA (Z), 0xD2 (NC), 0xDA (C), 0xE2 (PO), 0xEA (PE), 0xF2 (P), 0xFA (M)`() {
+        val d = Decoder()
+        BranchOps.installInto(d)
+        assertThat((d.main[0xC2] as JpAbsCc).mnemonic { 0 }).isEqualTo("JP NZ, nn")
+        assertThat((d.main[0xCA] as JpAbsCc).mnemonic { 0 }).isEqualTo("JP Z, nn")
+        assertThat((d.main[0xD2] as JpAbsCc).mnemonic { 0 }).isEqualTo("JP NC, nn")
+        assertThat((d.main[0xDA] as JpAbsCc).mnemonic { 0 }).isEqualTo("JP C, nn")
+        assertThat((d.main[0xE2] as JpAbsCc).mnemonic { 0 }).isEqualTo("JP PO, nn")
+        assertThat((d.main[0xEA] as JpAbsCc).mnemonic { 0 }).isEqualTo("JP PE, nn")
+        assertThat((d.main[0xF2] as JpAbsCc).mnemonic { 0 }).isEqualTo("JP P, nn")
+        assertThat((d.main[0xFA] as JpAbsCc).mnemonic { 0 }).isEqualTo("JP M, nn")
     }
 }
