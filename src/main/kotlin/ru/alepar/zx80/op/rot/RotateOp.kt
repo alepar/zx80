@@ -4,8 +4,8 @@ import ru.alepar.zx80.cpu.AluResult
 import ru.alepar.zx80.cpu.Flags
 
 /**
- * The 7 documented Z80 rotate/shift operations used by the CB-prefixed table. SLL
- * (shift-left-logical) at the bits=6 slot is undocumented and not modeled.
+ * The 8 Z80 rotate/shift operations used by the CB-prefixed table. SLL (shift-left-logical) at the
+ * bits=6 slot is undocumented but installed in Phase 2.12 (CB 0x30-0x37) since ZEXDOC exercises it.
  */
 enum class RotateOp(val mnemonic: String) {
     RLC("RLC"),
@@ -14,6 +14,7 @@ enum class RotateOp(val mnemonic: String) {
     RR("RR"),
     SLA("SLA"),
     SRA("SRA"),
+    SLL("SLL"),
     SRL("SRL");
 
     fun apply(value: Int, oldF: Int): AluResult =
@@ -24,13 +25,14 @@ enum class RotateOp(val mnemonic: String) {
             RR -> Flags.afterRr(value, oldF)
             SLA -> Flags.afterSla(value)
             SRA -> Flags.afterSra(value)
+            SLL -> Flags.afterSll(value)
             SRL -> Flags.afterSrl(value)
         }
 
     companion object {
         /**
          * Map CB opcode bits 5-3 (the 'ooo' field) to a RotateOp. Encoding: 0=RLC, 1=RRC, 2=RL,
-         * 3=RR, 4=SLA, 5=SRA, 6=SLL (rejected), 7=SRL.
+         * 3=RR, 4=SLA, 5=SRA, 6=SLL (undocumented but installed in Phase 2.12), 7=SRL.
          */
         fun fromBits(bits: Int): RotateOp =
             when (bits and 0x07) {
@@ -40,7 +42,7 @@ enum class RotateOp(val mnemonic: String) {
                 3 -> RR
                 4 -> SLA
                 5 -> SRA
-                6 -> error("bits=6 is SLL (undocumented); not modeled")
+                6 -> SLL
                 7 -> SRL
                 else -> error("unreachable")
             }

@@ -698,4 +698,35 @@ class FlagsTest {
         assertThat(r.newF and Flags.S).isZero
         assertThat(r.newF and Flags.C).isNotZero
     }
+
+    @Test
+    fun `afterSll shifts left and forces bit 0 to 1, ejected bit 7 sets C`() {
+        val r = Flags.afterSll(0x55)
+        // 0x55 = 01010101 -> shift left = 10101010, set bit 0 -> 10101011 = 0xAB
+        // ejected bit 7 of 0x55 = 0 -> C clear
+        assertThat(r.value).isEqualTo(0xAB)
+        assertThat(r.newF and Flags.C).isZero
+        assertThat(r.newF and Flags.S).isNotZero // bit 7 of 0xAB = 1
+        assertThat(r.newF and Flags.Z).isZero
+        assertThat(r.newF and Flags.H).isZero
+        assertThat(r.newF and Flags.N).isZero
+    }
+
+    @Test
+    fun `afterSll on 0x80 shifts to 0x01 and sets C`() {
+        val r = Flags.afterSll(0x80)
+        // ejected bit 7 = 1 -> C set; result = 0x00 shifted left + 1 = 0x01
+        assertThat(r.value).isEqualTo(0x01)
+        assertThat(r.newF and Flags.C).isNotZero
+        assertThat(r.newF and Flags.S).isZero
+        assertThat(r.newF and Flags.Z).isZero
+    }
+
+    @Test
+    fun `afterSll on 0x00 yields 0x01, no flags except parity`() {
+        val r = Flags.afterSll(0x00)
+        assertThat(r.value).isEqualTo(0x01)
+        assertThat(r.newF and Flags.C).isZero
+        assertThat(r.newF and Flags.Z).isZero // 0x01 != 0
+    }
 }

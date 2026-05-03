@@ -39,4 +39,13 @@ class RotShiftHlTest {
         assertThat(op.operandLength).isZero
         assertThat(op.baseCycles).isEqualTo(15)
     }
+
+    @Test
+    fun `SLL (HL) shifts memory at HL, sets bit 0 to 1`() {
+        val cpu = Cpu().apply { hl = 0x4000 }
+        val mem = Memory().apply { write(0x4000, 0x80) }
+        RotShiftHl(RotateOp.SLL).execute(cpu, mem)
+        assertThat(mem.read(0x4000)).isEqualTo(0x01)
+        assertThat(cpu.f and Flags.C).isNotZero
+    }
 }

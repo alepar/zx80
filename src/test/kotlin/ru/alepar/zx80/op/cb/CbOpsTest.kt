@@ -29,20 +29,27 @@ class CbOpsTest {
     }
 
     @Test
-    fun `installInto leaves SLL slots (CB 0x30 to 0x37) null`() {
+    fun `installInto registers SLL ops at CB 0x30 to 0x37`() {
         val d = Decoder()
         CbOps.installInto(d)
-        for (slot in 0x30..0x37) {
-            assertThat(d.cb[slot]).`as`("SLL slot 0x%02X must be null", slot).isNull()
-        }
+        // CB 0x30 = SLL B, CB 0x31 = SLL C, ..., CB 0x35 = SLL L,
+        // CB 0x36 = SLL (HL), CB 0x37 = SLL A
+        assertThat((d.cb[0x30] as RotShiftReg).mnemonic { 0 }).isEqualTo("SLL B")
+        assertThat((d.cb[0x31] as RotShiftReg).mnemonic { 0 }).isEqualTo("SLL C")
+        assertThat((d.cb[0x32] as RotShiftReg).mnemonic { 0 }).isEqualTo("SLL D")
+        assertThat((d.cb[0x33] as RotShiftReg).mnemonic { 0 }).isEqualTo("SLL E")
+        assertThat((d.cb[0x34] as RotShiftReg).mnemonic { 0 }).isEqualTo("SLL H")
+        assertThat((d.cb[0x35] as RotShiftReg).mnemonic { 0 }).isEqualTo("SLL L")
+        assertThat((d.cb[0x36] as RotShiftHl).mnemonic { 0 }).isEqualTo("SLL (HL)")
+        assertThat((d.cb[0x37] as RotShiftReg).mnemonic { 0 }).isEqualTo("SLL A")
     }
 
     @Test
-    fun `installInto registers exactly 56 documented rotate-shift opcodes in CB 0x00 to 0x3F`() {
+    fun `installInto registers all 64 rotate-shift opcodes in CB 0x00 to 0x3F`() {
         val d = Decoder()
         CbOps.installInto(d)
         val count = (0x00..0x3F).count { d.cb[it] != null }
-        assertThat(count).isEqualTo(56)
+        assertThat(count).isEqualTo(64)
     }
 
     @Test
@@ -91,10 +98,10 @@ class CbOpsTest {
     }
 
     @Test
-    fun `installInto fills 248 documented CB opcodes (256 minus 8 SLL slots)`() {
+    fun `installInto fills all 256 CB opcodes (with SLL added in Phase 2_12)`() {
         val d = Decoder()
         CbOps.installInto(d)
         val total = d.cb.count { it != null }
-        assertThat(total).isEqualTo(248)
+        assertThat(total).isEqualTo(256)
     }
 }

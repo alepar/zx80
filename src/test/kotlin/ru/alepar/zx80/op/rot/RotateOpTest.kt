@@ -1,7 +1,6 @@
 package ru.alepar.zx80.op.rot
 
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import ru.alepar.zx80.cpu.Flags
 
@@ -37,20 +36,14 @@ class RotateOpTest {
     }
 
     @Test
-    fun `fromBits maps 0 to 7 except 6`() {
+    fun `fromBits maps 0 to 7 (including SLL at 6)`() {
         assertThat(RotateOp.fromBits(0)).isEqualTo(RotateOp.RLC)
         assertThat(RotateOp.fromBits(1)).isEqualTo(RotateOp.RRC)
         assertThat(RotateOp.fromBits(2)).isEqualTo(RotateOp.RL)
         assertThat(RotateOp.fromBits(3)).isEqualTo(RotateOp.RR)
         assertThat(RotateOp.fromBits(4)).isEqualTo(RotateOp.SLA)
         assertThat(RotateOp.fromBits(5)).isEqualTo(RotateOp.SRA)
+        assertThat(RotateOp.fromBits(6)).isEqualTo(RotateOp.SLL)
         assertThat(RotateOp.fromBits(7)).isEqualTo(RotateOp.SRL)
-    }
-
-    @Test
-    fun `fromBits rejects 6 (SLL undocumented)`() {
-        assertThatThrownBy { RotateOp.fromBits(6) }
-            .isInstanceOf(IllegalStateException::class.java)
-            .hasMessageContaining("SLL")
     }
 }

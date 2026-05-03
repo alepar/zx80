@@ -63,4 +63,25 @@ class RotShiftRegTest {
         assertThat(op.operandLength).isZero
         assertThat(op.baseCycles).isEqualTo(8)
     }
+
+    @Test
+    fun `SLL B shifts left, sets bit 0 to 1`() {
+        val cpu =
+            Cpu().apply {
+                pc = 0x100
+                r = 0
+                tStates = 0L
+                b = 0x55
+            }
+        RotShiftReg(RotateOp.SLL, Reg.B).execute(cpu, Memory())
+        assertThat(cpu.b).isEqualTo(0xAB)
+        assertThat(cpu.pc).isEqualTo(0x102)
+        assertThat(cpu.r).isEqualTo(2)
+        assertThat(cpu.tStates).isEqualTo(8L)
+    }
+
+    @Test
+    fun `SLL mnemonic is SLL r`() {
+        assertThat(RotShiftReg(RotateOp.SLL, Reg.B).mnemonic { 0 }).isEqualTo("SLL B")
+    }
 }

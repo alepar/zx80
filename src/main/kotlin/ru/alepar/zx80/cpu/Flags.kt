@@ -327,6 +327,18 @@ object Flags {
         return AluResult(result, computeRotateShiftFlags(result, newC))
     }
 
+    /**
+     * SLL: shift left logical, undocumented. Bit 0 always 1; bit 7 → C. Z80 quirk: this is
+     * sometimes called "SL1" or "SLIA" in disassemblers since SLA already shifts left and SLL
+     * forces bit 0 to 1 instead of 0.
+     */
+    fun afterSll(value: Int): AluResult {
+        val v = value and 0xFF
+        val newC = (v and 0x80) != 0
+        val result = ((v shl 1) or 0x01) and 0xFF
+        return AluResult(result, computeRotateShiftFlags(result, newC))
+    }
+
     private fun computeRotateShiftFlags(result: Int, newC: Boolean): Int {
         var f = 0
         if (result == 0) f = f or Z
