@@ -17,6 +17,14 @@ object EdOps {
         installReturns(d)
         installRrdRld(d)
         installExtendedLdPair(d)
+        installBlockMove(d)
+    }
+
+    private fun installBlockMove(d: Decoder) {
+        d.ed[0xA0] = Ldi
+        d.ed[0xA8] = Ldd
+        d.ed[0xB0] = Ldir
+        d.ed[0xB8] = Lddr
     }
 
     private fun installExtendedLdPair(d: Decoder) {
