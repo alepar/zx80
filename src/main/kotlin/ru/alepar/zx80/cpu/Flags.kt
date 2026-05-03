@@ -266,6 +266,76 @@ object Flags {
      * - N = preserved from oldF.
      * - C = potentially set if high-nibble correction was applied.
      */
+    /**
+     * RLC: rotate value left circular. Bit 7 → C and → bit 0. Flag rules: S/Z from result; H=0;
+     * PV=parity; N=0; C from old bit 7.
+     */
+    fun afterRlc(value: Int): AluResult {
+        val v = value and 0xFF
+        val newC = (v and 0x80) != 0
+        val result = ((v shl 1) or (if (newC) 1 else 0)) and 0xFF
+        return AluResult(result, computeRotateShiftFlags(result, newC))
+    }
+
+    /** RRC: rotate value right circular. Bit 0 → C and → bit 7. */
+    fun afterRrc(value: Int): AluResult {
+        val v = value and 0xFF
+        val newC = (v and 0x01) != 0
+        val result = ((v ushr 1) or (if (newC) 0x80 else 0)) and 0xFF
+        return AluResult(result, computeRotateShiftFlags(result, newC))
+    }
+
+    /** RL: rotate left through carry. Old C → new bit 0; old bit 7 → new C. */
+    fun afterRl(value: Int, oldF: Int): AluResult {
+        val v = value and 0xFF
+        val oldC = if (oldF and C != 0) 1 else 0
+        val newC = (v and 0x80) != 0
+        val result = ((v shl 1) or oldC) and 0xFF
+        return AluResult(result, computeRotateShiftFlags(result, newC))
+    }
+
+    /** RR: rotate right through carry. Old C → new bit 7; old bit 0 → new C. */
+    fun afterRr(value: Int, oldF: Int): AluResult {
+        val v = value and 0xFF
+        val oldC = if (oldF and C != 0) 0x80 else 0
+        val newC = (v and 0x01) != 0
+        val result = ((v ushr 1) or oldC) and 0xFF
+        return AluResult(result, computeRotateShiftFlags(result, newC))
+    }
+
+    /** SLA: shift left arithmetic. Bit 0 always 0; bit 7 → C. */
+    fun afterSla(value: Int): AluResult {
+        val v = value and 0xFF
+        val newC = (v and 0x80) != 0
+        val result = (v shl 1) and 0xFF
+        return AluResult(result, computeRotateShiftFlags(result, newC))
+    }
+
+    /** SRA: shift right arithmetic. Bit 7 preserved (sign extend); bit 0 → C. */
+    fun afterSra(value: Int): AluResult {
+        val v = value and 0xFF
+        val newC = (v and 0x01) != 0
+        val result = ((v ushr 1) or (v and 0x80)) and 0xFF
+        return AluResult(result, computeRotateShiftFlags(result, newC))
+    }
+
+    /** SRL: shift right logical. Bit 7 always 0; bit 0 → C. */
+    fun afterSrl(value: Int): AluResult {
+        val v = value and 0xFF
+        val newC = (v and 0x01) != 0
+        val result = (v ushr 1) and 0xFF
+        return AluResult(result, computeRotateShiftFlags(result, newC))
+    }
+
+    private fun computeRotateShiftFlags(result: Int, newC: Boolean): Int {
+        var f = 0
+        if (result == 0) f = f or Z
+        if (result and 0x80 != 0) f = f or S
+        if (parity(result)) f = f or PV
+        if (newC) f = f or C
+        return f
+    }
+
     fun afterDaa(a: Int, oldF: Int): AluResult {
         val n = oldF and N != 0
         val cFlag = oldF and C != 0

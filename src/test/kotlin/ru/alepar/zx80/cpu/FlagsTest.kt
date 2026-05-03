@@ -527,4 +527,175 @@ class FlagsTest {
         r = Flags.afterDaa(0x82, oldF = 0)
         assertThat(r.newF and Flags.S).isNotZero
     }
+
+    @Test
+    fun `afterRlc 0x80 rotates to 0x01 with C set, Z clear`() {
+        val r = Flags.afterRlc(0x80)
+        assertThat(r.value).isEqualTo(0x01)
+        assertThat(r.newF and Flags.C).isNotZero
+        assertThat(r.newF and Flags.Z).isZero
+        assertThat(r.newF and Flags.S).isZero
+        assertThat(r.newF and Flags.H).isZero
+        assertThat(r.newF and Flags.N).isZero
+        assertThat(r.newF and Flags.PV).isZero
+    }
+
+    @Test
+    fun `afterRlc 0x00 stays 0x00 with Z set, no C`() {
+        val r = Flags.afterRlc(0x00)
+        assertThat(r.value).isZero
+        assertThat(r.newF and Flags.Z).isNotZero
+        assertThat(r.newF and Flags.C).isZero
+        assertThat(r.newF and Flags.PV).isNotZero
+    }
+
+    @Test
+    fun `afterRlc 0x55 rotates to 0xAA, S set`() {
+        val r = Flags.afterRlc(0x55)
+        assertThat(r.value).isEqualTo(0xAA)
+        assertThat(r.newF and Flags.S).isNotZero
+        assertThat(r.newF and Flags.C).isZero
+    }
+
+    @Test
+    fun `afterRrc 0x01 rotates to 0x80 with C set, S set`() {
+        val r = Flags.afterRrc(0x01)
+        assertThat(r.value).isEqualTo(0x80)
+        assertThat(r.newF and Flags.C).isNotZero
+        assertThat(r.newF and Flags.S).isNotZero
+        assertThat(r.newF and Flags.Z).isZero
+    }
+
+    @Test
+    fun `afterRrc 0x00 stays 0x00 with Z set`() {
+        val r = Flags.afterRrc(0x00)
+        assertThat(r.value).isZero
+        assertThat(r.newF and Flags.Z).isNotZero
+        assertThat(r.newF and Flags.C).isZero
+    }
+
+    @Test
+    fun `afterRrc 0x02 gives 0x01, no C`() {
+        val r = Flags.afterRrc(0x02)
+        assertThat(r.value).isEqualTo(0x01)
+        assertThat(r.newF and Flags.C).isZero
+    }
+
+    @Test
+    fun `afterRl 0x80 with C=1 gives 0x01 with C set`() {
+        val r = Flags.afterRl(0x80, oldF = Flags.C)
+        assertThat(r.value).isEqualTo(0x01)
+        assertThat(r.newF and Flags.C).isNotZero
+    }
+
+    @Test
+    fun `afterRl 0x80 with C=0 gives 0x00 with Z and C set`() {
+        val r = Flags.afterRl(0x80, oldF = 0)
+        assertThat(r.value).isZero
+        assertThat(r.newF and Flags.Z).isNotZero
+        assertThat(r.newF and Flags.C).isNotZero
+    }
+
+    @Test
+    fun `afterRl 0x40 with C=0 gives 0x80, S set`() {
+        val r = Flags.afterRl(0x40, oldF = 0)
+        assertThat(r.value).isEqualTo(0x80)
+        assertThat(r.newF and Flags.S).isNotZero
+        assertThat(r.newF and Flags.C).isZero
+    }
+
+    @Test
+    fun `afterRr 0x01 with C=1 gives 0x80 with C set`() {
+        val r = Flags.afterRr(0x01, oldF = Flags.C)
+        assertThat(r.value).isEqualTo(0x80)
+        assertThat(r.newF and Flags.S).isNotZero
+        assertThat(r.newF and Flags.C).isNotZero
+    }
+
+    @Test
+    fun `afterRr 0x01 with C=0 gives 0x00 with Z and C set`() {
+        val r = Flags.afterRr(0x01, oldF = 0)
+        assertThat(r.value).isZero
+        assertThat(r.newF and Flags.Z).isNotZero
+        assertThat(r.newF and Flags.C).isNotZero
+    }
+
+    @Test
+    fun `afterRr 0x02 with C=0 gives 0x01, no C`() {
+        val r = Flags.afterRr(0x02, oldF = 0)
+        assertThat(r.value).isEqualTo(0x01)
+        assertThat(r.newF and Flags.C).isZero
+    }
+
+    @Test
+    fun `afterSla 0x80 gives 0x00 with Z and C set`() {
+        val r = Flags.afterSla(0x80)
+        assertThat(r.value).isZero
+        assertThat(r.newF and Flags.Z).isNotZero
+        assertThat(r.newF and Flags.C).isNotZero
+    }
+
+    @Test
+    fun `afterSla 0x40 gives 0x80, S set, no C`() {
+        val r = Flags.afterSla(0x40)
+        assertThat(r.value).isEqualTo(0x80)
+        assertThat(r.newF and Flags.S).isNotZero
+        assertThat(r.newF and Flags.C).isZero
+    }
+
+    @Test
+    fun `afterSla 0xFF gives 0xFE, S and C set`() {
+        val r = Flags.afterSla(0xFF)
+        assertThat(r.value).isEqualTo(0xFE)
+        assertThat(r.newF and Flags.S).isNotZero
+        assertThat(r.newF and Flags.C).isNotZero
+    }
+
+    @Test
+    fun `afterSra 0x80 gives 0xC0 with sign bit preserved`() {
+        val r = Flags.afterSra(0x80)
+        assertThat(r.value).isEqualTo(0xC0)
+        assertThat(r.newF and Flags.S).isNotZero
+        assertThat(r.newF and Flags.C).isZero
+    }
+
+    @Test
+    fun `afterSra 0x01 gives 0x00 with Z and C set`() {
+        val r = Flags.afterSra(0x01)
+        assertThat(r.value).isZero
+        assertThat(r.newF and Flags.Z).isNotZero
+        assertThat(r.newF and Flags.C).isNotZero
+    }
+
+    @Test
+    fun `afterSra 0x42 gives 0x21, no C, no sign change`() {
+        val r = Flags.afterSra(0x42)
+        assertThat(r.value).isEqualTo(0x21)
+        assertThat(r.newF and Flags.S).isZero
+        assertThat(r.newF and Flags.C).isZero
+    }
+
+    @Test
+    fun `afterSrl 0x80 gives 0x40 no sign preservation`() {
+        val r = Flags.afterSrl(0x80)
+        assertThat(r.value).isEqualTo(0x40)
+        assertThat(r.newF and Flags.S).isZero
+        assertThat(r.newF and Flags.C).isZero
+    }
+
+    @Test
+    fun `afterSrl 0x01 gives 0x00 with Z and C set`() {
+        val r = Flags.afterSrl(0x01)
+        assertThat(r.value).isZero
+        assertThat(r.newF and Flags.Z).isNotZero
+        assertThat(r.newF and Flags.C).isNotZero
+    }
+
+    @Test
+    fun `afterSrl 0xFF gives 0x7F, no sign, C set`() {
+        val r = Flags.afterSrl(0xFF)
+        assertThat(r.value).isEqualTo(0x7F)
+        assertThat(r.newF and Flags.S).isZero
+        assertThat(r.newF and Flags.C).isNotZero
+    }
 }
