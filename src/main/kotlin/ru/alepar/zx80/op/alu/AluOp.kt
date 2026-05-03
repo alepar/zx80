@@ -22,8 +22,8 @@ enum class AluOp(val mnemonic: String, val updatesA: Boolean) {
         when (this) {
             ADD -> Flags.afterAdd(a, b, 0)
             ADC -> Flags.afterAdd(a, b, if (oldF and Flags.C != 0) 1 else 0)
-            SUB,
-            CP -> Flags.afterSub(a, b, 0)
+            SUB -> Flags.afterSub(a, b, 0)
+            CP -> Flags.afterCp(a, b, 0)
             SBC -> Flags.afterSub(a, b, if (oldF and Flags.C != 0) 1 else 0)
             AND -> Flags.afterAnd(a, b)
             OR -> Flags.afterOr(a, b)

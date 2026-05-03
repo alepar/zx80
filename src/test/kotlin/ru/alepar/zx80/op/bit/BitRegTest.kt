@@ -78,4 +78,23 @@ class BitRegTest {
         assertThat(op.operandLength).isZero
         assertThat(op.baseCycles).isEqualTo(8)
     }
+
+    @Test
+    fun `BIT n, r sets X and Y from operand bits 5 and 3 NOT from bit-test result`() {
+        // operand = 0x28 -> X+Y both set in F regardless of which bit is tested
+        val cpu = Cpu().apply { b = 0x28 }
+        BitReg(0, Reg.B).execute(cpu, Memory())
+        assertThat(cpu.f and Flags.X).isNotZero
+        assertThat(cpu.f and Flags.Y).isNotZero
+
+        val cpu2 = Cpu().apply { b = 0x20 }
+        BitReg(7, Reg.B).execute(cpu2, Memory())
+        assertThat(cpu2.f and Flags.X).isNotZero
+        assertThat(cpu2.f and Flags.Y).isZero
+
+        val cpu3 = Cpu().apply { c = 0x08 }
+        BitReg(3, Reg.C).execute(cpu3, Memory())
+        assertThat(cpu3.f and Flags.X).isZero
+        assertThat(cpu3.f and Flags.Y).isNotZero
+    }
 }

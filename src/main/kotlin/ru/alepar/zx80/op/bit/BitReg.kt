@@ -22,10 +22,12 @@ class BitReg(private val n: Int, private val src: Reg) : Op {
     override val baseCycles = 8
 
     override fun execute(cpu: Cpu, mem: Memory) {
-        val bit = (src.read(cpu) shr n) and 1
+        val operand = src.read(cpu)
+        val bit = (operand shr n) and 1
         var f = cpu.f and Flags.C
         f = f or Flags.H
         if (bit == 0) f = f or Flags.Z
+        f = f or (operand and 0x28) // X/Y from operand
         cpu.f = f
         cpu.pc = (cpu.pc + 2) and 0xFFFF
         cpu.bumpR(2)

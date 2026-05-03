@@ -905,4 +905,31 @@ class FlagsTest {
         assertThat(srl.newF and Flags.X).isNotZero
         assertThat(srl.newF and Flags.Y).isNotZero
     }
+
+    @Test
+    fun `afterCp sets X and Y from operand bits 5 and 3 NOT from result`() {
+        // a=0x80, b=0x28 -> result=0x58 (X clear, Y clear in result)
+        // but X+Y should come from b=0x28 -> both set
+        val r1 = Flags.afterCp(0x80, 0x28, 0)
+        assertThat(r1.value).isEqualTo(0x58) // result = a - b
+        assertThat(r1.newF and Flags.X).isNotZero // from b, not result
+        assertThat(r1.newF and Flags.Y).isNotZero
+        // a=0x40, b=0x20 -> result=0x20, b=0x20 -> only X
+        val r2 = Flags.afterCp(0x40, 0x20, 0)
+        assertThat(r2.newF and Flags.X).isNotZero
+        assertThat(r2.newF and Flags.Y).isZero
+    }
+
+    @Test
+    fun `afterCp matches afterSub on all flags except X and Y`() {
+        val a = 0x42
+        val b = 0x10
+        val cp = Flags.afterCp(a, b, 0)
+        val sub = Flags.afterSub(a, b, 0)
+        // value identical
+        assertThat(cp.value).isEqualTo(sub.value)
+        // flags identical except X, Y
+        val maskExceptXY = (Flags.S or Flags.Z or Flags.H or Flags.PV or Flags.N or Flags.C)
+        assertThat(cp.newF and maskExceptXY).isEqualTo(sub.newF and maskExceptXY)
+    }
 }

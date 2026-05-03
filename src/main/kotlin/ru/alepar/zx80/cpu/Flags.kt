@@ -73,6 +73,24 @@ object Flags {
     }
 
     /**
+     * CP a, b: same arithmetic as SUB but X/Y come from operand b (not result), per Z80 quirk. The
+     * returned `value` is `(a - b) and 0xFF`; callers ignore it (CP doesn't write A) but flags are
+     * based on it.
+     */
+    fun afterCp(a: Int, b: Int, borrow: Int): AluResult {
+        val diff = a - b - borrow
+        val value = diff and 0xFF
+        var f = N
+        if (value == 0) f = f or Z
+        if (value and 0x80 != 0) f = f or S
+        if ((a and 0x0F) - (b and 0x0F) - borrow < 0) f = f or H
+        if ((a xor b) and 0x80 != 0 && (a xor value) and 0x80 != 0) f = f or PV
+        if (diff < 0) f = f or C
+        f = f or (b and 0x28) // X/Y from operand
+        return AluResult(value, f)
+    }
+
+    /**
      * AND a, b. Result is bitwise AND of the low 8 bits of each. Flags: S = bit 7 of result, Z =
      * result == 0, H = 1, P/V = parity, N = 0, C = 0.
      */
