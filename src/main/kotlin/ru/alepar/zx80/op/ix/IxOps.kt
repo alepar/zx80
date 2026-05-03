@@ -1,6 +1,7 @@
 package ru.alepar.zx80.op.ix
 
 import ru.alepar.zx80.cpu.Decoder
+import ru.alepar.zx80.cpu.IndexHalfReg
 import ru.alepar.zx80.cpu.IndexReg
 import ru.alepar.zx80.cpu.Reg
 import ru.alepar.zx80.op.alu.AluOp
@@ -18,6 +19,22 @@ object IxOps {
         installIndexedAlu(d)
         installIndexedIncDec(d)
         installJpIx(d)
+        installAluAHalves(d)
+    }
+
+    private fun installAluAHalves(d: Decoder) {
+        for (idx in IndexReg.entries) {
+            val table = if (idx == IndexReg.IX) d.dd else d.fd
+            val high = if (idx == IndexReg.IX) IndexHalfReg.IXH else IndexHalfReg.IYH
+            val low = if (idx == IndexReg.IX) IndexHalfReg.IXL else IndexHalfReg.IYL
+            for (oooBits in 0..7) {
+                val op = AluOp.fromBits(oooBits)
+                // <ALU> A, IXH/IYH at 0x84 + (ooo << 3)
+                table[0x84 or (oooBits shl 3)] = AluAFromIxHalf(op, high)
+                // <ALU> A, IXL/IYL at 0x85 + (ooo << 3)
+                table[0x85 or (oooBits shl 3)] = AluAFromIxHalf(op, low)
+            }
+        }
     }
 
     private fun installLdSpHlStraggler(d: Decoder) {

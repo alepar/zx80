@@ -92,4 +92,26 @@ class IxOpsTest {
         assertThat((d.dd[0xE9] as JpIx).mnemonic { 0 }).isEqualTo("JP (IX)")
         assertThat((d.fd[0xE9] as JpIx).mnemonic { 0 }).isEqualTo("JP (IY)")
     }
+
+    @Test
+    fun `installInto registers ALU on IXH at DD 84-BC and ALU on IXL at DD 85-BD`() {
+        val d = Decoder()
+        IxOps.installInto(d)
+        // Spot-check ADD A, IXH at DD 84
+        assertThat((d.dd[0x84] as AluAFromIxHalf).mnemonic { 0 }).isEqualTo("ADD A, IXH")
+        // ADC A, IXH at DD 8C
+        assertThat((d.dd[0x8C] as AluAFromIxHalf).mnemonic { 0 }).isEqualTo("ADC A, IXH")
+        // SUB IXL at DD 95
+        assertThat((d.dd[0x95] as AluAFromIxHalf).mnemonic { 0 }).isEqualTo("SUB A, IXL")
+        // CP IXL at DD BD
+        assertThat((d.dd[0xBD] as AluAFromIxHalf).mnemonic { 0 }).isEqualTo("CP A, IXL")
+    }
+
+    @Test
+    fun `installInto registers ALU on IYH at FD 84-BC and IYL at FD 85-BD`() {
+        val d = Decoder()
+        IxOps.installInto(d)
+        assertThat((d.fd[0x84] as AluAFromIxHalf).mnemonic { 0 }).isEqualTo("ADD A, IYH")
+        assertThat((d.fd[0xAD] as AluAFromIxHalf).mnemonic { 0 }).isEqualTo("XOR A, IYL")
+    }
 }
