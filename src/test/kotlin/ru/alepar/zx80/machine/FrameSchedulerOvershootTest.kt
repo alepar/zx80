@@ -12,7 +12,7 @@ class FrameSchedulerOvershootTest {
         machine.mem.write(0x4001, 0xFE)
         machine.cpu.apply { pc = 0x4000; sp = 0xFFFF; iff1 = false; iff2 = false; im = 1 }
 
-        val scheduler = FrameScheduler(machine)
+        val scheduler = machine.scheduler
         scheduler.runFrame()
         val afterFrame1 = machine.cpu.tStates
         scheduler.runFrame()

@@ -20,7 +20,7 @@ class FrameSchedulerRunFrameTest {
         machine.mem.loadAt(0, rom)
         machine.cpu.apply { pc = 0x0000; sp = 0xFFFF; iff1 = false; iff2 = false; im = 1 }
 
-        FrameScheduler(machine).runFrame()
+        machine.scheduler.runFrame()
 
         // After one frame: tStates = budget (69_888) + IM 1 INT cycles (13) = 69_901.
         // HALT case skips cpu.tStates to budget exactly (no instruction overshoot), then
@@ -43,7 +43,7 @@ class FrameSchedulerRunFrameTest {
         machine.mem.write(0x4001, 0xFE)
         machine.cpu.apply { pc = 0x4000; sp = 0xFFFF; iff1 = true; iff2 = true; im = 1 }
 
-        FrameScheduler(machine).runFrame()
+        machine.scheduler.runFrame()
 
         // INT fired exactly once.
         assertThat(machine.cpu.sp).isEqualTo(0xFFFD)
@@ -63,7 +63,7 @@ class FrameSchedulerRunFrameTest {
         machine.mem.write(0x4001, 0xFE)
         machine.cpu.apply { pc = 0x4000; sp = 0xFFFF; iff1 = false; iff2 = false; im = 1 }
 
-        FrameScheduler(machine).runFrame()
+        machine.scheduler.runFrame()
 
         // iff1=false → INT was NOT taken; nothing pushed.
         assertThat(machine.cpu.sp).isEqualTo(0xFFFF)

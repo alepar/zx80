@@ -8,15 +8,17 @@ import ru.alepar.zx80.cpu.ReadOnlyBelow
 import ru.alepar.zx80.op.OpTableBuilder
 
 /**
- * Minimal ZX Spectrum 48K machine container — Cpu, Memory with a 0x4000 write-guard, and an Op
- * dispatcher. cpu.io stays as the default NoIoBus until M2.5 wires the keyboard-aware bus.
+ * Minimal ZX Spectrum 48K machine container — Cpu, Memory with a 0x4000 write-guard, an Op
+ * dispatcher, and a 50Hz [FrameScheduler]. cpu.io stays as the default NoIoBus until M2.5 wires
+ * the keyboard-aware bus.
  *
- * No frame loop, no interrupts, no ULA video — those land in M2.2-M2.5.
+ * No display backend, no audio, no contention — those land in M2.3-M2.7.
  */
 class Spectrum48k(decoder: Decoder = OpTableBuilder.build()) {
     val cpu: Cpu = Cpu()
     val mem: Memory = Memory(ReadOnlyBelow(0x4000))
     private val dispatcher = Dispatcher(decoder)
+    val scheduler: FrameScheduler = FrameScheduler(this)
 
     /** Z80 power-on register state + ROM installed at 0x0000-0x3FFF. Idempotent. */
     fun reset() {
@@ -51,4 +53,7 @@ class Spectrum48k(decoder: Decoder = OpTableBuilder.build()) {
         val target = cpu.tStates + cycles
         while (cpu.tStates < target && !cpu.halted) step()
     }
+
+    /** Run one Spectrum frame (69_888 T-states) and fire the 50Hz maskable INT at the end. */
+    fun runFrame() = scheduler.runFrame()
 }

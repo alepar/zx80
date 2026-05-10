@@ -65,4 +65,20 @@ class Spectrum48kTest {
         machine.run(10_000L)
         assertThat(machine.cpu.tStates).isGreaterThanOrEqualTo(10_000L)
     }
+
+    @Test
+    fun `runFrame ten times from real ROM does not crash and accumulates 10x69888 t-states`() {
+        val machine = Spectrum48k()
+        machine.reset()
+
+        repeat(10) { machine.runFrame() }
+
+        // Cumulative t-states equal 10*69_888 plus the final-frame overshoot (≤22) plus any
+        // INT t-states each frame (13 for IM 1 — the ROM uses IM 1; 13*10 = 130). Plus
+        // overshoot carried within the loop (compensated). Lower bound is exactly
+        // 10*69_888; upper bound is 10*(69_888) + 13*10 + ~22 (final frame trailing overshoot).
+        val cumulative = machine.cpu.tStates
+        assertThat(cumulative).isGreaterThanOrEqualTo(10L * 69_888L)
+        assertThat(cumulative).isLessThan(10L * 69_888L + 200L)
+    }
 }
