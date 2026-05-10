@@ -13,6 +13,23 @@ class FrameScheduler(private val machine: Spectrum48k) {
     private var pendingCycles: Long = 0
 
     /**
+     * Runs the CPU for one Spectrum frame ([T_STATES_PER_FRAME] T-states minus any overshoot
+     * carried over from the prior frame), then fires the maskable INT. If the CPU enters HALT
+     * mid-frame, jumps T-states forward to the budget — real hardware idles in HALT until INT.
+     *
+     * Long-run average is exactly [T_STATES_PER_FRAME] T-states per call.
+     */
+    fun runFrame() {
+        val cpu = machine.cpu
+        val budget = T_STATES_PER_FRAME - pendingCycles
+        val target = cpu.tStates + budget
+        while (cpu.tStates < target && !cpu.halted) machine.step()
+        if (cpu.halted) cpu.tStates = target
+        pendingCycles = cpu.tStates - target
+        interruptRequest()
+    }
+
+    /**
      * Z80 maskable interrupt acknowledge. Returns true if the INT was taken, false if it was
      * ignored (iff1=false or in post-EI delay slot).
      *
