@@ -11,12 +11,12 @@ import kotlin.concurrent.thread
 import kotlin.system.exitProcess
 
 /**
- * Swing-based host window that displays the Pacer's framebuffer. Opens a non-resizable JFrame
- * sized 256*scale x 192*scale. Spawns a daemon thread that loops Pacer.stepOneFrame and
- * schedules repaints on the EDT.
+ * Swing-based host window that displays the Pacer's framebuffer. Opens a non-resizable JFrame sized
+ * 256*scale x 192*scale. Spawns a daemon thread that loops Pacer.stepOneFrame and schedules
+ * repaints on the EDT.
  *
- * On window close: signals the pacer thread to stop, waits up to 500ms, disposes the frame,
- * and calls exitProcess(0). Standard emulator shutdown behavior.
+ * On window close: signals the pacer thread to stop, waits up to 500ms, disposes the frame, and
+ * calls exitProcess(0). Standard emulator shutdown behavior.
  */
 class SpectrumWindow(private val pacer: Pacer, private val scale: Int = 2) {
     private val frame = JFrame("ZX Spectrum 48K")
