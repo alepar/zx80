@@ -477,7 +477,7 @@ EOF
 
 This task has no JUnit test (Gradle behavior is not unit-testable here). Verification is `./gradlew downloadRom` succeeds and produces a 16384-byte file with the expected SHA-256.
 
-### Step 3.1: Add the downloadRom task — first pass with empty SHA placeholder
+### Step 3.1: Add the downloadRom task with pre-pinned SHA
 
 - [ ] Add these two imports at the very top of `build.gradle.kts` (above the existing `plugins { ... }` block; both are required because Gradle Kotlin DSL has a `java` extension that shadows the `java.*` package — fully-qualified `java.net.URL` does NOT resolve):
 
@@ -491,10 +491,11 @@ import java.security.MessageDigest
 ```kotlin
 val downloadRom by tasks.registering {
     val outFile = layout.buildDirectory.file("generated-resources/rom/48.rom")
-    val romUrl = "https://github.com/redcode/ZX-Spectrum-48K-ROMs/raw/master/48.rom"
+    // rastersoft/fbzx is an actively-maintained ZX emulator that bundles the canonical Sinclair
+    // 48K ROM. Verified live mirror returning 16384 bytes with the SHA-256 below as of 2026-05-10.
+    val romUrl = "https://github.com/rastersoft/fbzx/raw/master/data/spectrum-roms/48.rom"
     val expectedSize = 16_384
-    // To be filled in step 3.3 once we've downloaded the file once and recorded the digest.
-    val expectedSha256 = ""
+    val expectedSha256 = "d55daa439b673b0e3f5897f99ac37ecb45f974d1862b4dadb85dec34af99cb42"
 
     outputs.file(outFile)
     outputs.upToDateWhen {
@@ -535,7 +536,9 @@ tasks.processResources {
 }
 ```
 
-### Step 3.2: Run the task once to download and capture the SHA
+### Step 3.2: Run the task and verify it downloads the correct bytes
+
+The SHA-256 is pre-pinned in step 3.1, so this step downloads and verifies in one shot.
 
 - [ ] Run:
 
@@ -543,9 +546,10 @@ tasks.processResources {
 ./gradlew clean downloadRom
 ```
 
-Expected output (lifecycle line): `downloaded 48.rom (16384 bytes, sha256=<HEX>) to <path>`.
+Expected output (lifecycle line): `downloaded 48.rom (16384 bytes, sha256=d55daa439b673b0e3f5897f99ac37ecb45f974d1862b4dadb85dec34af99cb42) to <path>`.
 
-- [ ] Copy the printed `<HEX>` SHA-256 value (64 lowercase hex chars).
+If the SHA doesn't match the pre-pinned value, the task fails with a clear mismatch message and you should stop — that means the upstream mirror has been re-keyed, and a different URL needs to be sourced. Do not proceed.
+
 - [ ] Verify the output file:
 
 ```bash
@@ -553,17 +557,9 @@ ls -la build/generated-resources/rom/48.rom
 sha256sum build/generated-resources/rom/48.rom
 ```
 
-Expected: file exists, size 16384, SHA matches the value the task printed.
+Expected: file exists, size 16384, SHA matches `d55daa439b673b0e3f5897f99ac37ecb45f974d1862b4dadb85dec34af99cb42`.
 
-### Step 3.3: Pin the SHA in build.gradle.kts
-
-- [ ] Edit `build.gradle.kts`: replace the `val expectedSha256 = ""` line with the captured digest:
-
-```kotlin
-    val expectedSha256 = "<paste the 64-char hex from step 3.2>"
-```
-
-### Step 3.4: Verify caching and SHA check
+### Step 3.3: Verify caching and SHA check
 
 - [ ] Run:
 
@@ -588,7 +584,7 @@ Expected: task re-runs (size or SHA mismatch on `upToDateWhen`), re-downloads fr
 ./gradlew clean downloadRom
 ```
 
-### Step 3.5: Verify processResources picks up the ROM
+### Step 3.4: Verify processResources picks up the ROM
 
 - [ ] Run:
 
@@ -600,7 +596,7 @@ sha256sum build/resources/main/rom/48.rom
 
 Expected: `build/resources/main/rom/48.rom` exists, size 16384, SHA matches.
 
-### Step 3.6: Commit
+### Step 3.5: Commit
 
 - [ ] Commit:
 
