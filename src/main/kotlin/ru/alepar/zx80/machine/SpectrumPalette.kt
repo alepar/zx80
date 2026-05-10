@@ -3,8 +3,8 @@ package ru.alepar.zx80.machine
 /**
  * Canonical ZX Spectrum 48K palette: 8 colors × 2 brightness levels.
  *
- * Per Sean Young's TUZD and Wikipedia "ZX Spectrum graphic modes": non-bright values use 0xCD
- * on active channels; bright values use 0xFF. Black is 0x000000 in both phases.
+ * Per Sean Young's TUZD and Wikipedia "ZX Spectrum graphic modes": non-bright values use 0xCD on
+ * active channels; bright values use 0xFF. Black is 0x000000 in both phases.
  *
  * Returned as packed RGB ints (alpha bits = 0) suitable for `BufferedImage.setRGB` with
  * TYPE_INT_RGB images.
