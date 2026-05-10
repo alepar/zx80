@@ -28,4 +28,15 @@ class EiTest {
     fun `mnemonic`() {
         assertThat(Ei.mnemonic { 0 }).isEqualTo("EI")
     }
+
+    @Test
+    fun `Ei sets eiPending to enable post-EI interrupt delay slot`() {
+        val cpu =
+            Cpu().apply {
+                pc = 0x100
+                eiPending = false
+            }
+        Ei.execute(cpu, Memory())
+        assertThat(cpu.eiPending).isTrue
+    }
 }

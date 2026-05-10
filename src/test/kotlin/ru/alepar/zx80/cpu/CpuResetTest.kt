@@ -37,6 +37,7 @@ class CpuResetTest {
                 im = 2
                 halted = true
                 tStates = 12345L
+                eiPending = true
             }
 
         cpu.reset()
@@ -65,6 +66,7 @@ class CpuResetTest {
         assertThat(cpu.im).isEqualTo(0)
         assertThat(cpu.halted).isFalse
         assertThat(cpu.tStates).isEqualTo(0L)
+        assertThat(cpu.eiPending).isFalse
     }
 
     @Test

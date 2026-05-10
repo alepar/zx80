@@ -52,6 +52,13 @@ class Cpu {
     var halted: Boolean = false
 
     /**
+     * Z80 post-EI delay slot. Set true by `Ei.execute()`; cleared by the run loop after the next
+     * instruction completes. Maskable INTs are not acknowledged while this is true, so the
+     * canonical `EI; HALT` pattern in the Spectrum ROM works correctly.
+     */
+    var eiPending: Boolean = false
+
+    /**
      * Cycle accumulator (T-states since reset). The convention is that each `Op.execute()` adds its
      * own T-states; the dispatcher does not touch this field.
      */
@@ -138,6 +145,7 @@ class Cpu {
         iff2 = false
         im = 0
         halted = false
+        eiPending = false
         tStates = 0L
     }
 }

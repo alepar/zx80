@@ -12,6 +12,7 @@ object Ei : Op {
     override fun execute(cpu: Cpu, mem: Memory) {
         cpu.iff1 = true
         cpu.iff2 = true
+        cpu.eiPending = true
         cpu.pc = (cpu.pc + 1) and 0xFFFF
         cpu.bumpR()
         cpu.tStates += baseCycles
