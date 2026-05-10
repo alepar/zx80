@@ -270,7 +270,8 @@ edge connector). Splitting now keeps both classes focused.
   returning — Spectrum ROM does this).
 - Initial state: `cpu.iff1=false, cpu.pc=0x0000, cpu.sp=0xFFFF`.
 - After `runFrame()`:
-  - `cpu.tStates == 69_888` (exactly, on first frame, since pendingCycles starts at 0).
+  - `cpu.tStates == 69_888 + 13` (budget + IM 1 INT cycles; first frame, no overshoot
+    since HALT skips tStates to budget exactly).
   - `cpu.halted == false` (INT cleared it).
   - `cpu.pc` == 0x0039 or further (we entered the ISR; specific value
     depends on how many ISR instructions executed within budget).

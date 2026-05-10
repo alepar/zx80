@@ -596,16 +596,16 @@ class FrameSchedulerRunFrameTest {
 
         machine.scheduler.runFrame()
 
-        // After one frame: tStates exactly 69_888 (first frame, no carry-over).
-        assertThat(machine.cpu.tStates).isEqualTo(69_888L)
+        // After one frame: tStates = budget (69_888) + IM 1 INT cycles (13) = 69_901.
+        // HALT case skips cpu.tStates to budget exactly (no instruction overshoot), then
+        // interruptRequest() inside runFrame() adds the 13 IM 1 T-states.
+        assertThat(machine.cpu.tStates).isEqualTo(69_888L + 13L)
         // INT cleared halted and pushed the post-HALT address (0x0002).
         assertThat(machine.cpu.halted).isFalse
         assertThat(machine.cpu.sp).isEqualTo(0xFFFD)
         assertThat(machine.mem.readWord(0xFFFD)).isEqualTo(0x0002)
-        // PC landed at the ISR entry (or just past it, depending on whether overshoot allowed
-        // a NOP step inside the ISR within budget — it shouldn't because runFrame stops at
-        // budget; but the INT itself adds 13 T-states AFTER budget is hit, then return.
-        // Actually the INT fires after the loop ends, so PC ends at 0x0038 exactly.
+        // PC landed at the ISR entry — runFrame's loop stops at budget, then INT fires and
+        // jumps to 0x0038. ISR doesn't execute within this frame; PC stays at 0x0038.
         assertThat(machine.cpu.pc).isEqualTo(0x0038)
     }
 
