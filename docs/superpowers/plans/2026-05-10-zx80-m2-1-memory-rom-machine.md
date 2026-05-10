@@ -479,7 +479,14 @@ This task has no JUnit test (Gradle behavior is not unit-testable here). Verific
 
 ### Step 3.1: Add the downloadRom task — first pass with empty SHA placeholder
 
-- [ ] Append to `build.gradle.kts` (after the existing `tasks.test { ... }` block, before the `spotless { ... }` block):
+- [ ] Add these two imports at the very top of `build.gradle.kts` (above the existing `plugins { ... }` block; both are required because Gradle Kotlin DSL has a `java` extension that shadows the `java.*` package — fully-qualified `java.net.URL` does NOT resolve):
+
+```kotlin
+import java.net.URL
+import java.security.MessageDigest
+```
+
+- [ ] Then append to `build.gradle.kts` (after the existing `tasks.test { ... }` block, before the `spotless { ... }` block):
 
 ```kotlin
 val downloadRom by tasks.registering {
@@ -499,7 +506,7 @@ val downloadRom by tasks.registering {
     doLast {
         val target = outFile.get().asFile
         target.parentFile.mkdirs()
-        java.net.URL(romUrl).openStream().use { input ->
+        URL(romUrl).openStream().use { input ->
             target.outputStream().use { input.copyTo(it) }
         }
         val actualSize = target.length()
@@ -518,7 +525,7 @@ val downloadRom by tasks.registering {
 }
 
 fun sha256Hex(bytes: ByteArray): String =
-    java.security.MessageDigest.getInstance("SHA-256")
+    MessageDigest.getInstance("SHA-256")
         .digest(bytes)
         .joinToString("") { "%02x".format(it) }
 
