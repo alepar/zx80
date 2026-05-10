@@ -8,8 +8,8 @@ import ru.alepar.zx80.cpu.ReadOnlyBelow
 import ru.alepar.zx80.op.OpTableBuilder
 
 /**
- * Minimal ZX Spectrum 48K machine container — Cpu, Memory with a 0x4000 write-guard, and an
- * Op dispatcher. cpu.io stays as the default NoIoBus until M2.5 wires the keyboard-aware bus.
+ * Minimal ZX Spectrum 48K machine container — Cpu, Memory with a 0x4000 write-guard, and an Op
+ * dispatcher. cpu.io stays as the default NoIoBus until M2.5 wires the keyboard-aware bus.
  *
  * No frame loop, no interrupts, no ULA video — those land in M2.2-M2.5.
  */
@@ -26,11 +26,12 @@ class Spectrum48k(decoder: Decoder = OpTableBuilder.build()) {
 
     /** Decode and execute one instruction at cpu.pc. Throws if the slot is unmapped. */
     fun step() {
-        val op = dispatcher.decodeAt(cpu, mem)
-            ?: error(
-                "no dispatch route for opcode 0x${mem.read(cpu.pc).toString(16)} " +
-                    "at pc=0x${cpu.pc.toString(16)}"
-            )
+        val op =
+            dispatcher.decodeAt(cpu, mem)
+                ?: error(
+                    "no dispatch route for opcode 0x${mem.read(cpu.pc).toString(16)} " +
+                        "at pc=0x${cpu.pc.toString(16)}"
+                )
         op.execute(cpu, mem)
     }
 

@@ -8,8 +8,8 @@ package ru.alepar.zx80.cpu
  * wrapped internally. This is required for Z80 semantics like `PUSH` from `SP=0` decrementing to
  * `0xFFFF`.
  *
- * The [writePolicy] gates `write` (and indirectly `writeWord`). [loadAt] bypasses the policy —
- * it is the install path for ROM and other privileged loads.
+ * The [writePolicy] gates `write` (and indirectly `writeWord`). [loadAt] bypasses the policy — it
+ * is the install path for ROM and other privileged loads.
  */
 class Memory(private val writePolicy: WritePolicy = OpenPolicy) {
     private val bytes = ByteArray(SIZE)
