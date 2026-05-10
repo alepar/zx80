@@ -11,6 +11,13 @@ class Zx80Cli : CliktCommand(name = "zx80") {
 
 fun main(args: Array<String>) {
     Zx80Cli()
-        .subcommands(ScoreCommand(), RunCommand(), DisasmCommand(), BenchCommand(), ZexdocCommand())
+        .subcommands(
+            ScoreCommand(),
+            RunCommand(),
+            DisasmCommand(),
+            BenchCommand(),
+            ZexdocCommand(),
+            SpectrumCommand(),
+        )
         .main(args)
 }
