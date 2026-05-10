@@ -103,4 +103,33 @@ class Cpu {
     fun bumpR(by: Int = 1) {
         r = (r and 0x80) or ((r + by) and 0x7F)
     }
+
+    /**
+     * Z80 hardware reset: PC=I=R=0, IFF1=IFF2=false, IM=0, halted=false, MEMPTR=0, tStates=0.
+     * SP and the main register pairs are set to 0xFFFF (Z80 power-on convention; Sinclair's ROM
+     * sets SP explicitly within the first dozen instructions). Alternates and IX/IY likewise
+     * 0xFFFF for parity with real-hardware indeterminate state.
+     */
+    fun reset() {
+        a = 0xFF; f = 0xFF
+        b = 0xFF; c = 0xFF
+        d = 0xFF; e = 0xFF
+        h = 0xFF; l = 0xFF
+        aAlt = 0xFF; fAlt = 0xFF
+        bAlt = 0xFF; cAlt = 0xFF
+        dAlt = 0xFF; eAlt = 0xFF
+        hAlt = 0xFF; lAlt = 0xFF
+        ix = 0xFFFF
+        iy = 0xFFFF
+        sp = 0xFFFF
+        pc = 0x0000
+        i = 0
+        r = 0
+        memptr = 0
+        iff1 = false
+        iff2 = false
+        im = 0
+        halted = false
+        tStates = 0L
+    }
 }
