@@ -261,7 +261,7 @@ class UlaRendererTest {
     }
 
     @Test
-    fun `flash off: bit 7 of attr is ignored when flashOn=false`() {
+    fun `flash off, bit 7 of attr is ignored when flashOn=false`() {
         val mem = Memory()
         mem.write(0x4000, 0xFF)
         mem.write(0x5800, 0x87) // FLASH=1, ink=white, paper=black
@@ -272,7 +272,7 @@ class UlaRendererTest {
     }
 
     @Test
-    fun `flash on: bit 7 of attr inverts ink and paper when flashOn=true`() {
+    fun `flash on, bit 7 of attr inverts ink and paper when flashOn=true`() {
         val mem = Memory()
         mem.write(0x4000, 0xFF)
         mem.write(0x5800, 0x87) // FLASH=1, ink=white, paper=black
@@ -284,7 +284,7 @@ class UlaRendererTest {
     }
 
     @Test
-    fun `bright bit: attribute 0x47 renders 0xFFFFFF not 0xCDCDCD`() {
+    fun `bright bit, attribute 0x47 renders 0xFFFFFF not 0xCDCDCD`() {
         val mem = Memory()
         mem.write(0x4000, 0xFF)
         mem.write(0x5800, 0x47) // BRIGHT=1, ink=white, paper=black
@@ -439,7 +439,7 @@ EOF
 
 ```kotlin
     @Test
-    fun `SMOKE: render the live machine after reset returns 256x192 image`() {
+    fun `SMOKE render the live machine after reset returns 256x192 image`() {
         val machine = Spectrum48k()
         machine.reset()
         val img = renderer.render(machine.mem, flashOn = false)
@@ -455,7 +455,7 @@ EOF
 - [ ] Run:
 
 ```bash
-./gradlew test --tests "ru.alepar.zx80.machine.UlaRendererTest.SMOKE: render the live machine after reset returns 256x192 image"
+./gradlew test --tests "ru.alepar.zx80.machine.UlaRendererTest.SMOKE render the live machine after reset returns 256x192 image"
 ```
 
 Expected: PASS. If it fails or throws, that means `Spectrum48k().reset()` itself crashes (M2.1 regression) or there's an out-of-bounds read in `UlaRenderer` that the synthetic tests didn't catch — STOP, do not proceed to Task 4. Investigate and fix.
