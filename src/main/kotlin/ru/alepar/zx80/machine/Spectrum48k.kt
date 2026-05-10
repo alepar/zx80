@@ -9,8 +9,8 @@ import ru.alepar.zx80.op.OpTableBuilder
 
 /**
  * Minimal ZX Spectrum 48K machine container — Cpu, Memory with a 0x4000 write-guard, an Op
- * dispatcher, and a 50Hz [FrameScheduler]. cpu.io stays as the default NoIoBus until M2.5 wires
- * the keyboard-aware bus.
+ * dispatcher, and a 50Hz [FrameScheduler]. cpu.io stays as the default NoIoBus until M2.5 wires the
+ * keyboard-aware bus.
  *
  * No display backend, no audio, no contention — those land in M2.3-M2.7.
  */

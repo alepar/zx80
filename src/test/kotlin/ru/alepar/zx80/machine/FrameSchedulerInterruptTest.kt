@@ -7,7 +7,12 @@ class FrameSchedulerInterruptTest {
     @Test
     fun `interruptRequest is ignored when iff1 is false`() {
         val machine = Spectrum48k()
-        machine.cpu.apply { pc = 0x1234; sp = 0xFFFF; iff1 = false; tStates = 0L }
+        machine.cpu.apply {
+            pc = 0x1234
+            sp = 0xFFFF
+            iff1 = false
+            tStates = 0L
+        }
         val scheduler = FrameScheduler(machine)
 
         val taken = scheduler.interruptRequest()
@@ -22,7 +27,11 @@ class FrameSchedulerInterruptTest {
     fun `interruptRequest is ignored during post-EI delay slot`() {
         val machine = Spectrum48k()
         machine.cpu.apply {
-            pc = 0x1234; sp = 0xFFFF; iff1 = true; eiPending = true; tStates = 0L
+            pc = 0x1234
+            sp = 0xFFFF
+            iff1 = true
+            eiPending = true
+            tStates = 0L
         }
         val scheduler = FrameScheduler(machine)
 
@@ -37,8 +46,13 @@ class FrameSchedulerInterruptTest {
     fun `IM 1 acknowledge pushes pc, sets pc to 0x0038, t-states += 13`() {
         val machine = Spectrum48k()
         machine.cpu.apply {
-            pc = 0x1234; sp = 0xFFFF; iff1 = true; iff2 = true
-            im = 1; tStates = 0L; r = 0
+            pc = 0x1234
+            sp = 0xFFFF
+            iff1 = true
+            iff2 = true
+            im = 1
+            tStates = 0L
+            r = 0
         }
         val scheduler = FrameScheduler(machine)
 
@@ -61,7 +75,12 @@ class FrameSchedulerInterruptTest {
         // which is identical destination and timing to IM 1 (PC=0x0038, +13 T-states).
         val machine = Spectrum48k()
         machine.cpu.apply {
-            pc = 0x1234; sp = 0xFFFF; iff1 = true; im = 0; tStates = 0L; r = 0
+            pc = 0x1234
+            sp = 0xFFFF
+            iff1 = true
+            im = 0
+            tStates = 0L
+            r = 0
         }
         val scheduler = FrameScheduler(machine)
 
@@ -79,7 +98,13 @@ class FrameSchedulerInterruptTest {
         // loadAt bypasses ROM write-guard for the 0x39FF byte.
         machine.mem.loadAt(0x39FF, byteArrayOf(0x34, 0x42))
         machine.cpu.apply {
-            pc = 0x1234; sp = 0xFFFF; iff1 = true; im = 2; i = 0x39; tStates = 0L; r = 0
+            pc = 0x1234
+            sp = 0xFFFF
+            iff1 = true
+            im = 2
+            i = 0x39
+            tStates = 0L
+            r = 0
         }
         val scheduler = FrameScheduler(machine)
 
@@ -99,7 +124,13 @@ class FrameSchedulerInterruptTest {
         // HALT is at 0x4321; halted=true means the CPU has been holding PC there. On INT,
         // PC must advance to 0x4322 BEFORE being pushed, so RET from the ISR resumes after HALT.
         machine.cpu.apply {
-            pc = 0x4321; sp = 0xFFFF; iff1 = true; halted = true; im = 1; tStates = 0L; r = 0
+            pc = 0x4321
+            sp = 0xFFFF
+            iff1 = true
+            halted = true
+            im = 1
+            tStates = 0L
+            r = 0
         }
         val scheduler = FrameScheduler(machine)
 

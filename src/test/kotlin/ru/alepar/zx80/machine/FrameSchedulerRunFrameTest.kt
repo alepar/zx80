@@ -18,7 +18,13 @@ class FrameSchedulerRunFrameTest {
         rom[0x0001] = 0x76.toByte()
         rom[0x0038] = 0x00 // NOP
         machine.mem.loadAt(0, rom)
-        machine.cpu.apply { pc = 0x0000; sp = 0xFFFF; iff1 = false; iff2 = false; im = 1 }
+        machine.cpu.apply {
+            pc = 0x0000
+            sp = 0xFFFF
+            iff1 = false
+            iff2 = false
+            im = 1
+        }
 
         machine.scheduler.runFrame()
 
@@ -41,7 +47,13 @@ class FrameSchedulerRunFrameTest {
         // Tight loop in RAM: JR -2 at 0x4000 (0x18 0xFE).
         machine.mem.write(0x4000, 0x18)
         machine.mem.write(0x4001, 0xFE)
-        machine.cpu.apply { pc = 0x4000; sp = 0xFFFF; iff1 = true; iff2 = true; im = 1 }
+        machine.cpu.apply {
+            pc = 0x4000
+            sp = 0xFFFF
+            iff1 = true
+            iff2 = true
+            im = 1
+        }
 
         machine.scheduler.runFrame()
 
@@ -61,7 +73,13 @@ class FrameSchedulerRunFrameTest {
         // Simpler: write JR -2 at 0x4000.
         machine.mem.write(0x4000, 0x18)
         machine.mem.write(0x4001, 0xFE)
-        machine.cpu.apply { pc = 0x4000; sp = 0xFFFF; iff1 = false; iff2 = false; im = 1 }
+        machine.cpu.apply {
+            pc = 0x4000
+            sp = 0xFFFF
+            iff1 = false
+            iff2 = false
+            im = 1
+        }
 
         machine.scheduler.runFrame()
 

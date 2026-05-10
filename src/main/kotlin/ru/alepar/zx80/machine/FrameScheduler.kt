@@ -1,9 +1,9 @@
 package ru.alepar.zx80.machine
 
 /**
- * Drives the CPU one Spectrum frame at a time and fires the maskable interrupt at the end.
- * Owns the cycle-budget overshoot state so the long-run average frame is exactly
- * [T_STATES_PER_FRAME] T-states.
+ * Drives the CPU one Spectrum frame at a time and fires the maskable interrupt at the end. Owns the
+ * cycle-budget overshoot state so the long-run average frame is exactly [T_STATES_PER_FRAME]
+ * T-states.
  *
  * Spectrum 48K: 3.5 MHz / 50 Hz = 69_888 T-states per frame.
  */
@@ -57,7 +57,8 @@ class FrameScheduler(private val machine: Spectrum48k) {
         cpu.iff2 = false
         cpu.bumpR(1)
         when (cpu.im) {
-            0, 1 -> {
+            0,
+            1 -> {
                 cpu.pc = 0x0038
                 cpu.tStates += 13
             }
