@@ -24,8 +24,15 @@ class Spectrum48k(decoder: Decoder = OpTableBuilder.build()) {
         mem.loadAt(0, RomLoader.load48k())
     }
 
-    /** Decode and execute one instruction at cpu.pc. Throws if the slot is unmapped. */
+    /**
+     * Decode and execute one instruction at cpu.pc. Throws if the slot is unmapped.
+     *
+     * Clears `cpu.eiPending` AFTER executing the next non-EI instruction (the post-EI delay slot
+     * mechanism). Capturing the prior value before dispatch ensures the EI step itself doesn't
+     * clear the flag it just set.
+     */
     fun step() {
+        val priorEiPending = cpu.eiPending
         val op =
             dispatcher.decodeAt(cpu, mem)
                 ?: error(
@@ -33,6 +40,7 @@ class Spectrum48k(decoder: Decoder = OpTableBuilder.build()) {
                         "at pc=0x${cpu.pc.toString(16)}"
                 )
         op.execute(cpu, mem)
+        if (priorEiPending) cpu.eiPending = false
     }
 
     /**
