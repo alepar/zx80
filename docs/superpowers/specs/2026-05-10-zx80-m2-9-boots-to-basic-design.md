@@ -5,9 +5,14 @@
 Wrap up M2 with a composite "boots-to-BASIC" milestone gate. After
 `Spectrum48k().reset()` the gate verifies, in order:
 
-1. ROM reaches EI within ~150 frames (`cpu.iff1 == true`).
-2. ROM ISR increments FRAMES counter at 0x5C78 (`> 0` after another
-   ~50 frames).
+1. ROM ISR has run at least once — `mem.read(0x5C78) > 0` within
+   ~200 frames. This is the observable proxy for "EI was reached":
+   `runFrame()` ends with `interruptRequest()` which clears `iff1` on
+   INT ack, so checking `cpu.iff1` post-frame is always false; the
+   FRAMES counter incrementing proves the ROM reached EI and the ISR
+   ran.
+2. FRAMES counter keeps incrementing — reaches `>= 5` within another
+   ~60 frames. Proves sustained running, not a one-shot fluke.
 3. Screen RAM at 0x4000-0x57FF is non-empty (the © boot message has
    been drawn).
 
@@ -67,11 +72,14 @@ import ru.alepar.zx80.machine.UlaRenderer
  * End-to-end "did the Spectrum 48K ROM boot?" gate, run as a Suite for the score harness.
  *
  * Three sub-checks against a freshly reset machine:
- *   1. ROM reaches EI (cpu.iff1 becomes true) within EI_BUDGET_FRAMES.
- *   2. After EI, the ROM's 50Hz ISR increments FRAMES at 0x5C78 (> 0) within
- *      POST_EI_BUDGET_FRAMES additional frames.
- *   3. Screen RAM (0x4000-0x57FF) contains at least one non-zero byte after the
- *      above (the © boot message has been drawn).
+ *   1. isr-ran — mem.read(0x5C78) > 0 within EI_BUDGET_FRAMES. This is the observable
+ *      proxy for "ROM reached EI": runFrame() ends with interruptRequest() which clears
+ *      cpu.iff1 on INT ack, so checking iff1 post-frame is always false. FRAMES > 0
+ *      proves the ROM reached EI AND the ISR ran.
+ *   2. frames-sustained — FRAMES counter reaches >= MIN_FRAMES_FOR_SUSTAINED within
+ *      another POST_EI_BUDGET_FRAMES frames. Proves continued running.
+ *   3. screen-non-empty — screen RAM (0x4000-0x57FF) contains at least one non-zero byte
+ *      (the © boot message has been drawn).
  *
  * Returns SuiteResult with passed = count of checks that succeeded (0..3), total = 3.
  */
@@ -83,23 +91,23 @@ class BootsToBasic(private val decoder: Decoder) : Suite {
         val machine = Spectrum48k(decoder)
         machine.reset()
 
-        var framesToEi = 0
-        var eiReached = false
+        var framesToFirstIsr = 0
+        var isrRan = false
         for (i in 1..EI_BUDGET_FRAMES) {
             machine.runFrame()
-            framesToEi = i
-            if (machine.cpu.iff1) {
-                eiReached = true
+            framesToFirstIsr = i
+            if (machine.mem.read(0x5C78) > 0) {
+                isrRan = true
                 break
             }
         }
 
-        var framesIncremented = false
-        if (eiReached) {
+        var framesSustained = false
+        if (isrRan) {
             for (i in 1..POST_EI_BUDGET_FRAMES) {
                 machine.runFrame()
-                if (machine.mem.read(0x5C78) > 0) {
-                    framesIncremented = true
+                if (machine.mem.read(0x5C78) >= MIN_FRAMES_FOR_SUSTAINED) {
+                    framesSustained = true
                     break
                 }
             }
@@ -114,15 +122,15 @@ class BootsToBasic(private val decoder: Decoder) : Suite {
         }
 
         val checks = listOf(
-            "ei-reached" to eiReached,
-            "frames-incremented" to framesIncremented,
+            "isr-ran" to isrRan,
+            "frames-sustained" to framesSustained,
             "screen-non-empty" to screenNonEmpty,
         )
         val passed = checks.count { it.second }
 
         val details = buildJsonObject {
             put("checks", JsonArray(checks.map { (label, ok) -> jsonCheck(label, ok) }))
-            put("frames-to-ei", JsonPrimitive(framesToEi))
+            put("frames-to-first-isr", JsonPrimitive(framesToFirstIsr))
             put("frames-counter", JsonPrimitive(machine.mem.read(0x5C78)))
         }
         return SuiteResult(name = name, weight = weight, passed = passed, total = checks.size,
@@ -135,8 +143,9 @@ class BootsToBasic(private val decoder: Decoder) : Suite {
     }
 
     companion object {
-        const val EI_BUDGET_FRAMES = 200       // ROM memory test takes ~82 frames; 200 = generous
-        const val POST_EI_BUDGET_FRAMES = 60   // FRAMES should tick within a frame or two of EI
+        const val EI_BUDGET_FRAMES = 200          // ROM memory test takes ~82 frames; 200 = generous
+        const val POST_EI_BUDGET_FRAMES = 60      // sustained-running check
+        const val MIN_FRAMES_FOR_SUSTAINED = 5    // FRAMES counter must reach this for "sustained"
     }
 }
 ```
@@ -167,10 +176,10 @@ fun `Result has weight 0_1 and name boots-to-basic`() {
 }
 
 @Test
-fun `Details include frames-to-ei and frames-counter fields`() {
+fun `Details include frames-to-first-isr and frames-counter fields`() {
     val result = BootsToBasic(OpTableBuilder.build()).run()
     val details = result.details
-    assertThat(details).containsKey("frames-to-ei")
+    assertThat(details).containsKey("frames-to-first-isr")
     assertThat(details).containsKey("frames-counter")
     assertThat(details).containsKey("checks")
 }
@@ -332,9 +341,8 @@ both. Three small WUs.
   normalization keeps SCORE in 0..1.
 - **Screen-non-empty too loose.** Any non-zero byte passes the gate.
   If a future change populates screen RAM during reset, the gate
-  passes spuriously. Mitigated by also requiring ei-reached +
-  frames-incremented; spurious screen-non-empty alone is 1/3, not
-  3/3.
+  passes spuriously. Mitigated by also requiring isr-ran +
+  frames-sustained; spurious screen-non-empty alone is 1/3, not 3/3.
 - **Slow Suite.** ~270ms per `zx80 score` run. Negligible.
 - **Test method names with colons.** Recurring author trap. All test
   names in this spec use commas/dashes/underscores; no colons.
