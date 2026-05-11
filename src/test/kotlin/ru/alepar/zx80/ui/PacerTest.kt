@@ -85,8 +85,14 @@ class PacerTest {
     fun `audioSink beforeFrame and afterFrame fire around each runFrame`() {
         class RecordingAudioSink : AudioSink {
             val log: MutableList<String> = mutableListOf()
-            override fun beforeFrame() { log += "before" }
-            override fun afterFrame() { log += "after" }
+
+            override fun beforeFrame() {
+                log += "before"
+            }
+
+            override fun afterFrame() {
+                log += "after"
+            }
         }
         val machine = Spectrum48k()
         val clock = FakeClock()

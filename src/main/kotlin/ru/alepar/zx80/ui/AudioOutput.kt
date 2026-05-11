@@ -11,6 +11,7 @@ import javax.sound.sampled.SourceDataLine
  */
 interface AudioOutput {
     fun push(buf: ByteArray, length: Int)
+
     fun close()
 
     companion object {
@@ -21,8 +22,8 @@ interface AudioOutput {
 
         /**
          * Try to open a 48 kHz 8-bit unsigned mono SourceDataLine. On any failure
-         * (LineUnavailableException, device absent, format unsupported), log a warning to
-         * stderr and return [NoOpAudioOutput] so emulation continues silently.
+         * (LineUnavailableException, device absent, format unsupported), log a warning to stderr
+         * and return [NoOpAudioOutput] so emulation continues silently.
          */
         fun tryOpen(): AudioOutput {
             return try {
@@ -41,10 +42,14 @@ interface AudioOutput {
                 line.start()
                 JavaSoundAudioOutput(line)
             } catch (e: LineUnavailableException) {
-                System.err.println("WARN: audio device unavailable; running silently (${e.message})")
+                System.err.println(
+                    "WARN: audio device unavailable; running silently (${e.message})"
+                )
                 NoOpAudioOutput
             } catch (e: IllegalArgumentException) {
-                System.err.println("WARN: audio format unsupported; running silently (${e.message})")
+                System.err.println(
+                    "WARN: audio format unsupported; running silently (${e.message})"
+                )
                 NoOpAudioOutput
             }
         }
@@ -55,6 +60,7 @@ class JavaSoundAudioOutput(private val line: SourceDataLine) : AudioOutput {
     override fun push(buf: ByteArray, length: Int) {
         line.write(buf, 0, length)
     }
+
     override fun close() {
         line.drain()
         line.stop()
@@ -63,6 +69,9 @@ class JavaSoundAudioOutput(private val line: SourceDataLine) : AudioOutput {
 }
 
 object NoOpAudioOutput : AudioOutput {
-    override fun push(buf: ByteArray, length: Int) { /* swallow */ }
+    override fun push(buf: ByteArray, length: Int) {
+        /* swallow */
+    }
+
     override fun close() {}
 }

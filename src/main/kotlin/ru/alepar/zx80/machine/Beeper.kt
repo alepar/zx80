@@ -3,15 +3,14 @@ package ru.alepar.zx80.machine
 import ru.alepar.zx80.cpu.Cpu
 
 /**
- * Captures OUT(0xFE) bit-4 toggles (the Spectrum's 1-bit beeper) and renders them to a 48 kHz
- * 8-bit unsigned PCM buffer once per frame.
+ * Captures OUT(0xFE) bit-4 toggles (the Spectrum's 1-bit beeper) and renders them to a 48 kHz 8-bit
+ * unsigned PCM buffer once per frame.
  *
- * Single-threaded (Pacer thread only): SpectrumIoBus.write calls [onWrite] during runFrame;
- * Pacer's audio sink calls [beginFrame] before runFrame and [render] after.
+ * Single-threaded (Pacer thread only): SpectrumIoBus.write calls [onWrite] during runFrame; Pacer's
+ * audio sink calls [beginFrame] before runFrame and [render] after.
  *
- * `events` holds T-state offsets (relative to frame start) at which the bit toggled. We don't
- * need to record the new value — toggles always flip; the starting [bit] is the post-render
- * carry-over.
+ * `events` holds T-state offsets (relative to frame start) at which the bit toggled. We don't need
+ * to record the new value — toggles always flip; the starting [bit] is the post-render carry-over.
  */
 class Beeper(private val cpu: Cpu) {
     private val events = mutableListOf<Long>()
@@ -34,9 +33,9 @@ class Beeper(private val cpu: Cpu) {
     }
 
     /**
-     * Render 960 samples for the just-completed frame into [buf]. The starting bit is the value
-     * of [bit] at frame begin (carried from the previous frame); each event flips it at the
-     * sample whose T-state >= the event offset.
+     * Render 960 samples for the just-completed frame into [buf]. The starting bit is the value of
+     * [bit] at frame begin (carried from the previous frame); each event flips it at the sample
+     * whose T-state >= the event offset.
      */
     fun render(buf: ByteArray) {
         require(buf.size >= SAMPLES_PER_FRAME) { "buf must hold >= $SAMPLES_PER_FRAME samples" }
@@ -45,7 +44,8 @@ class Beeper(private val cpu: Cpu) {
         var startBit = startBitForRender()
         var eventIdx = 0
         for (sample in 0 until SAMPLES_PER_FRAME) {
-            val tStateAtSample = (sample.toDouble() * T_STATES_PER_FRAME / SAMPLES_PER_FRAME).toLong()
+            val tStateAtSample =
+                (sample.toDouble() * T_STATES_PER_FRAME / SAMPLES_PER_FRAME).toLong()
             while (eventIdx < events.size && events[eventIdx] <= tStateAtSample) {
                 startBit = startBit xor 1
                 eventIdx++
