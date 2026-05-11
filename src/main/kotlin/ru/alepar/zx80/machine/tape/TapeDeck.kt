@@ -7,7 +7,8 @@ package ru.alepar.zx80.machine.tape
  * The deck is always present on a [ru.alepar.zx80.machine.Spectrum48k]; when no tape is loaded its
  * methods are inert (no trap fires, ear-level stays at the idle constant).
  *
- * M3.2 scope: ROM-trap path only. Pulse-level fields land in M3.3.
+ * M3.3 additions: [pulser] is non-null when pulse mode is active. [startPulseBlock] launches the
+ * pulse-level timeline for the current block; [earLevel] delegates to the pulser when active.
  */
 class TapeDeck {
     /** Currently-loaded tape file, or null if no tape is mounted. */
@@ -21,6 +22,13 @@ class TapeDeck {
      * pulse-mode data. Defaults to true (fast path on).
      */
     var trapEnabled: Boolean = true
+
+    /**
+     * Active pulse-level player, or null when pulse mode is not engaged. Set by [startPulseBlock];
+     * cleared when pulse mode is disengaged.
+     */
+    var pulser: TapePulser? = null
+        private set
 
     /** Mount [file] and reset the block index. Pass null to eject the tape. */
     fun loadTape(file: TapeFile?) {
@@ -82,4 +90,101 @@ class TapeDeck {
     fun advanceBlock() {
         if (blockIndex < blockCount()) blockIndex++
     }
+
+    /**
+     * Start pulse-level playback of the current block at the given [startTState]. Creates a
+     * [TapePulser] from the current block's timing parameters and data, then engages pulse mode.
+     *
+     * Skips informational blocks (same auto-skip logic as [currentTrapData]). Does nothing if no
+     * tape is loaded or the tape has played out.
+     */
+    fun startPulseBlock(startTState: Long) {
+        val t = tape ?: return
+        // Skip informational blocks to find the next data block.
+        while (blockIndex < blockCount()) {
+            val block =
+                when (t) {
+                    is TapTapeFile -> t.blocks[blockIndex]
+                    is TzxTapeFile -> t.blocks[blockIndex]
+                }
+            when (block) {
+                is TapBlock -> {
+                    pulser =
+                        TapePulser(
+                                pilotPulse = 2168,
+                                sync1Pulse = 667,
+                                sync2Pulse = 735,
+                                zeroBitPulse = 855,
+                                oneBitPulse = 1710,
+                                pilotToneLen =
+                                    if (
+                                        block.data.isNotEmpty() &&
+                                            (block.data[0].toInt() and 0xFF) == 0xFF
+                                    )
+                                        3223
+                                    else 8063,
+                                lastByteBits = 8,
+                                pauseMs = 1000,
+                            )
+                            .also { it.start(block.data, startTState) }
+                    return
+                }
+                is TzxStandardData -> {
+                    pulser =
+                        TapePulser(
+                                pilotPulse = 2168,
+                                sync1Pulse = 667,
+                                sync2Pulse = 735,
+                                zeroBitPulse = 855,
+                                oneBitPulse = 1710,
+                                pilotToneLen =
+                                    if (
+                                        block.data.isNotEmpty() &&
+                                            (block.data[0].toInt() and 0xFF) == 0xFF
+                                    )
+                                        3223
+                                    else 8063,
+                                lastByteBits = 8,
+                                pauseMs = block.pauseMs,
+                            )
+                            .also { it.start(block.data, startTState) }
+                    return
+                }
+                is TzxTurboData -> {
+                    pulser =
+                        TapePulser(
+                                pilotPulse = block.pilotPulse,
+                                sync1Pulse = block.sync1Pulse,
+                                sync2Pulse = block.sync2Pulse,
+                                zeroBitPulse = block.zeroBitPulse,
+                                oneBitPulse = block.oneBitPulse,
+                                pilotToneLen = block.pilotToneLen,
+                                lastByteBits = block.lastByteBits,
+                                pauseMs = block.pauseMs,
+                            )
+                            .also { it.start(block.data, startTState) }
+                    return
+                }
+                is TzxPause,
+                is TzxGroupStart,
+                TzxGroupEnd,
+                is TzxTextDescription,
+                is TzxArchiveInfo,
+                is TzxUnknown -> blockIndex++ // skip informational blocks
+            }
+        }
+    }
+
+    /** Stop pulse-level playback and clear the pulser. */
+    fun stopPulse() {
+        pulser?.stop()
+        pulser = null
+    }
+
+    /**
+     * Returns the current EAR level for port-0xFE bit 6 (0x40 mask or 0). Delegates to the active
+     * [pulser] if pulse mode is engaged; otherwise returns 0 (idle low). EAR idle is low on the
+     * Spectrum 48K bus; bit 6 is only driven during tape playback.
+     */
+    fun earLevel(tState: Long): Int = pulser?.earLevelAt(tState) ?: 0
 }
