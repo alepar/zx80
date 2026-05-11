@@ -168,16 +168,18 @@ class TapePulseLoadSuite : Suite {
             deck.earLevel(dataStart) == 0 && deck.earLevel(firstHalfEnd) == 0x40
         }
 
-        // 9. Pulser data matches for 1-bit half-period
+        // 9. Pulser data matches for 1-bit half-period.
+        // Block: flag=0x80 (MSB=1 → first transmitted bit is a 1-bit), payload=0x00, parity=0x80.
+        // flag != 0xFF → deck selects 8063-pulse pilot, consistent with dataStart below.
         check("one-bit-half-period-1710-via-deck") {
             val deck = TapeDeck()
             deck.loadTape(
-                TapTapeFile(listOf(TapBlock(byteArrayOf(0xFF.toByte(), 0xFF.toByte(), 0x00))))
+                TapTapeFile(listOf(TapBlock(byteArrayOf(0x80.toByte(), 0x00, 0x80.toByte()))))
             )
             deck.startPulseBlock(0L)
             val dataStart = 8063L * 2168L + 667L + 735L
             val firstHalfEnd = dataStart + 1710L
-            // First half of 1-bit is LOW, second half HIGH
+            // First half of 1-bit (flag byte MSB=1) is LOW, second half HIGH
             deck.earLevel(dataStart) == 0 && deck.earLevel(firstHalfEnd) == 0x40
         }
 
