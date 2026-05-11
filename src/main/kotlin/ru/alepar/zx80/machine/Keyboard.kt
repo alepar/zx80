@@ -8,14 +8,14 @@ import java.util.concurrent.atomic.AtomicIntegerArray
  * press/release).
  *
  * Each of the 8 rows is an int in [rows]. The low 5 bits indicate state for the 5 keys: 1 =
- * released, 0 = pressed. Bits 5-7 of a row are always 1 (idle); SpectrumIoBus adds the bus
- * pull-ups for the upper bits.
+ * released, 0 = pressed. Bits 5-7 of a row are always 1 (idle); SpectrumIoBus adds the bus pull-ups
+ * for the upper bits.
  *
- * `pressCounts` refcounts each SpectrumKey so multiple host keys mapping to the same Spectrum
- * key release cleanly (e.g. Backspace = CAPS_SHIFT + K0; if the user holds Shift then taps
- * Backspace, the Shift-release should NOT clear CAPS_SHIFT while Backspace is still down).
- * `pressCounts` is EDT-only — no synchronization needed; all KeyEvents fire on the EDT, and
- * tests call press/release directly on the test thread (single-threaded JUnit execution).
+ * `pressCounts` refcounts each SpectrumKey so multiple host keys mapping to the same Spectrum key
+ * release cleanly (e.g. Backspace = CAPS_SHIFT + K0; if the user holds Shift then taps Backspace,
+ * the Shift-release should NOT clear CAPS_SHIFT while Backspace is still down). `pressCounts` is
+ * EDT-only — no synchronization needed; all KeyEvents fire on the EDT, and tests call press/release
+ * directly on the test thread (single-threaded JUnit execution).
  */
 class Keyboard {
     private val rows = AtomicIntegerArray(8).also { for (i in 0 until 8) it.set(i, 0xFF) }
@@ -48,8 +48,8 @@ class Keyboard {
 
     /**
      * ULA read: high byte of port 0xFE is the row-select pattern (bit=0 means row selected).
-     * Multiple rows can be selected; result is the bitwise AND of all selected rows.
-     * Returns the low 5 bits only.
+     * Multiple rows can be selected; result is the bitwise AND of all selected rows. Returns the
+     * low 5 bits only.
      */
     fun read(rowSelectByte: Int): Int {
         var result = 0xFF

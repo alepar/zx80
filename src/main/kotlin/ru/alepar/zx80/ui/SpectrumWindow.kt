@@ -16,17 +16,17 @@ import kotlin.system.exitProcess
 import ru.alepar.zx80.machine.Keyboard
 
 /**
- * Swing-based host window that displays the Pacer's framebuffer and forwards keyboard events to
- * the Spectrum [Keyboard]. Opens a non-resizable JFrame sized 256*scale x 192*scale and spawns
- * a daemon worker thread that loops Pacer.stepOneFrame, scheduling repaints on the EDT.
+ * Swing-based host window that displays the Pacer's framebuffer and forwards keyboard events to the
+ * Spectrum [Keyboard]. Opens a non-resizable JFrame sized 256*scale x 192*scale and spawns a daemon
+ * worker thread that loops Pacer.stepOneFrame, scheduling repaints on the EDT.
  *
  * Key handling: a KeyAdapter on the focusable panel translates VK_* codes via [HostKeyMap] into
- * SpectrumKey lists, calling press/release on each. A `currentlyDown` set dedupes Java's
- * keyPressed repeats for held keys. On `windowDeactivated` and `focusLost` we call
- * `keyboard.releaseAll()` and clear the set so stuck keys are cleared when focus leaves.
+ * SpectrumKey lists, calling press/release on each. A `currentlyDown` set dedupes Java's keyPressed
+ * repeats for held keys. On `windowDeactivated` and `focusLost` we call `keyboard.releaseAll()` and
+ * clear the set so stuck keys are cleared when focus leaves.
  *
- * On window close: signal the pacer thread to stop, wait up to 500ms, dispose the frame, and
- * call exitProcess(0).
+ * On window close: signal the pacer thread to stop, wait up to 500ms, dispose the frame, and call
+ * exitProcess(0).
  */
 class SpectrumWindow(
     private val pacer: Pacer,

@@ -4,12 +4,11 @@ import ru.alepar.zx80.cpu.IoBus
 
 /**
  * Spectrum 48K ULA bus. Decodes Z80 IN/OUT ports:
- *
- * - Read at any port with A0=0 (ULA): low 5 bits return the keyboard matrix for the rows
- *   selected by the port high byte (bit=0 = row selected). Bits 5 and 7 return 1 (bus idle).
- *   Bit 6 returns 1 (EAR idle; M3 may override for tape input).
- * - Write at any port with A0=0 (ULA): low 3 bits set border color (M2.8); bit 4 is the
- *   beeper bit (M2.6). M2.5 stubs the write as a no-op so the CPU doesn't crash.
+ * - Read at any port with A0=0 (ULA): low 5 bits return the keyboard matrix for the rows selected
+ *   by the port high byte (bit=0 = row selected). Bits 5 and 7 return 1 (bus idle). Bit 6 returns 1
+ *   (EAR idle; M3 may override for tape input).
+ * - Write at any port with A0=0 (ULA): low 3 bits set border color (M2.8); bit 4 is the beeper bit
+ *   (M2.6). M2.5 stubs the write as a no-op so the CPU doesn't crash.
  * - Non-ULA ports (A0=1) read 0xFF and ignore writes (matches M1 NoIoBus behavior).
  */
 class SpectrumIoBus(private val keyboard: Keyboard) : IoBus {
