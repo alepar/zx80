@@ -9,6 +9,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import ru.alepar.zx80.harness.Score
+import ru.alepar.zx80.harness.suites.BootsToBasic
 import ru.alepar.zx80.harness.suites.FuseSuite
 import ru.alepar.zx80.harness.suites.OpcodeCoverage
 import ru.alepar.zx80.harness.suites.ProgramsSuite
@@ -37,6 +38,7 @@ class ScoreCommand : CliktCommand(name = "score") {
                     ResourceLoader.loadFuseExpected(),
                 ),
                 ProgramsSuite(decoder, ResourceLoader.loadPrograms()),
+                BootsToBasic(decoder),
             )
         val selected = if (suiteFilter == "all") all else all.filter { it.name == suiteFilter }
         if (selected.isEmpty()) throw CliktError("unknown suite: $suiteFilter")

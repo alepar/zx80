@@ -75,7 +75,11 @@ data class GitInfo(val branch: String, val sha: String, val dirty: Boolean) {
 object Score {
     fun compute(suites: List<Suite>): CompositeScore {
         val results = suites.map { it.run() }
-        val score = results.sumOf { it.weight * it.ratio }
+        val totalWeight = results.sumOf { it.weight }
+        val score =
+            if (totalWeight > 0.0) {
+                results.sumOf { it.weight * it.ratio } / totalWeight
+            } else 0.0
         return CompositeScore(score = score, results = results)
     }
 }
