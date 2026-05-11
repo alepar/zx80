@@ -11,6 +11,7 @@ import java.nio.file.StandardCopyOption
 import ru.alepar.zx80.harness.Score
 import ru.alepar.zx80.harness.suites.BootsToBasic
 import ru.alepar.zx80.harness.suites.FuseSuite
+import ru.alepar.zx80.harness.suites.GameMilestoneSuite
 import ru.alepar.zx80.harness.suites.OpcodeCoverage
 import ru.alepar.zx80.harness.suites.ProgramsSuite
 import ru.alepar.zx80.harness.suites.TapeParserSuite
@@ -45,6 +46,7 @@ class ScoreCommand : CliktCommand(name = "score") {
                 TapeParserSuite(),
                 TapeTrapLoadSuite(),
                 TapePulseLoadSuite(),
+                GameMilestoneSuite(),
             )
         val selected = if (suiteFilter == "all") all else all.filter { it.name == suiteFilter }
         if (selected.isEmpty()) throw CliktError("unknown suite: $suiteFilter")
