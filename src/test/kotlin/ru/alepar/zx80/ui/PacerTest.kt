@@ -2,6 +2,8 @@ package ru.alepar.zx80.ui
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import ru.alepar.zx80.machine.BorderState
+import ru.alepar.zx80.machine.BorderedUlaRenderer
 import ru.alepar.zx80.machine.Spectrum48k
 import ru.alepar.zx80.machine.UlaRenderer
 
@@ -10,7 +12,7 @@ class PacerTest {
     private fun newPacer(initialClockTime: Long = 0L): Pair<Pacer, FakeClock> {
         val machine = Spectrum48k() // no reset; synthetic state (all-zero RAM)
         val clock = FakeClock(initialClockTime)
-        val pacer = Pacer(machine, UlaRenderer(), clock)
+        val pacer = Pacer(machine, BorderedUlaRenderer(UlaRenderer(), BorderState()), clock)
         return pacer to clock
     }
 
@@ -64,13 +66,13 @@ class PacerTest {
     }
 
     @Test
-    fun `currentImage returns a 256x192 BufferedImage`() {
+    fun `currentImage returns a 352x288 BufferedImage`() {
         val (pacer, _) = newPacer()
         pacer.start()
         pacer.stepOneFrame()
         val img = pacer.currentImage()
-        assertThat(img.width).isEqualTo(256)
-        assertThat(img.height).isEqualTo(192)
+        assertThat(img.width).isEqualTo(352)
+        assertThat(img.height).isEqualTo(288)
     }
 
     @Test
@@ -97,7 +99,7 @@ class PacerTest {
         val machine = Spectrum48k()
         val clock = FakeClock()
         val sink = RecordingAudioSink()
-        val pacer = Pacer(machine, UlaRenderer(), clock, sink)
+        val pacer = Pacer(machine, BorderedUlaRenderer(UlaRenderer(), BorderState()), clock, sink)
         pacer.start()
         pacer.stepOneFrame()
         pacer.stepOneFrame()

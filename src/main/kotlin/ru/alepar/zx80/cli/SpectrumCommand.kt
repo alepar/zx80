@@ -6,6 +6,8 @@ import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.int
 import ru.alepar.zx80.machine.Beeper
+import ru.alepar.zx80.machine.BorderState
+import ru.alepar.zx80.machine.BorderedUlaRenderer
 import ru.alepar.zx80.machine.Keyboard
 import ru.alepar.zx80.machine.Spectrum48k
 import ru.alepar.zx80.machine.SpectrumIoBus
@@ -25,11 +27,13 @@ class SpectrumCommand : CliktCommand(name = "spectrum") {
         val machine = Spectrum48k()
         val keyboard = Keyboard()
         val beeper = Beeper(machine.cpu)
-        machine.cpu.io = SpectrumIoBus(keyboard, beeper)
+        val border = BorderState()
+        machine.cpu.io = SpectrumIoBus(keyboard, beeper, border)
         machine.reset()
         val audioOut = if (noAudio) NoOpAudioOutput else AudioOutput.tryOpen()
         val audioSink = BeeperAudioSink(beeper, audioOut)
-        val pacer = Pacer(machine, UlaRenderer(), audioSink = audioSink)
+        val renderer = BorderedUlaRenderer(UlaRenderer(), border)
+        val pacer = Pacer(machine, renderer, audioSink = audioSink)
         val window = SpectrumWindow(pacer, keyboard, scale)
         window.show()
     }

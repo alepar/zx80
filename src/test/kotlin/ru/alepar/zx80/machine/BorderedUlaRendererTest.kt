@@ -9,7 +9,8 @@ class BorderedUlaRendererTest {
 
     private fun pixel(img: BufferedImage, x: Int, y: Int): Int = img.getRGB(x, y) and 0xFFFFFF
 
-    @Test fun `output dimensions are 352 by 288`() {
+    @Test
+    fun `output dimensions are 352 by 288`() {
         val border = BorderState()
         val r = BorderedUlaRenderer(UlaRenderer(), border)
         val img = r.render(Memory(), flashOn = false)
@@ -17,7 +18,8 @@ class BorderedUlaRendererTest {
         assertThat(img.height).isEqualTo(288)
     }
 
-    @Test fun `border pixels match BorderState color`() {
+    @Test
+    fun `border pixels match BorderState color`() {
         val border = BorderState().apply { write(2) } // red
         val r = BorderedUlaRenderer(UlaRenderer(), border)
         val img = r.render(Memory(), flashOn = false)
@@ -25,7 +27,8 @@ class BorderedUlaRendererTest {
         assertThat(pixel(img, 351, 287)).isEqualTo(0xCD0000)
     }
 
-    @Test fun `screen pixels at offset 48,48 match inner UlaRenderer output`() {
+    @Test
+    fun `screen pixels at offset 48,48 match inner UlaRenderer output`() {
         val mem = Memory()
         mem.write(0x4000, 0xFF) // top-left cell pixel row, all pixels on
         mem.write(0x5800, 0x07) // ink=white, paper=black
@@ -37,7 +40,8 @@ class BorderedUlaRendererTest {
         assertThat(pixel(img, 47, 48)).isEqualTo(0x000000)
     }
 
-    @Test fun `changing BorderState between renders changes border color`() {
+    @Test
+    fun `changing BorderState between renders changes border color`() {
         val border = BorderState()
         val r = BorderedUlaRenderer(UlaRenderer(), border)
         border.write(0)
@@ -48,7 +52,8 @@ class BorderedUlaRendererTest {
         assertThat(pixel(img5, 0, 0)).isEqualTo(0x00CDCD)
     }
 
-    @Test fun `bottom and right border pixels are border color`() {
+    @Test
+    fun `bottom and right border pixels are border color`() {
         val border = BorderState().apply { write(4) } // green
         val r = BorderedUlaRenderer(UlaRenderer(), border)
         val img = r.render(Memory(), flashOn = false)

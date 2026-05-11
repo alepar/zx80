@@ -1,8 +1,8 @@
 package ru.alepar.zx80.ui
 
 import java.awt.image.BufferedImage
+import ru.alepar.zx80.machine.BorderedUlaRenderer
 import ru.alepar.zx80.machine.Spectrum48k
-import ru.alepar.zx80.machine.UlaRenderer
 
 /**
  * Drives the Spectrum at real-time 50Hz, tracks the flash phase, and produces the latest
@@ -14,7 +14,7 @@ import ru.alepar.zx80.machine.UlaRenderer
  */
 class Pacer(
     private val machine: Spectrum48k,
-    private val renderer: UlaRenderer,
+    private val renderer: BorderedUlaRenderer,
     private val clock: Clock = RealClock,
     private val audioSink: AudioSink = NoOpAudioSink,
 ) {

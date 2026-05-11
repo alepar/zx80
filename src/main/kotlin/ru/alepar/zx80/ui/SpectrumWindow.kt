@@ -13,6 +13,7 @@ import javax.swing.JPanel
 import javax.swing.SwingUtilities
 import kotlin.concurrent.thread
 import kotlin.system.exitProcess
+import ru.alepar.zx80.machine.BorderedUlaRenderer
 import ru.alepar.zx80.machine.Keyboard
 
 /**
@@ -47,7 +48,8 @@ class SpectrumWindow(
     private val currentlyDown = mutableSetOf<Int>()
 
     fun show() {
-        panel.preferredSize = Dimension(256 * scale, 192 * scale)
+        panel.preferredSize =
+            Dimension(BorderedUlaRenderer.WIDTH * scale, BorderedUlaRenderer.HEIGHT * scale)
         panel.isFocusable = true
         panel.addKeyListener(
             object : KeyAdapter() {
