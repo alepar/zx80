@@ -1,4 +1,4 @@
-import java.net.URL
+import java.net.URI
 import java.security.MessageDigest
 
 plugins {
@@ -56,7 +56,9 @@ val downloadRom by
         doLast {
             val target = outFile.get().asFile
             target.parentFile.mkdirs()
-            URL(romUrl).openStream().use { input -> target.outputStream().use { input.copyTo(it) } }
+            URI(romUrl).toURL().openStream().use { input ->
+                target.outputStream().use { input.copyTo(it) }
+            }
             val actualSize = target.length()
             check(actualSize == expectedSize.toLong()) {
                 "downloaded $romUrl: expected $expectedSize bytes, got $actualSize"
