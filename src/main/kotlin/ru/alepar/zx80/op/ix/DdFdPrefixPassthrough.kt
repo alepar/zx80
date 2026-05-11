@@ -6,13 +6,12 @@ import ru.alepar.zx80.op.Op
 import ru.alepar.zx80.op.OperandFetcher
 
 /**
- * Wraps a main-table Op for a DD/FD prefix slot where the prefix is a no-op:
- * adds the prefix's 4 T-states, 1 R, 1 PC, then runs the wrapped op as if
- * the prefix weren't there. Identical net effect to [DdFdNopPrefix] followed
- * by the wrapped op on the next dispatch.
+ * Wraps a main-table Op for a DD/FD prefix slot where the prefix is a no-op: adds the prefix's 4
+ * T-states, 1 R, 1 PC, then runs the wrapped op as if the prefix weren't there. Identical net
+ * effect to [DdFdNopPrefix] followed by the wrapped op on the next dispatch.
  *
- * Installed by [IxOps.installInto] for every (dd, fd) slot where the main
- * table has a non-null op and the IX/IY-aware version is also absent.
+ * Installed by [IxOps.installInto] for every (dd, fd) slot where the main table has a non-null op
+ * and the IX/IY-aware version is also absent.
  */
 class DdFdPrefixPassthrough(private val wrapped: Op) : Op {
     override val operandLength = 1 + wrapped.operandLength
@@ -25,6 +24,5 @@ class DdFdPrefixPassthrough(private val wrapped: Op) : Op {
         wrapped.execute(cpu, mem)
     }
 
-    override fun mnemonic(operands: OperandFetcher): String =
-        "DD/FD ${wrapped.mnemonic(operands)}"
+    override fun mnemonic(operands: OperandFetcher): String = "DD/FD ${wrapped.mnemonic(operands)}"
 }

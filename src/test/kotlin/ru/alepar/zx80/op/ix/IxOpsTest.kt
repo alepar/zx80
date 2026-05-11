@@ -3,6 +3,7 @@ package ru.alepar.zx80.op.ix
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import ru.alepar.zx80.cpu.Decoder
+import ru.alepar.zx80.op.OpTableBuilder
 
 class IxOpsTest {
     @Test
@@ -204,5 +205,34 @@ class IxOpsTest {
         IxOps.installInto(d)
         assertThat(d.dd[0x76]).isNull()
         assertThat(d.fd[0x76]).isNull()
+    }
+
+    @Test
+    fun `Phase H install loop fills dd null slots with passthroughs`() {
+        val decoder = OpTableBuilder.build()
+        val ddNonNull = (0..255).count { decoder.dd[it] != null }
+        assertThat(ddNonNull).isGreaterThanOrEqualTo(248) // 256 minus prefix/null main slots
+    }
+
+    @Test
+    fun `Phase H install loop fills fd null slots with passthroughs`() {
+        val decoder = OpTableBuilder.build()
+        val fdNonNull = (0..255).count { decoder.fd[it] != null }
+        assertThat(fdNonNull).isGreaterThanOrEqualTo(248)
+    }
+
+    @Test
+    fun `dd 0x00 is a passthrough wrapping the main NOP`() {
+        val decoder = OpTableBuilder.build()
+        val op = decoder.dd[0x00]
+        assertThat(op).isInstanceOf(DdFdPrefixPassthrough::class.java)
+    }
+
+    @Test
+    fun `dd 0x21 (LD IX, nn) is the IX-aware op, not a passthrough`() {
+        val decoder = OpTableBuilder.build()
+        val op = decoder.dd[0x21]
+        assertThat(op).isNotNull
+        assertThat(op).isNotInstanceOf(DdFdPrefixPassthrough::class.java)
     }
 }

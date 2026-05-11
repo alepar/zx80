@@ -9,6 +9,7 @@ import ru.alepar.zx80.cpu.Cpu
 import ru.alepar.zx80.cpu.Decoder
 import ru.alepar.zx80.cpu.Memory
 import ru.alepar.zx80.op.Op
+import ru.alepar.zx80.op.OpTableBuilder
 import ru.alepar.zx80.op.OperandFetcher
 
 class OpcodeCoverageTest {
@@ -47,6 +48,14 @@ class OpcodeCoverageTest {
         val r = OpcodeCoverage(Decoder()).run() // empty Decoder; everything is missing
         val missing = (r.details as JsonObject)["missing"]!!.jsonArray
         assertThat(missing).hasSize(OpcodeCoverage.MISSING_LIMIT)
+    }
+
+    @Test
+    fun `Phase H raises opcode coverage to at least 1748 of 1792`() {
+        val decoder = OpTableBuilder.build()
+        val suite = OpcodeCoverage(decoder)
+        val result = suite.run()
+        assertThat(result.passed).isGreaterThanOrEqualTo(1748)
     }
 }
 

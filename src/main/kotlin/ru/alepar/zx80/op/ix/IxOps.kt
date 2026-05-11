@@ -24,6 +24,15 @@ object IxOps {
         installIncDecHalves(d)
         installLdHalfImm(d)
         installLdRegRegPrefixed(d)
+
+        // Phase H: any dd/fd slot still null where the unprefixed main op exists is a
+        // "prefix-as-noop" combo. Install a passthrough wrapper so OpcodeCoverage counts
+        // these slots and runtime behavior matches the prior DdFdNopPrefix fallback path.
+        for (i in 0..255) {
+            val main = d.main[i] ?: continue
+            if (d.dd[i] == null) d.dd[i] = DdFdPrefixPassthrough(main)
+            if (d.fd[i] == null) d.fd[i] = DdFdPrefixPassthrough(main)
+        }
     }
 
     private fun installLdRegRegPrefixed(d: Decoder) {

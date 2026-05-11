@@ -10,7 +10,12 @@ class DdFdPrefixPassthroughTest {
     @Test
     fun `wrapping NOP, PC advances by 2, R bumped twice, T-states += 8`() {
         val passthrough = DdFdPrefixPassthrough(Nop)
-        val cpu = Cpu().apply { pc = 0x100; r = 0; tStates = 0L }
+        val cpu =
+            Cpu().apply {
+                pc = 0x100
+                r = 0
+                tStates = 0L
+            }
         passthrough.execute(cpu, Memory())
         assertThat(cpu.pc).isEqualTo(0x102)
         assertThat(cpu.r).isEqualTo(2)
