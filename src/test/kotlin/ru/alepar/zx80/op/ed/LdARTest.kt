@@ -19,7 +19,8 @@ class LdARTest {
                 f = Flags.C
             }
         LdAR.execute(cpu, Memory())
-        assertThat(cpu.a).isEqualTo(0x42)
+        // After bumpR(2): r = 0x42 + 2 = 0x44 (no bit-7 wrap), A gets post-bump value
+        assertThat(cpu.a).isEqualTo(0x44)
         assertThat(cpu.f and Flags.PV).isNotZero
         assertThat(cpu.f and Flags.C).isNotZero
         assertThat(cpu.tStates).isEqualTo(9L)
@@ -34,6 +35,31 @@ class LdARTest {
             }
         LdAR.execute(cpu, Memory())
         assertThat(cpu.f and Flags.PV).isZero
+    }
+
+    @Test
+    fun `LD A, R copies the post-bump R value (bumped twice for ED-prefix opcode)`() {
+        val cpu =
+            Cpu().apply {
+                a = 0
+                r = 0x10
+                pc = 0x100
+                tStates = 0L
+            }
+        LdAR.execute(cpu, Memory())
+        assertThat(cpu.a).isEqualTo(0x12)
+        assertThat(cpu.r).isEqualTo(0x12)
+    }
+
+    @Test
+    fun `LD A, R preserves R bit 7 across bumps`() {
+        // bumpR keeps bit 7 and wraps the low 7 bits mod 128. Starting R = 0xFE:
+        // first bump: low 7 bits = 0x7E+1 = 0x7F, r = 0xFF
+        // second bump: low 7 bits = 0x7F+1 = 0x00 (wraps), r = 0x80
+        val cpu = Cpu().apply { r = 0xFE }
+        LdAR.execute(cpu, Memory())
+        assertThat(cpu.r).isEqualTo(0x80)
+        assertThat(cpu.a).isEqualTo(0x80)
     }
 
     @Test
