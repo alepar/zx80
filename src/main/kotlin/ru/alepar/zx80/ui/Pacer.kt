@@ -16,6 +16,7 @@ class Pacer(
     private val machine: Spectrum48k,
     private val renderer: UlaRenderer,
     private val clock: Clock = RealClock,
+    private val audioSink: AudioSink = NoOpAudioSink,
 ) {
     private var startNanos: Long = 0
     private var frameNum: Long = 0
@@ -30,7 +31,9 @@ class Pacer(
 
     /** Run one Spectrum frame, advance the flash counter, park until the next 20ms boundary. */
     fun stepOneFrame() {
+        audioSink.beforeFrame()
         machine.runFrame()
+        audioSink.afterFrame()
         flashCounter++
         frameNum++
         val nextTarget = startNanos + frameNum * FRAME_NS

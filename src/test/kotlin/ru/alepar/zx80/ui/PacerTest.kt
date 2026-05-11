@@ -80,4 +80,21 @@ class PacerTest {
         repeat(100) { pacer.stepOneFrame() }
         assertThat(clock.parks.last()).isEqualTo(100L * 20_000_000L)
     }
+
+    @Test
+    fun `audioSink beforeFrame and afterFrame fire around each runFrame`() {
+        class RecordingAudioSink : AudioSink {
+            val log: MutableList<String> = mutableListOf()
+            override fun beforeFrame() { log += "before" }
+            override fun afterFrame() { log += "after" }
+        }
+        val machine = Spectrum48k()
+        val clock = FakeClock()
+        val sink = RecordingAudioSink()
+        val pacer = Pacer(machine, UlaRenderer(), clock, sink)
+        pacer.start()
+        pacer.stepOneFrame()
+        pacer.stepOneFrame()
+        assertThat(sink.log).containsExactly("before", "after", "before", "after")
+    }
 }
