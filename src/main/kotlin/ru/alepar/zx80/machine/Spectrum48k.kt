@@ -5,6 +5,8 @@ import ru.alepar.zx80.cpu.Decoder
 import ru.alepar.zx80.cpu.Dispatcher
 import ru.alepar.zx80.cpu.Memory
 import ru.alepar.zx80.cpu.ReadOnlyBelow
+import ru.alepar.zx80.machine.tape.RomTrap
+import ru.alepar.zx80.machine.tape.TapeDeck
 import ru.alepar.zx80.op.OpTableBuilder
 
 /**
@@ -13,12 +15,20 @@ import ru.alepar.zx80.op.OpTableBuilder
  * keyboard-aware bus.
  *
  * No display backend, no audio, no contention — those land in M2.3-M2.7.
+ *
+ * M3 adds [tapeDeck]: a tape mount point. When a tape is loaded the [step] method checks for the
+ * Sinclair ROM's LD-BYTES entry (0x0556) before dispatching the normal opcode; if the trap fires,
+ * the instruction is replaced by an instant in-memory copy of the next tape block. Empty deck (no
+ * tape loaded) leaves the CPU's behaviour identical to pre-M3.
  */
 class Spectrum48k(decoder: Decoder = OpTableBuilder.build()) {
     val cpu: Cpu = Cpu()
     val mem: Memory = Memory(ReadOnlyBelow(0x4000))
     private val dispatcher = Dispatcher(decoder)
     val scheduler: FrameScheduler = FrameScheduler(this)
+
+    /** Tape mount point. Construct empty; load via [TapeDeck.loadTape]. */
+    val tapeDeck: TapeDeck = TapeDeck()
 
     /** Z80 power-on register state + ROM installed at 0x0000-0x3FFF. Idempotent. */
     fun reset() {
@@ -32,9 +42,16 @@ class Spectrum48k(decoder: Decoder = OpTableBuilder.build()) {
      * Clears `cpu.eiPending` AFTER executing the next non-EI instruction (the post-EI delay slot
      * mechanism). Capturing the prior value before dispatch ensures the EI step itself doesn't
      * clear the flag it just set.
+     *
+     * Tape trap: if [tapeDeck] has a trappable block loaded and `cpu.pc == 0x0556`, [RomTrap]
+     * consumes the block and synthesises the LD-BYTES return; normal dispatch is skipped.
      */
     fun step() {
         val priorEiPending = cpu.eiPending
+        if (RomTrap.tryTrap(cpu, mem, tapeDeck)) {
+            if (priorEiPending) cpu.eiPending = false
+            return
+        }
         val op =
             dispatcher.decodeAt(cpu, mem)
                 ?: error(
