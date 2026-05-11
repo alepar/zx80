@@ -11,7 +11,11 @@ import ru.alepar.zx80.cpu.IoBus
  *   (M2.6). M2.5 stubs the write as a no-op so the CPU doesn't crash.
  * - Non-ULA ports (A0=1) read 0xFF and ignore writes (matches M1 NoIoBus behavior).
  */
-class SpectrumIoBus(private val keyboard: Keyboard, private val beeper: Beeper) : IoBus {
+class SpectrumIoBus(
+    private val keyboard: Keyboard,
+    private val beeper: Beeper,
+    private val border: BorderState,
+) : IoBus {
     override fun read(port: Int): Int =
         if ((port and 0x01) == 0) {
             val matrix = keyboard.read((port ushr 8) and 0xFF)
@@ -21,7 +25,7 @@ class SpectrumIoBus(private val keyboard: Keyboard, private val beeper: Beeper) 
     override fun write(port: Int, value: Int) {
         if ((port and 0x01) == 0) {
             beeper.onWrite((value ushr 4) and 1)
-            // Border color (bits 0-2) stays stubbed for M2.8.
+            border.write(value and 0x07)
         }
     }
 }
