@@ -10,7 +10,7 @@ import ru.alepar.zx80.cpu.Memory
  * Entry contract from the Sinclair ROM (per the disassembly):
  * - A' (alternate A register) contains the expected flag byte (0x00 = header, 0xFF = data). The ROM
  *   pushes A onto the stack, swaps in A', then later compares the first tape byte.
- * - DE = byte count to load (excluding the flag and parity bytes).
+ * - DE = byte count to load (payload only — excludes flag byte and trailing parity).
  * - IX = destination address.
  * - Carry flag of the alternate F register (F') = 1 → LOAD, = 0 → VERIFY. The caller sets up AF'
  *   via `EX AF,AF'` semantics inside the ROM's LOAD entry sequence.
@@ -67,11 +67,11 @@ object RomTrap {
             return true
         }
 
-        // Bytes after the flag, including parity. DE includes parity per ROM convention.
-        val tapePayloadAndParity = blockData.size - 1
-        if (requestedLen > tapePayloadAndParity) {
+        // Payload bytes on tape (excludes flag and parity). DE = payload count per ROM convention.
+        val tapePayload = blockData.size - 2
+        if (requestedLen > tapePayload) {
             // More bytes requested than the tape has — load whatever we can then fail.
-            for (i in 0 until tapePayloadAndParity - 1) {
+            for (i in 0 until tapePayload) {
                 mem.write((dest + i) and 0xFFFF, blockData[1 + i].toInt() and 0xFF)
             }
             failExit(cpu, mem)
@@ -80,9 +80,9 @@ object RomTrap {
         }
 
         // Compute parity (XOR of flag + payload) and compare to the parity byte on tape.
-        // The block layout is: [flag][payload bytes... requestedLen-1 of them][parity].
-        // requestedLen INCLUDES the parity byte.
-        val payloadLen = requestedLen - 1
+        // The block layout is: [flag][payload bytes... requestedLen of them][parity].
+        // requestedLen is the payload count only; parity is at blockData[1 + requestedLen].
+        val payloadLen = requestedLen
         var parity = tapeFlag
         if (isLoad) {
             for (i in 0 until payloadLen) {

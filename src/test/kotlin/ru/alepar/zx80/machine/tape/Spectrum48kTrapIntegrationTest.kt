@@ -23,7 +23,7 @@ class Spectrum48kTrapIntegrationTest {
         // Set up CPU as if LOAD just CALLed LD-BYTES at 0x0556
         machine.cpu.pc = 0x0556
         machine.cpu.a = 0xFF
-        machine.cpu.de = 2 // payload (1) + parity (1)
+        machine.cpu.de = 1 // payload (1); parity is separate, not counted in DE
         machine.cpu.ix = 0x6000
         machine.cpu.f = machine.cpu.f or 0x01 // carry = LOAD
         // Push return address onto stack

@@ -50,7 +50,7 @@ class TapeTrapLoadSuite : Suite {
             deck.loadTape(
                 TapTapeFile(listOf(TapBlock(parityBlock(0xFF, byteArrayOf(0xAA.toByte())))))
             )
-            prime(cpu, mem, flag = 0xFF, length = 2, dest = 0x6000)
+            prime(cpu, mem, flag = 0xFF, length = 1, dest = 0x6000)
             RomTrap.tryTrap(cpu, mem, deck) && mem.read(0x6000) == 0xAA
         }
 
@@ -59,7 +59,7 @@ class TapeTrapLoadSuite : Suite {
             val (cpu, mem, deck) = harness()
             val payload = ByteArray(256) { (it and 0xFF).toByte() }
             deck.loadTape(TapTapeFile(listOf(TapBlock(parityBlock(0xFF, payload)))))
-            prime(cpu, mem, flag = 0xFF, length = 257, dest = 0x6000)
+            prime(cpu, mem, flag = 0xFF, length = 256, dest = 0x6000)
             if (!RomTrap.tryTrap(cpu, mem, deck)) return@check false
             (0 until 256).all { mem.read(0x6000 + it) == (it and 0xFF) }
         }
@@ -70,9 +70,9 @@ class TapeTrapLoadSuite : Suite {
             val header = TapBlock(parityBlock(0x00, ByteArray(17) { 0x42 }))
             val data = TapBlock(parityBlock(0xFF, byteArrayOf(0x33, 0x44)))
             deck.loadTape(TapTapeFile(listOf(header, data)))
-            prime(cpu, mem, flag = 0x00, length = 18, dest = 0x6000)
+            prime(cpu, mem, flag = 0x00, length = 17, dest = 0x6000)
             if (!RomTrap.tryTrap(cpu, mem, deck)) return@check false
-            prime(cpu, mem, flag = 0xFF, length = 3, dest = 0x7000)
+            prime(cpu, mem, flag = 0xFF, length = 2, dest = 0x7000)
             if (!RomTrap.tryTrap(cpu, mem, deck)) return@check false
             mem.read(0x6000) == 0x42 && mem.read(0x7000) == 0x33 && mem.read(0x7001) == 0x44
         }
@@ -90,7 +90,7 @@ class TapeTrapLoadSuite : Suite {
             deck.loadTape(
                 TzxTapeFile(listOf(TzxStandardData(1000, parityBlock(0xFF, byteArrayOf(0x77)))))
             )
-            prime(cpu, mem, flag = 0xFF, length = 2, dest = 0x6000)
+            prime(cpu, mem, flag = 0xFF, length = 1, dest = 0x6000)
             RomTrap.tryTrap(cpu, mem, deck) && mem.read(0x6000) == 0x77
         }
 
@@ -101,7 +101,7 @@ class TapeTrapLoadSuite : Suite {
                 TapTapeFile(listOf(TapBlock(parityBlock(0xFF, byteArrayOf(0xAA.toByte())))))
             )
             deck.trapEnabled = false
-            prime(cpu, mem, flag = 0xFF, length = 2, dest = 0x6000)
+            prime(cpu, mem, flag = 0xFF, length = 1, dest = 0x6000)
             !RomTrap.tryTrap(cpu, mem, deck) && mem.read(0x6000) == 0
         }
 
@@ -112,7 +112,7 @@ class TapeTrapLoadSuite : Suite {
             deck.loadTape(
                 TapTapeFile(listOf(TapBlock(byteArrayOf(0xFF.toByte(), 0xAA.toByte(), 0x00))))
             )
-            prime(cpu, mem, flag = 0xFF, length = 2, dest = 0x6000)
+            prime(cpu, mem, flag = 0xFF, length = 1, dest = 0x6000)
             val ok = RomTrap.tryTrap(cpu, mem, deck)
             ok && (cpu.f and 0x01) == 0
         }
@@ -123,7 +123,7 @@ class TapeTrapLoadSuite : Suite {
             deck.loadTape(
                 TapTapeFile(listOf(TapBlock(parityBlock(0x00, byteArrayOf(0xAA.toByte())))))
             )
-            prime(cpu, mem, flag = 0xFF, length = 2, dest = 0x6000)
+            prime(cpu, mem, flag = 0xFF, length = 1, dest = 0x6000)
             RomTrap.tryTrap(cpu, mem, deck) &&
                 (cpu.f and 0x01) == 0 &&
                 deck.currentBlockIndex() == 1
@@ -133,7 +133,7 @@ class TapeTrapLoadSuite : Suite {
         check("pc-set-from-return-addr") {
             val (cpu, mem, deck) = harness()
             deck.loadTape(TapTapeFile(listOf(TapBlock(parityBlock(0x00, byteArrayOf(0x11))))))
-            prime(cpu, mem, flag = 0x00, length = 2, dest = 0x6000, returnAddr = 0x1234)
+            prime(cpu, mem, flag = 0x00, length = 1, dest = 0x6000, returnAddr = 0x1234)
             RomTrap.tryTrap(cpu, mem, deck) && cpu.pc == 0x1234
         }
 
@@ -141,7 +141,7 @@ class TapeTrapLoadSuite : Suite {
         check("de-zero-on-success") {
             val (cpu, mem, deck) = harness()
             deck.loadTape(TapTapeFile(listOf(TapBlock(parityBlock(0x00, byteArrayOf(0x11))))))
-            prime(cpu, mem, flag = 0x00, length = 2, dest = 0x6000)
+            prime(cpu, mem, flag = 0x00, length = 1, dest = 0x6000)
             RomTrap.tryTrap(cpu, mem, deck) && cpu.de == 0
         }
 
@@ -150,7 +150,7 @@ class TapeTrapLoadSuite : Suite {
             val (cpu, mem, deck) = harness()
             deck.loadTape(TapTapeFile(listOf(TapBlock(parityBlock(0x00, byteArrayOf(0x11))))))
             val spBeforePrime = cpu.sp
-            prime(cpu, mem, flag = 0x00, length = 2, dest = 0x6000)
+            prime(cpu, mem, flag = 0x00, length = 1, dest = 0x6000)
             val spAfterPrime = cpu.sp
             RomTrap.tryTrap(cpu, mem, deck) &&
                 cpu.sp == ((spAfterPrime + 2) and 0xFFFF) &&
@@ -177,7 +177,7 @@ class TapeTrapLoadSuite : Suite {
                     )
                 )
             )
-            prime(cpu, mem, flag = 0xFF, length = 2, dest = 0x6000)
+            prime(cpu, mem, flag = 0xFF, length = 1, dest = 0x6000)
             !RomTrap.tryTrap(cpu, mem, deck)
         }
 
@@ -194,7 +194,7 @@ class TapeTrapLoadSuite : Suite {
                     )
                 )
             )
-            prime(cpu, mem, flag = 0xFF, length = 2, dest = 0x6000)
+            prime(cpu, mem, flag = 0xFF, length = 1, dest = 0x6000)
             RomTrap.tryTrap(cpu, mem, deck) && mem.read(0x6000) == 0x55
         }
 
@@ -213,9 +213,9 @@ class TapeTrapLoadSuite : Suite {
         check("tape-played-out") {
             val (cpu, mem, deck) = harness()
             deck.loadTape(TapTapeFile(listOf(TapBlock(parityBlock(0x00, byteArrayOf(0x11))))))
-            prime(cpu, mem, flag = 0x00, length = 2, dest = 0x6000)
+            prime(cpu, mem, flag = 0x00, length = 1, dest = 0x6000)
             RomTrap.tryTrap(cpu, mem, deck) // consume
-            prime(cpu, mem, flag = 0x00, length = 2, dest = 0x7000)
+            prime(cpu, mem, flag = 0x00, length = 1, dest = 0x7000)
             !RomTrap.tryTrap(cpu, mem, deck)
         }
 

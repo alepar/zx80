@@ -59,7 +59,7 @@ class RomTrapTest {
         // Block: [flag=0xFF, payload=0xAA, parity=flag^payload=0x55]
         val block = TapBlock(byteArrayOf(0xFF.toByte(), 0xAA.toByte(), 0x55.toByte()))
         deck.loadTape(TapTapeFile(listOf(block)))
-        primeForLoad(cpu, mem, flag = 0xFF, length = 2, dest = 0x6000)
+        primeForLoad(cpu, mem, flag = 0xFF, length = 1, dest = 0x6000)
 
         val ok = RomTrap.tryTrap(cpu, mem, deck)
         assertThat(ok).isTrue
@@ -87,7 +87,7 @@ class RomTrapTest {
         rawData[rawData.size - 1] = parity.toByte()
         deck.loadTape(TapTapeFile(listOf(TapBlock(rawData))))
 
-        primeForLoad(cpu, mem, flag = 0xFF, length = 257, dest = 0x6000)
+        primeForLoad(cpu, mem, flag = 0xFF, length = 256, dest = 0x6000)
         val ok = RomTrap.tryTrap(cpu, mem, deck)
         assertThat(ok).isTrue
         for (i in 0 until 256) {
@@ -104,11 +104,11 @@ class RomTrapTest {
         val block2 = TapBlock(byteArrayOf(0xFF.toByte(), 0x22, 0xDD.toByte())) // 0xFF^0x22=0xDD
         deck.loadTape(TapTapeFile(listOf(block1, block2)))
 
-        primeForLoad(cpu, mem, flag = 0x00, length = 2, dest = 0x6000)
+        primeForLoad(cpu, mem, flag = 0x00, length = 1, dest = 0x6000)
         assertThat(RomTrap.tryTrap(cpu, mem, deck)).isTrue
         assertThat(mem.read(0x6000)).isEqualTo(0x11)
 
-        primeForLoad(cpu, mem, flag = 0xFF, length = 2, dest = 0x7000)
+        primeForLoad(cpu, mem, flag = 0xFF, length = 1, dest = 0x7000)
         assertThat(RomTrap.tryTrap(cpu, mem, deck)).isTrue
         assertThat(mem.read(0x7000)).isEqualTo(0x22)
     }
@@ -121,7 +121,7 @@ class RomTrapTest {
         // Correct parity for 0xFF and 0xAA would be 0x55; we put 0x00 to force a mismatch.
         val block = TapBlock(byteArrayOf(0xFF.toByte(), 0xAA.toByte(), 0x00))
         deck.loadTape(TapTapeFile(listOf(block)))
-        primeForLoad(cpu, mem, flag = 0xFF, length = 2, dest = 0x6000)
+        primeForLoad(cpu, mem, flag = 0xFF, length = 1, dest = 0x6000)
         val ok = RomTrap.tryTrap(cpu, mem, deck)
         assertThat(ok).isTrue
         // Carry clear on failure
@@ -137,7 +137,7 @@ class RomTrapTest {
         // Tape has a HEADER block (flag=0x00) but caller expects DATA (flag=0xFF).
         val block = TapBlock(byteArrayOf(0x00, 0xAA.toByte(), 0xAA.toByte()))
         deck.loadTape(TapTapeFile(listOf(block)))
-        primeForLoad(cpu, mem, flag = 0xFF, length = 2, dest = 0x6000)
+        primeForLoad(cpu, mem, flag = 0xFF, length = 1, dest = 0x6000)
         val ok = RomTrap.tryTrap(cpu, mem, deck)
         assertThat(ok).isTrue
         assertThat(cpu.f and 0x01).isEqualTo(0)
@@ -153,7 +153,7 @@ class RomTrapTest {
         val data = byteArrayOf(0xFF.toByte(), 0x42, (0xFF xor 0x42).toByte())
         val tzx = TzxTapeFile(listOf(TzxStandardData(1000, data)))
         deck.loadTape(tzx)
-        primeForLoad(cpu, mem, flag = 0xFF, length = 2, dest = 0x6000)
+        primeForLoad(cpu, mem, flag = 0xFF, length = 1, dest = 0x6000)
         val ok = RomTrap.tryTrap(cpu, mem, deck)
         assertThat(ok).isTrue
         assertThat(mem.read(0x6000)).isEqualTo(0x42)
@@ -168,7 +168,7 @@ class RomTrapTest {
             TapTapeFile(listOf(TapBlock(byteArrayOf(0xFF.toByte(), 0xAA.toByte(), 0x55.toByte()))))
         )
         deck.trapEnabled = false
-        primeForLoad(cpu, mem, flag = 0xFF, length = 2, dest = 0x6000)
+        primeForLoad(cpu, mem, flag = 0xFF, length = 1, dest = 0x6000)
         assertThat(RomTrap.tryTrap(cpu, mem, deck)).isFalse
         // Memory untouched
         assertThat(mem.read(0x6000)).isEqualTo(0)
@@ -196,7 +196,7 @@ class RomTrapTest {
                 )
             )
         )
-        primeForLoad(cpu, mem, flag = 0xFF, length = 2, dest = 0x6000)
+        primeForLoad(cpu, mem, flag = 0xFF, length = 1, dest = 0x6000)
         assertThat(RomTrap.tryTrap(cpu, mem, deck)).isFalse
     }
 
@@ -215,7 +215,7 @@ class RomTrapTest {
                 )
             )
         )
-        primeForLoad(cpu, mem, flag = 0xFF, length = 2, dest = 0x6000)
+        primeForLoad(cpu, mem, flag = 0xFF, length = 1, dest = 0x6000)
         val ok = RomTrap.tryTrap(cpu, mem, deck)
         assertThat(ok).isTrue
         assertThat(mem.read(0x6000)).isEqualTo(0x77)
@@ -230,10 +230,10 @@ class RomTrapTest {
             TapTapeFile(listOf(TapBlock(byteArrayOf(0xFF.toByte(), 0xAA.toByte(), 0x55.toByte()))))
         )
         // Advance past the only block
-        primeForLoad(cpu, mem, flag = 0xFF, length = 2, dest = 0x6000)
+        primeForLoad(cpu, mem, flag = 0xFF, length = 1, dest = 0x6000)
         RomTrap.tryTrap(cpu, mem, deck) // consume the block
         // Second trap attempt: no blocks remain
-        primeForLoad(cpu, mem, flag = 0xFF, length = 2, dest = 0x7000)
+        primeForLoad(cpu, mem, flag = 0xFF, length = 1, dest = 0x7000)
         assertThat(RomTrap.tryTrap(cpu, mem, deck)).isFalse
     }
 
@@ -243,7 +243,7 @@ class RomTrapTest {
         val mem = Memory()
         val deck = TapeDeck()
         deck.loadTape(TapTapeFile(listOf(TapBlock(byteArrayOf(0x00, 0x10, 0x10)))))
-        primeForLoad(cpu, mem, flag = 0x00, length = 2, dest = 0x6000, returnAddr = 0x1234)
+        primeForLoad(cpu, mem, flag = 0x00, length = 1, dest = 0x6000, returnAddr = 0x1234)
         assertThat(RomTrap.tryTrap(cpu, mem, deck)).isTrue
         assertThat(cpu.pc).isEqualTo(0x1234)
     }
@@ -256,7 +256,7 @@ class RomTrapTest {
         deck.loadTape(
             TapTapeFile(listOf(TapBlock(byteArrayOf(0x00, 0xAA.toByte(), 0xAA.toByte()))))
         )
-        primeForLoad(cpu, mem, flag = 0x00, length = 2, dest = 0x6000)
+        primeForLoad(cpu, mem, flag = 0x00, length = 1, dest = 0x6000)
         RomTrap.tryTrap(cpu, mem, deck)
         assertThat(cpu.de).isEqualTo(0)
         assertThat(cpu.b).isEqualTo(0)
@@ -268,7 +268,7 @@ class RomTrapTest {
         val mem = Memory()
         val deck = TapeDeck()
         deck.loadTape(TapTapeFile(listOf(TapBlock(byteArrayOf(0x00, 0x42, 0x42)))))
-        primeForLoad(cpu, mem, flag = 0x00, length = 2, dest = 0x6000)
+        primeForLoad(cpu, mem, flag = 0x00, length = 1, dest = 0x6000)
         val spBeforeTrap = cpu.sp
         RomTrap.tryTrap(cpu, mem, deck)
         // After RET pops 2 bytes, SP increments by 2
