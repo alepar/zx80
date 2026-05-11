@@ -375,10 +375,12 @@ class SpectrumIoBusTest {
     }
 
     @Test
-    fun `read ULA port 0xFEFD returns row 1 ORed with 0xA0`() {
+    fun `read ULA port 0xFDFE returns row 1 ORed with 0xA0`() {
+        // Port 0xFDFE: low byte 0xFE has A0=0 (ULA port); high byte 0xFD = 0b11111101,
+        // bit 1 clear, so row 1 is selected.
         val kb = Keyboard().apply { press(SpectrumKey.A) }
         val bus = SpectrumIoBus(kb)
-        assertThat(bus.read(0xFEFD)).isEqualTo(0xA0 or 0x1E)
+        assertThat(bus.read(0xFDFE)).isEqualTo(0xA0 or 0x1E)
     }
 
     @Test
