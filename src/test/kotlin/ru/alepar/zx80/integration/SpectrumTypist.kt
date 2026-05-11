@@ -36,5 +36,6 @@ class SpectrumTypist(
     }
 
     fun enter() = press(SpectrumKey.ENTER)
+
     fun space() = press(SpectrumKey.SPACE)
 }

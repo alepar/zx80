@@ -24,21 +24,21 @@ class BasicPrintHelloWorldTest {
         repeat(200) { machine.runFrame() }
 
         val type = SpectrumTypist(machine, keyboard)
-        type.press(SpectrumKey.P)                                  // PRINT keyword
-        type.withMod(SpectrumKey.SYMBOL_SHIFT, SpectrumKey.P)      // "
+        type.press(SpectrumKey.P) // PRINT keyword
+        type.withMod(SpectrumKey.SYMBOL_SHIFT, SpectrumKey.P) // "
         type.press(SpectrumKey.H)
         type.press(SpectrumKey.E)
         type.press(SpectrumKey.L)
         type.press(SpectrumKey.L)
         type.press(SpectrumKey.O)
-        type.withMod(SpectrumKey.SYMBOL_SHIFT, SpectrumKey.N)      // ,
+        type.withMod(SpectrumKey.SYMBOL_SHIFT, SpectrumKey.N) // ,
         type.space()
         type.press(SpectrumKey.W)
         type.press(SpectrumKey.O)
         type.press(SpectrumKey.R)
         type.press(SpectrumKey.L)
         type.press(SpectrumKey.D)
-        type.withMod(SpectrumKey.SYMBOL_SHIFT, SpectrumKey.P)      // "
+        type.withMod(SpectrumKey.SYMBOL_SHIFT, SpectrumKey.P) // "
         type.enter()
 
         // BASIC parses + executes + reprints ready prompt.
